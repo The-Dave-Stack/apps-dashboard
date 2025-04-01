@@ -1,0 +1,17 @@
+node_modules
+npm-debug.log
+dist
+.git
+.github
+.gitignore
+.vscode
+.DS_Store
+README.md
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.dockerignore
+Dockerfile
+docker-compose.yml
