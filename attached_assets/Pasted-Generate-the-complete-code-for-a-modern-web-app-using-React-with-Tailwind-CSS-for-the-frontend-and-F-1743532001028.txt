@@ -1,0 +1,71 @@
+Generate the complete code for a modern web app using React with Tailwind CSS for the frontend and Firebase (Firestore + Authentication) for the backend. The entire project must be written in TypeScript.
+1. Secure Authentication
+	•	Implement a secure login system using Firebase Authentication with email and password.
+	•	Ensure session persistence and proper route protection in React.
+	•	Only authenticated users should access the main dashboard.
+2. Main Interface
+	•	Once authenticated, the user should see a grid of categorized cards.
+	•	The UI should be responsive and modern, using Tailwind CSS.
+3. Dynamic Cards with Categories
+	•	The grid layout should be fetched from Firebase Firestore, structured as a JSON with categories.
+	•	Each category contains multiple cards, and each card should include:
+	•	An icon (URL of the external web app’s icon).
+	•	A name (descriptive title of the web app).
+	•	A link (URL to open the external web app).
+Example JSON in Firestore:
+{
+  "categories": [
+    {
+      "id": "productivity",
+      "name": "Productivity",
+      "apps": [
+        {
+          "id": "1",
+          "name": "Google Drive",
+          "icon": "https://www.google.com/drive/icon.png",
+          "url": "https://drive.google.com"
+        },
+        {
+          "id": "2",
+          "name": "Notion",
+          "icon": "https://www.notion.so/icon.png",
+          "url": "https://www.notion.so"
+        }
+      ]
+    },
+    {
+      "id": "social",
+      "name": "Social Media",
+      "apps": [
+        {
+          "id": "3",
+          "name": "Twitter",
+          "icon": "https://twitter.com/icon.png",
+          "url": "https://twitter.com"
+        },
+        {
+          "id": "4",
+          "name": "LinkedIn",
+          "icon": "https://linkedin.com/icon.png",
+          "url": "https://linkedin.com"
+        }
+      ]
+    }
+  ]
+}
+	•	Each category should be displayed as a section in the UI with its respective cards.
+4. Admin Panel
+	•	Create an admin interface, accessible only to authenticated users with admin roles.
+	•	From this panel, admins should be able to:
+	•	Add, edit, or delete categories.
+	•	Add, edit, or delete cards within each category.
+	•	Update data in Firestore in real time.
+5. Tech Stack
+	•	Frontend: React with Tailwind CSS.
+	•	Backend: Firebase (Authentication + Firestore).
+	•	Security:
+	•	Route protection in React.
+	•	User roles to restrict admin access.
+	•	Firestore security rules to ensure only admins can modify data.
+	•	Language: The entire codebase must be written in TypeScript.
+Generate the complete code with best practices, modular structure, and well-commented documentation.
