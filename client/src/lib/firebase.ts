@@ -17,8 +17,9 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Connect to emulators if in development
-if (import.meta.env.DEV) {
+// Only connect to emulators if explicitly configured
+const useEmulators = false; // Change to true to use emulators
+if (import.meta.env.DEV && useEmulators) {
   try {
     connectAuthEmulator(auth, "http://localhost:9099");
     connectFirestoreEmulator(db, "localhost", 8080);
@@ -26,6 +27,8 @@ if (import.meta.env.DEV) {
   } catch (error) {
     console.error("Failed to connect to Firebase emulators:", error);
   }
+} else {
+  console.log("Using production Firebase services");
 }
 
 export { app, auth, db };
