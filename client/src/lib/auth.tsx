@@ -4,9 +4,7 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signOut,
-  GoogleAuthProvider,
-  signInWithPopup
+  signOut
 } from "firebase/auth";
 import { auth } from "./firebase";
 
@@ -36,19 +34,7 @@ export async function registerWithEmail(email: string, password: string): Promis
   }
 }
 
-// Función para iniciar sesión con Google
-export async function loginWithGoogle(): Promise<User> {
-  console.log("Google login attempt");
-  try {
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    console.log("Google login successful");
-    return result.user;
-  } catch (error) {
-    console.error("Google login error:", error);
-    throw error;
-  }
-}
+// La función loginWithGoogle fue eliminada ya que no se requiere
 
 // Función para cerrar sesión
 export async function logout(): Promise<void> {

@@ -2,7 +2,6 @@
 export { 
   loginWithEmail,
   registerWithEmail,
-  loginWithGoogle,
   logout,
   getCurrentUser
 } from "./auth";

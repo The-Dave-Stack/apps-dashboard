@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { loginWithEmail, registerWithEmail, loginWithGoogle, useAuthState } from "@/lib/hooks";
+import { loginWithEmail, registerWithEmail, useAuthState } from "@/lib/hooks";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { SiGoogle } from "react-icons/si";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -223,36 +222,6 @@ export default function Auth() {
                 </Button>
               </form>
             )}
-          </div>
-          <div className="px-6 py-4 bg-neutral-50 border-t border-neutral-200 flex items-center justify-center">
-            <Button 
-              variant="outline" 
-              className="flex items-center justify-center gap-2"
-              onClick={async () => {
-                try {
-                  setIsLoading(true);
-                  console.log("Attempting Google login");
-                  await loginWithGoogle();
-                  toast({
-                    title: "Login successful",
-                    description: "Successfully signed in with Google!",
-                  });
-                } catch (error: any) {
-                  console.error("Google login error:", error);
-                  toast({
-                    title: "Google Login Error",
-                    description: error.message || "Failed to sign in with Google",
-                    variant: "destructive",
-                  });
-                } finally {
-                  setIsLoading(false);
-                }
-              }}
-              disabled={isLoading}
-            >
-              <SiGoogle className="h-5 w-5" />
-              <span>Sign in with Google</span>
-            </Button>
           </div>
         </CardContent>
       </Card>
