@@ -2,11 +2,6 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/hooks";
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword 
-} from "firebase/auth";
-import { auth } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,10 +19,13 @@ export default function Auth() {
   const [rememberMe, setRememberMe] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, login, register, loginWithGoogle } = useAuth();
+
+  console.log("Auth component rendered, user:", user ? "logged in" : "not logged in");
 
   // Redirect if already logged in
   if (user) {
+    console.log("User is already logged in, redirecting to dashboard");
     setLocation("/dashboard");
     return null;
   }
@@ -35,11 +33,13 @@ export default function Auth() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    console.log("Form submitted:", isLogin ? "login" : "register");
 
     try {
       if (isLogin) {
-        // Login
-        await signInWithEmailAndPassword(auth, email, password);
+        // Login using the context function
+        console.log("Attempting login with:", email);
+        await login(email, password);
         toast({
           title: "Login successful",
           description: "Welcome back!",
@@ -53,10 +53,12 @@ export default function Auth() {
             description: "Passwords do not match",
             variant: "destructive",
           });
+          setIsLoading(false);
           return;
         }
 
-        await createUserWithEmailAndPassword(auth, email, password);
+        console.log("Attempting registration with:", email);
+        await register(email, password);
         
         toast({
           title: "Registration successful",
@@ -65,6 +67,7 @@ export default function Auth() {
         setLocation("/dashboard");
       }
     } catch (error: any) {
+      console.error("Authentication error:", error);
       toast({
         title: "Authentication Error",
         description: error.message || "Failed to authenticate",
@@ -211,7 +214,32 @@ export default function Auth() {
             )}
           </div>
           <div className="px-6 py-4 bg-neutral-50 border-t border-neutral-200 flex items-center justify-center">
-            <Button variant="outline" className="flex items-center justify-center gap-2">
+            <Button 
+              variant="outline" 
+              className="flex items-center justify-center gap-2"
+              onClick={async () => {
+                try {
+                  setIsLoading(true);
+                  console.log("Attempting Google login");
+                  await loginWithGoogle();
+                  toast({
+                    title: "Login successful",
+                    description: "Successfully signed in with Google!",
+                  });
+                  setLocation("/dashboard");
+                } catch (error: any) {
+                  console.error("Google login error:", error);
+                  toast({
+                    title: "Google Login Error",
+                    description: error.message || "Failed to sign in with Google",
+                    variant: "destructive",
+                  });
+                } finally {
+                  setIsLoading(false);
+                }
+              }}
+              disabled={isLoading}
+            >
               <SiGoogle className="h-5 w-5" />
               <span>Sign in with Google</span>
             </Button>

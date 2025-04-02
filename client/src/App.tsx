@@ -7,7 +7,6 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/not-found";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
 
 // Protected Route component that checks authentication
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -18,7 +17,9 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-neutral-50">
-        <Spinner className="h-10 w-10 text-primary-600" />
+        <div className="h-10 w-10 rounded-full border-4 border-primary-600 border-t-transparent animate-spin">
+          <span className="sr-only">Loading...</span>
+        </div>
       </div>
     );
   }
