@@ -19,13 +19,13 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Redirect if not logged in
-  if (!user) {
-    setLocation("/");
-    return null;
-  }
-
   useEffect(() => {
+    // Redirect if not logged in
+    if (!user) {
+      setLocation("/");
+      return;
+    }
+
     const fetchCategoriesData = async () => {
       try {
         setLoading(true);
@@ -56,7 +56,7 @@ export default function Dashboard() {
     };
 
     fetchCategoriesData();
-  }, [toast]);
+  }, [user, toast, setLocation]);
 
   // Filter apps based on search term
   const filteredCategories = categories.map(category => ({
@@ -65,6 +65,19 @@ export default function Dashboard() {
       app.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
   })).filter(category => category.apps.length > 0);
+
+  // No renderizar nada mientras estamos verificando la autenticación o si no hay usuario
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-neutral-50">
+        <div className="h-12 w-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+  
+  // A partir de aquí, sabemos que user no es null
+  const userEmail = user.email || "";
+  const userPhotoURL = user.photoURL;
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -81,11 +94,11 @@ export default function Dashboard() {
               <Search className="h-5 w-5 text-neutral-600" />
             </button>
             <div className="h-8 w-8 rounded-full bg-neutral-300 overflow-hidden">
-              {user.photoURL ? (
-                <img src={user.photoURL} alt="User avatar" className="h-full w-full object-cover" />
+              {userPhotoURL ? (
+                <img src={userPhotoURL} alt="User avatar" className="h-full w-full object-cover" />
               ) : (
                 <div className="h-full w-full flex items-center justify-center bg-primary-100 text-primary-600">
-                  {user.email ? user.email[0].toUpperCase() : "U"}
+                  {userEmail ? userEmail[0].toUpperCase() : "U"}
                 </div>
               )}
             </div>

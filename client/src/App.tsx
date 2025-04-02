@@ -5,8 +5,6 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/not-found";
 import { Button } from "@/components/ui/button";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "./lib/queryClient";
 
 // Protected Route component that checks authentication
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -70,10 +68,10 @@ function AppRouter() {
 // Main App component
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <>
       <AppRouter />
       <Toaster />
-    </QueryClientProvider>
+    </>
   );
 }
 
