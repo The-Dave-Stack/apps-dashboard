@@ -61,9 +61,9 @@ export default function Sidebar() {
         <ul className="space-y-2">
           <li>
             <Button 
-              variant={location === "/dashboard" ? "secondary" : "ghost"} 
+              variant={location === "/" ? "secondary" : "ghost"} 
               className="w-full justify-start"
-              onClick={() => setLocation("/dashboard")}
+              onClick={() => setLocation("/")}
             >
               <Home className="mr-3 h-5 w-5" />
               <span>Dashboard</span>

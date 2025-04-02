@@ -18,9 +18,9 @@ export default function MobileNav() {
       <div className="flex justify-around py-2">
         <button 
           className={`flex flex-col items-center justify-center p-2 ${
-            location === "/dashboard" ? "text-primary-600" : "text-neutral-500"
+            location === "/" ? "text-primary-600" : "text-neutral-500"
           }`}
-          onClick={() => setLocation("/dashboard")}
+          onClick={() => setLocation("/")}
         >
           <Home className="h-5 w-5" />
           <span className="text-xs mt-1">Inicio</span>
