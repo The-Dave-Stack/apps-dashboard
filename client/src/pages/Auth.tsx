@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/lib/hooks";
+import { loginWithEmail, registerWithEmail, loginWithGoogle, useAuthState } from "@/lib/hooks";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,16 +19,29 @@ export default function Auth() {
   const [rememberMe, setRememberMe] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { user, login, register, loginWithGoogle } = useAuth();
+  const { user, loading } = useAuthState();
 
   console.log("Auth component rendered, user:", user ? "logged in" : "not logged in");
 
   // Redirect if already logged in
-  if (user) {
-    console.log("User is already logged in, redirecting to dashboard");
-    setLocation("/dashboard");
-    return null;
+  useEffect(() => {
+    if (user) {
+      console.log("User is already logged in, redirecting to dashboard");
+      setLocation("/dashboard");
+    }
+  }, [user, setLocation]);
+
+  // Si estamos cargando, mostramos un indicador de carga
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-neutral-50">
+        <div className="h-12 w-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
   }
+
+  // Si el usuario ya está autenticado, no renderizamos nada (se redirigirá por el efecto)
+  if (user) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,14 +50,13 @@ export default function Auth() {
 
     try {
       if (isLogin) {
-        // Login using the context function
+        // Login using the function
         console.log("Attempting login with:", email);
-        await login(email, password);
+        await loginWithEmail(email, password);
         toast({
           title: "Login successful",
           description: "Welcome back!",
         });
-        setLocation("/dashboard");
       } else {
         // Register
         if (password !== confirmPassword) {
@@ -58,13 +70,12 @@ export default function Auth() {
         }
 
         console.log("Attempting registration with:", email);
-        await register(email, password);
+        await registerWithEmail(email, password);
         
         toast({
           title: "Registration successful",
           description: "Your account has been created",
         });
-        setLocation("/dashboard");
       }
     } catch (error: any) {
       console.error("Authentication error:", error);
@@ -226,7 +237,6 @@ export default function Auth() {
                     title: "Login successful",
                     description: "Successfully signed in with Google!",
                   });
-                  setLocation("/dashboard");
                 } catch (error: any) {
                   console.error("Google login error:", error);
                   toast({

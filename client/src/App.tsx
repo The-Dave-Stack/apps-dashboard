@@ -1,16 +1,16 @@
 import { Switch, Route, useLocation } from "wouter";
-import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import { queryClient } from "./lib/queryClient";
-import { useAuth } from "./lib/hooks";
+import { logout, useAuthState } from "./lib/hooks";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/not-found";
 import { Button } from "@/components/ui/button";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./lib/queryClient";
 
 // Protected Route component that checks authentication
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
-  const { user, loading } = useAuth();
+  const { user, loading } = useAuthState();
   const [, setLocation] = useLocation();
 
   // Show loading state while auth is being checked
@@ -36,7 +36,6 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
 
 // Component for handling logout
 function LogoutButton() {
-  const { logout } = useAuth();
   const [, setLocation] = useLocation();
 
   const handleLogout = async () => {
