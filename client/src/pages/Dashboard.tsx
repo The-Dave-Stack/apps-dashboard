@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { useAuth } from "@/lib/hooks";
+import { useAuth, logout } from "@/lib/hooks";
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
@@ -9,7 +9,8 @@ import Sidebar from "@/components/Sidebar";
 import CategorySection from "@/components/CategorySection";
 import { CategoryData } from "@/lib/types";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, LogOut } from "lucide-react";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -30,26 +31,46 @@ export default function Dashboard() {
       try {
         setLoading(true);
         
+        // Intenta cargar los datos de Firestore
         const categoriesCol = collection(db, "categories");
         const categoriesSnapshot = await getDocs(categoriesCol);
         
-        const categoriesData: CategoryData[] = [];
-        categoriesSnapshot.forEach((doc) => {
-          const data = doc.data() as CategoryData;
-          categoriesData.push({
-            id: doc.id,
-            name: data.name,
-            apps: data.apps || []
+        if (categoriesSnapshot.empty) {
+          console.log("No categories found in Firestore");
+          // No hay categorías, establecemos un array vacío
+          setCategories([]);
+          
+          // Mostramos un mensaje indicativo al usuario
+          toast({
+            title: "Información",
+            description: "No hay aplicaciones configuradas todavía. Un administrador debe agregarlas.",
           });
-        });
-        
-        setCategories(categoriesData);
+        } else {
+          // Procesamos los datos de las categorías
+          const categoriesData: CategoryData[] = [];
+          categoriesSnapshot.forEach((doc) => {
+            const data = doc.data() as CategoryData;
+            categoriesData.push({
+              id: doc.id,
+              name: data.name,
+              apps: data.apps || []
+            });
+          });
+          
+          setCategories(categoriesData);
+        }
       } catch (error: any) {
+        console.error("Error fetching data:", error);
+        
+        // Muestra mensaje de error pero no bloquea la aplicación
         toast({
-          title: "Error fetching categories",
-          description: error.message || "Failed to load dashboard data",
+          title: "Error al cargar datos",
+          description: "No se pudieron cargar las aplicaciones. Por favor, intente más tarde.",
           variant: "destructive",
         });
+        
+        // Establecemos un array vacío para que la UI pueda renderizarse sin errores
+        setCategories([]);
       } finally {
         setLoading(false);
       }
@@ -78,6 +99,25 @@ export default function Dashboard() {
   // A partir de aquí, sabemos que user no es null
   const userEmail = user.email || "";
   const userPhotoURL = user.photoURL;
+  
+  // Función para cerrar sesión
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: "Sesión cerrada",
+        description: "Has cerrado sesión correctamente",
+      });
+      setLocation("/");
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo cerrar la sesión. Intenta de nuevo.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -89,10 +129,27 @@ export default function Dashboard() {
         {/* Mobile Header */}
         <header className="md:hidden bg-white border-b border-neutral-200 p-4 flex items-center justify-between">
           <h1 className="text-xl font-bold text-primary-600">AppHub</h1>
-          <div className="flex items-center space-x-4">
-            <button>
-              <Search className="h-5 w-5 text-neutral-600" />
-            </button>
+          <div className="flex items-center space-x-3">
+            <div className="relative">
+              <Input
+                type="text" 
+                className="w-32 pl-8 h-9" 
+                placeholder="Buscar..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <Search className="h-4 w-4 text-neutral-400 absolute left-2 top-1/2 transform -translate-y-1/2" />
+            </div>
+            
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={handleLogout}
+              className="text-neutral-500 h-9 w-9"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+            
             <div className="h-8 w-8 rounded-full bg-neutral-300 overflow-hidden">
               {userPhotoURL ? (
                 <img src={userPhotoURL} alt="User avatar" className="h-full w-full object-cover" />
@@ -109,17 +166,44 @@ export default function Dashboard() {
         <header className="hidden md:block bg-white border-b border-neutral-200 p-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-neutral-800">Dashboard</h1>
-            <div className="relative max-w-sm">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <Search className="h-4 w-4 text-neutral-400" />
+            <div className="flex items-center gap-4">
+              <div className="relative max-w-sm">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <Search className="h-4 w-4 text-neutral-400" />
+                </div>
+                <Input
+                  type="text" 
+                  className="pl-10" 
+                  placeholder="Buscar aplicaciones..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
-              <Input
-                type="text" 
-                className="pl-10" 
-                placeholder="Search apps..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+              
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2">
+                  <div className="h-8 w-8 rounded-full bg-neutral-200 overflow-hidden">
+                    {userPhotoURL ? (
+                      <img src={userPhotoURL} alt="User avatar" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center bg-primary-100 text-primary-600">
+                        {userEmail ? userEmail[0].toUpperCase() : "U"}
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-sm font-medium text-neutral-700">{userEmail}</span>
+                </div>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleLogout}
+                  className="flex items-center gap-1 text-neutral-600 hover:text-red-600 hover:border-red-200"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Salir</span>
+                </Button>
+              </div>
             </div>
           </div>
         </header>
@@ -147,8 +231,27 @@ export default function Dashboard() {
                 ))
               ) : (
                 <div className="text-center py-12">
-                  <h3 className="text-lg font-medium text-neutral-700">No results found</h3>
-                  <p className="text-neutral-500 mt-2">Try adjusting your search terms</p>
+                  {categories.length > 0 ? (
+                    // Si hay categorías pero el filtro no encontró resultados
+                    <>
+                      <h3 className="text-lg font-medium text-neutral-700">No se encontraron resultados</h3>
+                      <p className="text-neutral-500 mt-2">Intenta ajustar los términos de búsqueda</p>
+                    </>
+                  ) : (
+                    // Si no hay categorías en absoluto
+                    <>
+                      <div className="mx-auto w-16 h-16 mb-4 text-neutral-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-medium text-neutral-700">No hay aplicaciones disponibles</h3>
+                      <p className="text-neutral-500 mt-2">Un administrador debe configurar las aplicaciones primero</p>
+                      <p className="text-neutral-400 text-sm mt-4 max-w-md mx-auto">
+                        Puedes contactar con el administrador para solicitar que se agreguen tus aplicaciones favoritas.
+                      </p>
+                    </>
+                  )}
                 </div>
               )}
             </div>
