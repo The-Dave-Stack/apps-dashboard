@@ -18,18 +18,29 @@ export default function Sidebar() {
   const [location, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
+  
+  // Usuario simulado para el desarrollo (temporal)
+  const mockUser = {
+    uid: "mock-user-id",
+    email: "usuario@ejemplo.com",
+    displayName: "Usuario de Prueba",
+    photoURL: null
+  };
+  
+  // Durante el desarrollo, usamos el usuario simulado si no hay usuario autenticado
+  const effectiveUser = user || mockUser;
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
       toast({
-        title: "Logged out",
-        description: "You have been successfully logged out",
+        title: "Sesión cerrada",
+        description: "Has cerrado sesión correctamente",
       });
       setLocation("/");
     } catch (error: any) {
       toast({
-        title: "Error logging out",
+        title: "Error al cerrar sesión",
         description: error.message,
         variant: "destructive",
       });
@@ -64,7 +75,7 @@ export default function Sidebar() {
               className="w-full justify-start text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
             >
               <Search className="mr-3 h-5 w-5" />
-              <span>Search</span>
+              <span>Buscar</span>
             </Button>
           </li>
           <li>
@@ -73,7 +84,7 @@ export default function Sidebar() {
               className="w-full justify-start text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
             >
               <Star className="mr-3 h-5 w-5" />
-              <span>Favorites</span>
+              <span>Favoritos</span>
             </Button>
           </li>
           <li>
@@ -82,7 +93,7 @@ export default function Sidebar() {
               className="w-full justify-start text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
             >
               <Clock className="mr-3 h-5 w-5" />
-              <span>Recent</span>
+              <span>Recientes</span>
             </Button>
           </li>
           
@@ -93,7 +104,7 @@ export default function Sidebar() {
               onClick={navigateToAdmin}
             >
               <ShieldAlert className="mr-3 h-5 w-5" />
-              <span>Admin Panel</span>
+              <span>Panel de Administración</span>
             </Button>
           </li>
           
@@ -103,7 +114,7 @@ export default function Sidebar() {
               className="w-full justify-start text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
             >
               <Settings className="mr-3 h-5 w-5" />
-              <span>Settings</span>
+              <span>Configuración</span>
             </Button>
           </li>
         </ul>
@@ -112,17 +123,17 @@ export default function Sidebar() {
       <div className="p-4 border-t border-neutral-200">
         <div className="flex items-center">
           <div className="h-8 w-8 rounded-full bg-neutral-300 overflow-hidden">
-            {user?.photoURL ? (
-              <img src={user.photoURL} alt="User avatar" className="h-full w-full object-cover" />
+            {effectiveUser?.photoURL ? (
+              <img src={effectiveUser.photoURL} alt="User avatar" className="h-full w-full object-cover" />
             ) : (
               <div className="h-full w-full flex items-center justify-center bg-primary-100 text-primary-600">
-                {user?.email ? user.email[0].toUpperCase() : "U"}
+                {effectiveUser?.email ? effectiveUser.email[0].toUpperCase() : "U"}
               </div>
             )}
           </div>
           <div className="ml-3">
             <p className="text-sm font-medium text-neutral-800">
-              {user?.displayName || user?.email || "User"}
+              {effectiveUser?.displayName || effectiveUser?.email || "User"}
             </p>
             <Button 
               variant="link" 
@@ -131,7 +142,7 @@ export default function Sidebar() {
               onClick={handleLogout}
             >
               <LogOut className="h-3 w-3 mr-1" />
-              Sign out
+              Cerrar sesión
             </Button>
           </div>
         </div>

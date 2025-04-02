@@ -12,7 +12,7 @@ export default function CategorySection({ category }: CategorySectionProps) {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold text-neutral-800">{category.name}</h2>
         <button className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center">
-          <span>View all</span>
+          <span>Ver todos</span>
           <ChevronRight className="ml-1 h-4 w-4" />
         </button>
       </div>

@@ -20,17 +20,117 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Usuario simulado para el desarrollo (temporal)
+  const mockUser = {
+    uid: "mock-user-id",
+    email: "usuario@ejemplo.com",
+    displayName: "Usuario de Prueba",
+    photoURL: null
+  };
+  
   useEffect(() => {
-    // Redirect if not logged in
+    // Durante el desarrollo, no redirigimos si no hay usuario
+    // Cuando reactivemos la autenticación, descomenta esto:
+    /*
     if (!user) {
       setLocation("/");
       return;
     }
+    */
+
+    // Datos de ejemplo para desarrollo
+    const mockCategories: CategoryData[] = [
+      {
+        id: "cat1",
+        name: "Productividad",
+        apps: [
+          {
+            id: "app1",
+            name: "Google Workspace",
+            icon: "https://www.gstatic.com/images/branding/product/2x/hh_drive_96dp.png",
+            url: "https://workspace.google.com/",
+            description: "Suite de herramientas de productividad: Gmail, Drive, Docs, Calendar"
+          },
+          {
+            id: "app2",
+            name: "Microsoft 365",
+            icon: "https://img-prod-cms-rt-microsoft-com.akamaized.net/cms/api/am/imageFileData/RE1Mu3b?ver=5c31",
+            url: "https://www.microsoft.com/microsoft-365",
+            description: "Aplicaciones de Office en la nube: Word, Excel, PowerPoint, Teams"
+          },
+          {
+            id: "app3",
+            name: "Slack",
+            icon: "https://a.slack-edge.com/80588/marketing/img/meta/slack_hash_128.png",
+            url: "https://slack.com/",
+            description: "Plataforma de comunicación para equipos de trabajo"
+          }
+        ]
+      },
+      {
+        id: "cat2",
+        name: "Diseño",
+        apps: [
+          {
+            id: "app4",
+            name: "Figma",
+            icon: "https://cdn.sanity.io/images/599r6htc/localized/46a76c802176eb17b04e12108de7e7e0f3736dc6-1024x1024.png?w=804&h=804&q=75&fit=max&auto=format",
+            url: "https://figma.com/",
+            description: "Herramienta de diseño colaborativo en la nube"
+          },
+          {
+            id: "app5",
+            name: "Canva",
+            icon: "https://static.canva.com/static/images/canva-logo-blue.svg",
+            url: "https://canva.com/",
+            description: "Plataforma de diseño gráfico y composición de imágenes"
+          }
+        ]
+      },
+      {
+        id: "cat3",
+        name: "Desarrollo",
+        apps: [
+          {
+            id: "app6",
+            name: "GitHub",
+            icon: "https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png",
+            url: "https://github.com/",
+            description: "Plataforma de desarrollo colaborativo basado en Git"
+          },
+          {
+            id: "app7",
+            name: "Replit",
+            icon: "https://replit.com/cdn-cgi/image/width=64,quality=80/https://storage.googleapis.com/replit/images/1664475603315_1442b3c69cc612aff6ef60cce0c69328.png",
+            url: "https://replit.com/",
+            description: "Entorno de desarrollo integrado en la nube"
+          },
+          {
+            id: "app8",
+            name: "CodeSandbox",
+            icon: "https://codesandbox.io/favicon.ico",
+            url: "https://codesandbox.io/",
+            description: "Entorno de desarrollo instantáneo para aplicaciones web"
+          }
+        ]
+      }
+    ];
 
     const fetchCategoriesData = async () => {
       try {
         setLoading(true);
         
+        // Durante el desarrollo, utilizamos los datos simulados en lugar de Firestore
+        console.log("Usando datos de desarrollo simulados");
+        
+        // Simulamos un pequeño retraso para ver la carga
+        setTimeout(() => {
+          setCategories(mockCategories);
+          setLoading(false);
+        }, 1500);
+        
+        // CUANDO REACTIVEMOS FIRESTORE, DESCOMENTAR ESTO:
+        /*
         // Intenta cargar los datos de Firestore
         const categoriesCol = collection(db, "categories");
         const categoriesSnapshot = await getDocs(categoriesCol);
@@ -59,6 +159,7 @@ export default function Dashboard() {
           
           setCategories(categoriesData);
         }
+        */
       } catch (error: any) {
         console.error("Error fetching data:", error);
         
@@ -71,7 +172,6 @@ export default function Dashboard() {
         
         // Establecemos un array vacío para que la UI pueda renderizarse sin errores
         setCategories([]);
-      } finally {
         setLoading(false);
       }
     };
@@ -87,18 +187,12 @@ export default function Dashboard() {
     )
   })).filter(category => category.apps.length > 0);
 
-  // No renderizar nada mientras estamos verificando la autenticación o si no hay usuario
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-neutral-50">
-        <div className="h-12 w-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+  // Durante el desarrollo, usamos el usuario simulado si no hay usuario autenticado
+  const effectiveUser = user || mockUser;
   
-  // A partir de aquí, sabemos que user no es null
-  const userEmail = user.email || "";
-  const userPhotoURL = user.photoURL;
+  // A partir de aquí, siempre tenemos un usuario (real o simulado)
+  const userEmail = effectiveUser.email || "";
+  const userPhotoURL = effectiveUser.photoURL;
   
   // Función para cerrar sesión
   const handleLogout = async () => {

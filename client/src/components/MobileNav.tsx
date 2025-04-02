@@ -23,15 +23,15 @@ export default function MobileNav() {
           onClick={() => setLocation("/dashboard")}
         >
           <Home className="h-5 w-5" />
-          <span className="text-xs mt-1">Dashboard</span>
+          <span className="text-xs mt-1">Inicio</span>
         </button>
         <button className="flex flex-col items-center justify-center p-2 text-neutral-500">
           <Search className="h-5 w-5" />
-          <span className="text-xs mt-1">Search</span>
+          <span className="text-xs mt-1">Buscar</span>
         </button>
         <button className="flex flex-col items-center justify-center p-2 text-neutral-500">
           <Settings className="h-5 w-5" />
-          <span className="text-xs mt-1">Settings</span>
+          <span className="text-xs mt-1">Ajustes</span>
         </button>
         <button 
           className={`flex flex-col items-center justify-center p-2 ${
