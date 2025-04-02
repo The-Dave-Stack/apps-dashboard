@@ -71,8 +71,9 @@ export default function Sidebar() {
           </li>
           <li>
             <Button 
-              variant="ghost" 
+              variant={location === "/search" ? "secondary" : "ghost"} 
               className="w-full justify-start text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
+              onClick={() => setLocation("/search")}
             >
               <Search className="mr-3 h-5 w-5" />
               <span>Buscar</span>
@@ -80,8 +81,9 @@ export default function Sidebar() {
           </li>
           <li>
             <Button 
-              variant="ghost" 
+              variant={location === "/favorites" ? "secondary" : "ghost"} 
               className="w-full justify-start text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
+              onClick={() => setLocation("/favorites")}
             >
               <Star className="mr-3 h-5 w-5" />
               <span>Favoritos</span>
@@ -89,8 +91,9 @@ export default function Sidebar() {
           </li>
           <li>
             <Button 
-              variant="ghost" 
+              variant={location === "/recent" ? "secondary" : "ghost"} 
               className="w-full justify-start text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
+              onClick={() => setLocation("/recent")}
             >
               <Clock className="mr-3 h-5 w-5" />
               <span>Recientes</span>
@@ -110,8 +113,9 @@ export default function Sidebar() {
           
           <li>
             <Button 
-              variant="ghost" 
+              variant={location === "/settings" ? "secondary" : "ghost"} 
               className="w-full justify-start text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
+              onClick={() => setLocation("/settings")}
             >
               <Settings className="mr-3 h-5 w-5" />
               <span>Configuración</span>

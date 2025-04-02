@@ -52,14 +52,32 @@ function LogoutButton() {
   );
 }
 
+// Importamos las nuevas páginas
+import Search from "./pages/Search";
+import Favorites from "./pages/Favorites";
+import Recent from "./pages/Recent";
+import Settings from "./pages/Settings";
+import AdminPanel from "./pages/AdminPanel";
+
 // Router component
 function AppRouter() {
   // Temporalmente, mostramos directamente el dashboard sin protección
   return (
     <Switch>
-      {/* Temporalmente, redirigimos directamente al Dashboard */}
+      {/* Ruta principal al Dashboard */}
       <Route path="/" component={Dashboard} />
+      
+      {/* Rutas para las funcionalidades principales */}
+      <Route path="/search" component={Search} />
+      <Route path="/favorites" component={Favorites} />
+      <Route path="/recent" component={Recent} />
+      <Route path="/settings" component={Settings} />
+      <Route path="/admin" component={AdminPanel} />
+      
+      {/* Ruta de autenticación (temporalmente no utilizada) */}
       <Route path="/auth" component={Auth} />
+      
+      {/* Ruta para páginas no encontradas */}
       <Route component={NotFound} />
     </Switch>
   );

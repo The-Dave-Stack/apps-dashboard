@@ -1,461 +1,807 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
-import { useAuth } from "@/lib/hooks";
-import { db } from "@/lib/firebase";
-import { collection, getDocs, doc, deleteDoc, addDoc, updateDoc } from "firebase/firestore";
-import { useToast } from "@/hooks/use-toast";
-import AdminCategoryForm from "@/components/AdminCategoryForm";
-import AdminAppForm from "@/components/AdminAppForm";
-import { CategoryData, AppData } from "@/lib/types";
 import { 
-  Dialog, 
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription
-} from "@/components/ui/dialog";
+  Pencil, 
+  Trash, 
+  Plus, 
+  PlusCircle, 
+  X, 
+  Save, 
+  FolderPlus,
+  AppWindow,
+  Loader,
+  AlertTriangle
+} from "lucide-react";
+import MobileNav from "@/components/MobileNav";
+import Sidebar from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { AppData, CategoryData } from "@/lib/types";
+import { useAuth } from "@/lib/hooks";
 
 export default function AdminPanel() {
-  const [, setLocation] = useLocation();
-  const { user } = useAuth();
   const { toast } = useToast();
+  const { user } = useAuth();
+  
+  // Estados para la gestión de categorías y aplicaciones
   const [categories, setCategories] = useState<CategoryData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("categories");
-  const [showCategoryForm, setShowCategoryForm] = useState(false);
-  const [showAppForm, setShowAppForm] = useState(false);
   const [editingCategory, setEditingCategory] = useState<CategoryData | null>(null);
   const [editingApp, setEditingApp] = useState<{app: AppData, categoryId: string} | null>(null);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newAppData, setNewAppData] = useState<AppData>({
+    name: "",
+    icon: "",
+    url: "",
+    description: ""
+  });
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-
-  // Redirect if not logged in
-  if (!user) {
-    setLocation("/");
-    return null;
-  }
-
-  const fetchCategories = async () => {
-    try {
-      setLoading(true);
-      
-      const categoriesCol = collection(db, "categories");
-      const categoriesSnapshot = await getDocs(categoriesCol);
-      
-      const categoriesData: CategoryData[] = [];
-      categoriesSnapshot.forEach((doc) => {
-        const data = doc.data() as CategoryData;
-        categoriesData.push({
-          id: doc.id,
-          name: data.name,
-          apps: data.apps || []
-        });
-      });
-      
-      setCategories(categoriesData);
-    } catch (error: any) {
-      toast({
-        title: "Error fetching categories",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+  
+  // Dialogos
+  const [showNewCategoryDialog, setShowNewCategoryDialog] = useState(false);
+  const [showNewAppDialog, setShowNewAppDialog] = useState(false);
+  const [showEditCategoryDialog, setShowEditCategoryDialog] = useState(false);
+  const [showEditAppDialog, setShowEditAppDialog] = useState(false);
+  const [showDeleteCategoryDialog, setShowDeleteCategoryDialog] = useState(false);
+  const [showDeleteAppDialog, setShowDeleteAppDialog] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{id: string, type: 'app' | 'category', categoryId?: string} | null>(null);
+  
+  // Usuario simulado para el desarrollo (temporal)
+  const mockUser = {
+    uid: "mock-user-id",
+    email: "usuario@ejemplo.com",
+    displayName: "Usuario de Prueba",
+    photoURL: null
   };
 
+  // Durante el desarrollo, usamos el usuario simulado si no hay usuario autenticado
+  const effectiveUser = user || mockUser;
+  
+  // Datos de ejemplo para desarrollo
+  const mockCategories: CategoryData[] = [
+    {
+      id: "cat1",
+      name: "Productividad",
+      apps: [
+        {
+          id: "app1",
+          name: "Google Workspace",
+          icon: "https://www.gstatic.com/images/branding/product/2x/hh_drive_96dp.png",
+          url: "https://workspace.google.com/",
+          description: "Suite de herramientas de productividad: Gmail, Drive, Docs, Calendar"
+        },
+        {
+          id: "app2",
+          name: "Microsoft 365",
+          icon: "https://img-prod-cms-rt-microsoft-com.akamaized.net/cms/api/am/imageFileData/RE1Mu3b?ver=5c31",
+          url: "https://www.microsoft.com/microsoft-365",
+          description: "Aplicaciones de Office en la nube: Word, Excel, PowerPoint, Teams"
+        },
+        {
+          id: "app3",
+          name: "Slack",
+          icon: "https://a.slack-edge.com/80588/marketing/img/meta/slack_hash_128.png",
+          url: "https://slack.com/",
+          description: "Plataforma de comunicación para equipos de trabajo"
+        }
+      ]
+    },
+    {
+      id: "cat2",
+      name: "Diseño",
+      apps: [
+        {
+          id: "app4",
+          name: "Figma",
+          icon: "https://cdn.sanity.io/images/599r6htc/localized/46a76c802176eb17b04e12108de7e7e0f3736dc6-1024x1024.png?w=804&h=804&q=75&fit=max&auto=format",
+          url: "https://figma.com/",
+          description: "Herramienta de diseño colaborativo en la nube"
+        },
+        {
+          id: "app5",
+          name: "Canva",
+          icon: "https://static.canva.com/static/images/canva-logo-blue.svg",
+          url: "https://canva.com/",
+          description: "Plataforma de diseño gráfico y composición de imágenes"
+        }
+      ]
+    },
+    {
+      id: "cat3",
+      name: "Desarrollo",
+      apps: [
+        {
+          id: "app6",
+          name: "GitHub",
+          icon: "https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png",
+          url: "https://github.com/",
+          description: "Plataforma de desarrollo colaborativo basado en Git"
+        },
+        {
+          id: "app7",
+          name: "Replit",
+          icon: "https://replit.com/cdn-cgi/image/width=64,quality=80/https://storage.googleapis.com/replit/images/1664475603315_1442b3c69cc612aff6ef60cce0c69328.png",
+          url: "https://replit.com/",
+          description: "Entorno de desarrollo integrado en la nube"
+        },
+        {
+          id: "app8",
+          name: "CodeSandbox",
+          icon: "https://codesandbox.io/favicon.ico",
+          url: "https://codesandbox.io/",
+          description: "Entorno de desarrollo instantáneo para aplicaciones web"
+        }
+      ]
+    }
+  ];
+
+  // Cargar datos iniciales
   useEffect(() => {
-    fetchCategories();
-  }, [toast]);
+    // Simulación de carga de datos
+    setTimeout(() => {
+      setCategories(mockCategories);
+      setLoading(false);
+    }, 1000);
+  }, []);
 
-  const handleDeleteCategory = async (categoryId: string) => {
-    if (confirm("Are you sure you want to delete this category? This will also delete all apps in this category.")) {
-      try {
-        await deleteDoc(doc(db, "categories", categoryId));
-        toast({
-          title: "Category deleted",
-          description: "The category has been successfully deleted",
-        });
-        fetchCategories();
-      } catch (error: any) {
-        toast({
-          title: "Error deleting category",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
+  // Manejadores para categorías
+  const handleAddCategory = () => {
+    if (!newCategoryName.trim()) {
+      toast({
+        title: "Error",
+        description: "El nombre de la categoría no puede estar vacío",
+        variant: "destructive"
+      });
+      return;
     }
+    
+    const newCategory: CategoryData = {
+      id: `cat${Date.now()}`,
+      name: newCategoryName,
+      apps: []
+    };
+    
+    setCategories([...categories, newCategory]);
+    setNewCategoryName("");
+    setShowNewCategoryDialog(false);
+    
+    toast({
+      title: "Categoría creada",
+      description: `Se ha creado la categoría ${newCategory.name}`,
+    });
   };
-
+  
   const handleEditCategory = (category: CategoryData) => {
     setEditingCategory(category);
-    setShowCategoryForm(true);
+    setNewCategoryName(category.name);
+    setShowEditCategoryDialog(true);
   };
-
-  const handleSaveCategory = async (category: { id?: string; name: string }) => {
-    try {
-      if (category.id) {
-        // Update existing category
-        await updateDoc(doc(db, "categories", category.id), {
-          name: category.name
-        });
-        toast({
-          title: "Category updated",
-          description: "The category has been successfully updated",
-        });
-      } else {
-        // Add new category
-        await addDoc(collection(db, "categories"), {
-          name: category.name,
-          apps: []
-        });
-        toast({
-          title: "Category added",
-          description: "The new category has been successfully added",
-        });
-      }
-      setShowCategoryForm(false);
-      setEditingCategory(null);
-      fetchCategories();
-    } catch (error: any) {
+  
+  const handleUpdateCategory = () => {
+    if (!editingCategory || !newCategoryName.trim()) {
       toast({
-        title: "Error saving category",
-        description: error.message,
-        variant: "destructive",
+        title: "Error",
+        description: "El nombre de la categoría no puede estar vacío",
+        variant: "destructive"
       });
+      return;
     }
+    
+    const updatedCategories = categories.map(cat => 
+      cat.id === editingCategory.id 
+        ? { ...cat, name: newCategoryName } 
+        : cat
+    );
+    
+    setCategories(updatedCategories);
+    setShowEditCategoryDialog(false);
+    setEditingCategory(null);
+    setNewCategoryName("");
+    
+    toast({
+      title: "Categoría actualizada",
+      description: `Se ha actualizado la categoría a ${newCategoryName}`,
+    });
   };
-
-  const handleDeleteApp = async (categoryId: string, appId: string) => {
-    if (confirm("Are you sure you want to delete this app?")) {
-      try {
-        const categoryRef = doc(db, "categories", categoryId);
-        const category = categories.find(cat => cat.id === categoryId);
-        
-        if (category) {
-          const updatedApps = category.apps.filter(app => app.id !== appId);
-          await updateDoc(categoryRef, { apps: updatedApps });
-          
-          toast({
-            title: "App deleted",
-            description: "The app has been successfully deleted",
-          });
-          fetchCategories();
-        }
-      } catch (error: any) {
-        toast({
-          title: "Error deleting app",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
-    }
+  
+  const handleDeleteCategory = (category: CategoryData) => {
+    setItemToDelete({
+      id: category.id,
+      type: 'category'
+    });
+    setShowDeleteCategoryDialog(true);
   };
-
+  
+  const confirmDeleteCategory = () => {
+    if (!itemToDelete) return;
+    
+    const updatedCategories = categories.filter(cat => cat.id !== itemToDelete.id);
+    setCategories(updatedCategories);
+    setShowDeleteCategoryDialog(false);
+    setItemToDelete(null);
+    
+    toast({
+      title: "Categoría eliminada",
+      description: "La categoría ha sido eliminada correctamente",
+    });
+  };
+  
+  // Manejadores para aplicaciones
+  const handleAddApp = () => {
+    setNewAppData({
+      name: "",
+      icon: "",
+      url: "",
+      description: ""
+    });
+    setSelectedCategoryId(categories.length > 0 ? categories[0].id : null);
+    setShowNewAppDialog(true);
+  };
+  
   const handleEditApp = (app: AppData, categoryId: string) => {
-    setEditingApp({ app, categoryId });
-    setSelectedCategoryId(categoryId);
-    setShowAppForm(true);
+    setEditingApp({app, categoryId});
+    setNewAppData({...app});
+    setShowEditAppDialog(true);
   };
-
-  const handleAddApp = (categoryId: string) => {
-    setEditingApp(null);
-    setSelectedCategoryId(categoryId);
-    setShowAppForm(true);
-  };
-
-  const handleSaveApp = async (app: AppData, categoryId: string) => {
-    try {
-      const categoryRef = doc(db, "categories", categoryId);
-      const category = categories.find(cat => cat.id === categoryId);
-      
-      if (category) {
-        let updatedApps;
-        
-        if (app.id) {
-          // Update existing app
-          updatedApps = category.apps.map(a => 
-            a.id === app.id ? app : a
-          );
-        } else {
-          // Add new app with a new ID
-          const newApp = {
-            ...app,
-            id: Date.now().toString()
-          };
-          updatedApps = [...category.apps, newApp];
-        }
-        
-        await updateDoc(categoryRef, { apps: updatedApps });
-        
-        toast({
-          title: app.id ? "App updated" : "App added",
-          description: `The app has been successfully ${app.id ? "updated" : "added"}`,
-        });
-        
-        setShowAppForm(false);
-        setEditingApp(null);
-        setSelectedCategoryId(null);
-        fetchCategories();
-      }
-    } catch (error: any) {
+  
+  const handleSaveNewApp = () => {
+    if (!selectedCategoryId) {
       toast({
-        title: "Error saving app",
-        description: error.message,
-        variant: "destructive",
+        title: "Error",
+        description: "Debes seleccionar una categoría",
+        variant: "destructive"
       });
+      return;
     }
+    
+    if (!newAppData.name || !newAppData.url) {
+      toast({
+        title: "Error",
+        description: "El nombre y la URL son campos obligatorios",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Validar URL
+    try {
+      new URL(newAppData.url);
+    } catch (_) {
+      toast({
+        title: "Error",
+        description: "La URL no es válida",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const newApp: AppData = {
+      ...newAppData,
+      id: `app${Date.now()}`
+    };
+    
+    const updatedCategories = categories.map(cat => 
+      cat.id === selectedCategoryId 
+        ? { ...cat, apps: [...cat.apps, newApp] } 
+        : cat
+    );
+    
+    setCategories(updatedCategories);
+    setShowNewAppDialog(false);
+    
+    toast({
+      title: "Aplicación creada",
+      description: `Se ha creado la aplicación ${newApp.name}`,
+    });
   };
-
-  const allApps = categories.flatMap(category => 
-    category.apps.map(app => ({
-      ...app,
-      categoryId: category.id,
-      categoryName: category.name
-    }))
-  );
+  
+  const handleUpdateApp = () => {
+    if (!editingApp) return;
+    
+    if (!newAppData.name || !newAppData.url) {
+      toast({
+        title: "Error",
+        description: "El nombre y la URL son campos obligatorios",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Validar URL
+    try {
+      new URL(newAppData.url);
+    } catch (_) {
+      toast({
+        title: "Error",
+        description: "La URL no es válida",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const updatedCategories = categories.map(cat => 
+      cat.id === editingApp.categoryId 
+        ? { 
+            ...cat, 
+            apps: cat.apps.map(app => 
+              app.id === editingApp.app.id 
+                ? { ...newAppData, id: app.id } 
+                : app
+            ) 
+          } 
+        : cat
+    );
+    
+    setCategories(updatedCategories);
+    setShowEditAppDialog(false);
+    setEditingApp(null);
+    
+    toast({
+      title: "Aplicación actualizada",
+      description: `Se ha actualizado la aplicación ${newAppData.name}`,
+    });
+  };
+  
+  const handleDeleteApp = (appId: string | undefined, categoryId: string) => {
+    if (!appId) return;
+    
+    setItemToDelete({
+      id: appId,
+      type: 'app',
+      categoryId
+    });
+    setShowDeleteAppDialog(true);
+  };
+  
+  const confirmDeleteApp = () => {
+    if (!itemToDelete || !itemToDelete.categoryId) return;
+    
+    const updatedCategories = categories.map(cat => 
+      cat.id === itemToDelete.categoryId 
+        ? { ...cat, apps: cat.apps.filter(app => app.id !== itemToDelete.id) } 
+        : cat
+    );
+    
+    setCategories(updatedCategories);
+    setShowDeleteAppDialog(false);
+    setItemToDelete(null);
+    
+    toast({
+      title: "Aplicación eliminada",
+      description: "La aplicación ha sido eliminada correctamente",
+    });
+  };
 
   return (
-    <Dialog open={true} onOpenChange={() => setLocation("/dashboard")}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
-        <DialogHeader>
+    <div className="flex h-screen overflow-hidden">
+      {/* Sidebar for larger screens */}
+      <Sidebar />
+      
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-y-auto pb-16 md:pb-0">
+        {/* Mobile Header */}
+        <header className="md:hidden bg-white border-b border-neutral-200 p-4 flex items-center justify-between">
+          <h1 className="text-xl font-bold text-primary-600">AppHub</h1>
+        </header>
+        
+        {/* Desktop Header */}
+        <header className="bg-white border-b border-neutral-200 p-4">
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-bold text-neutral-800">Admin Panel</DialogTitle>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setLocation("/dashboard")}
-              className="text-neutral-500 hover:text-neutral-700"
-            >
-              <X className="h-5 w-5" />
-            </Button>
+            <h1 className="text-2xl font-bold text-neutral-800">Panel de Administración</h1>
+            <div className="flex gap-2">
+              <Button onClick={handleAddApp}>
+                <AppWindow className="mr-2 h-4 w-4" />
+                Nueva Aplicación
+              </Button>
+              <Button variant="outline" onClick={() => setShowNewCategoryDialog(true)}>
+                <FolderPlus className="mr-2 h-4 w-4" />
+                Nueva Categoría
+              </Button>
+            </div>
           </div>
-          <DialogDescription>
-            Manage your categories and apps
-          </DialogDescription>
-        </DialogHeader>
-
-        <Tabs 
-          value={activeTab} 
-          onValueChange={setActiveTab}
-          className="flex-1 flex flex-col overflow-hidden"
-        >
-          <TabsList className="grid grid-cols-2 mb-6">
-            <TabsTrigger value="categories">Categories</TabsTrigger>
-            <TabsTrigger value="apps">Apps</TabsTrigger>
-          </TabsList>
-
-          <div className="flex-1 overflow-auto">
-            <TabsContent value="categories" className="mt-0">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-neutral-800">Manage Categories</h3>
-                <Button
-                  onClick={() => {
-                    setEditingCategory(null);
-                    setShowCategoryForm(true);
-                  }}
-                  className="bg-primary-600 hover:bg-primary-700"
-                >
-                  Add Category
-                </Button>
-              </div>
-
-              {loading ? (
-                <div className="animate-pulse space-y-4">
-                  <div className="h-12 bg-neutral-100 rounded"></div>
-                  <div className="h-12 bg-neutral-100 rounded"></div>
-                  <div className="h-12 bg-neutral-100 rounded"></div>
-                </div>
-              ) : (
-                <div className="bg-white overflow-hidden border border-neutral-200 rounded-lg">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Apps Count</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {categories.length > 0 ? (
-                        categories.map((category) => (
-                          <TableRow key={category.id}>
-                            <TableCell className="font-medium">{category.name}</TableCell>
-                            <TableCell className="text-neutral-500">{category.id}</TableCell>
-                            <TableCell className="text-neutral-500">{category.apps.length}</TableCell>
-                            <TableCell>
-                              <div className="flex space-x-3">
-                                <Button 
-                                  variant="ghost" 
-                                  className="text-primary-600 hover:text-primary-900 h-auto p-0"
-                                  onClick={() => handleEditCategory(category)}
-                                >
-                                  Edit
-                                </Button>
-                                <Button 
-                                  variant="ghost" 
-                                  className="text-red-600 hover:text-red-800 h-auto p-0"
-                                  onClick={() => handleDeleteCategory(category.id)}
-                                >
-                                  Delete
-                                </Button>
-                                <Button 
-                                  variant="ghost" 
-                                  className="text-primary-600 hover:text-primary-900 h-auto p-0"
-                                  onClick={() => handleAddApp(category.id)}
-                                >
-                                  Add App
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={4} className="text-center py-4 text-neutral-500">
-                            No categories found. Click "Add Category" to create one.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="apps" className="mt-0">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-neutral-800">Manage Apps</h3>
-                <div className="flex space-x-2">
-                  {categories.length > 0 && (
-                    <Button
-                      onClick={() => {
-                        setEditingApp(null);
-                        setSelectedCategoryId(categories[0].id);
-                        setShowAppForm(true);
-                      }}
-                      className="bg-primary-600 hover:bg-primary-700"
-                    >
-                      Add App
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              {loading ? (
-                <div className="animate-pulse space-y-4">
-                  <div className="h-12 bg-neutral-100 rounded"></div>
-                  <div className="h-12 bg-neutral-100 rounded"></div>
-                  <div className="h-12 bg-neutral-100 rounded"></div>
-                </div>
-              ) : (
-                <div className="bg-white overflow-hidden border border-neutral-200 rounded-lg">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>App Name</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead>URL</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {allApps.length > 0 ? (
-                        allApps.map((app) => (
-                          <TableRow key={app.id}>
-                            <TableCell className="font-medium">
-                              <div className="flex items-center gap-2">
+        </header>
+        
+        {/* Admin Panel Content */}
+        <main className="flex-1 p-4 md:p-6">
+          {loading ? (
+            <div className="flex justify-center items-center h-full">
+              <Loader className="h-8 w-8 animate-spin text-primary-600" />
+              <span className="ml-2 text-neutral-600">Cargando datos...</span>
+            </div>
+          ) : (
+            <div className="space-y-8">
+              {categories.length > 0 ? (
+                categories.map(category => (
+                  <div key={category.id} className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
+                    <div className="p-4 bg-neutral-50 border-b border-neutral-200 flex justify-between items-center">
+                      <h2 className="text-lg font-medium text-neutral-800">{category.name}</h2>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-neutral-600"
+                          onClick={() => handleEditCategory(category)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-red-600"
+                          onClick={() => handleDeleteCategory(category)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      {category.apps.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {category.apps.map(app => (
+                            <div key={app.id} className="flex border rounded-lg overflow-hidden">
+                              <div className="w-16 h-16 bg-neutral-100 flex items-center justify-center p-2">
                                 <img 
-                                  src={app.icon} 
+                                  src={app.icon || "https://placehold.co/100x100?text=No+Icon"} 
                                   alt={app.name} 
-                                  className="h-6 w-6 object-contain"
+                                  className="max-w-full max-h-full object-contain"
                                   onError={(e) => (e.currentTarget.src = "https://placehold.co/100x100?text=No+Icon")}
                                 />
-                                {app.name}
                               </div>
-                            </TableCell>
-                            <TableCell className="text-neutral-500">{app.categoryName}</TableCell>
-                            <TableCell className="text-neutral-500 truncate max-w-[200px]">
-                              <a 
-                                href={app.url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-primary-600 hover:underline"
-                              >
-                                {app.url}
-                              </a>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex space-x-3">
-                                <Button 
-                                  variant="ghost" 
-                                  className="text-primary-600 hover:text-primary-900 h-auto p-0"
-                                  onClick={() => handleEditApp(app, app.categoryId)}
-                                >
-                                  Edit
-                                </Button>
-                                <Button 
-                                  variant="ghost" 
-                                  className="text-red-600 hover:text-red-800 h-auto p-0"
-                                  onClick={() => handleDeleteApp(app.categoryId, app.id)}
-                                >
-                                  Delete
-                                </Button>
+                              <div className="flex-1 p-3">
+                                <div className="flex justify-between">
+                                  <h3 className="font-medium text-neutral-800">{app.name}</h3>
+                                  <div className="flex gap-1">
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="h-6 w-6 p-0"
+                                      onClick={() => handleEditApp(app, category.id)}
+                                    >
+                                      <Pencil className="h-3 w-3" />
+                                    </Button>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="h-6 w-6 p-0 text-red-600"
+                                      onClick={() => app.id && handleDeleteApp(app.id, category.id)}
+                                    >
+                                      <Trash className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                </div>
+                                <p className="text-xs text-neutral-500 truncate">{app.url}</p>
+                                <p className="text-xs text-neutral-600 mt-1 line-clamp-1">{app.description}</p>
                               </div>
-                            </TableCell>
-                          </TableRow>
-                        ))
+                            </div>
+                          ))}
+                          <div 
+                            className="border border-dashed rounded-lg p-4 flex flex-col items-center justify-center text-neutral-500 cursor-pointer hover:bg-neutral-50 transition-colors"
+                            onClick={() => {
+                              setSelectedCategoryId(category.id);
+                              setShowNewAppDialog(true);
+                            }}
+                          >
+                            <PlusCircle className="h-8 w-8 mb-2" />
+                            <p>Agregar aplicación a {category.name}</p>
+                          </div>
+                        </div>
                       ) : (
-                        <TableRow>
-                          <TableCell colSpan={4} className="text-center py-4 text-neutral-500">
-                            No apps found. Add categories first, then add apps to them.
-                          </TableCell>
-                        </TableRow>
+                        <div className="text-center py-8">
+                          <p className="text-neutral-500 mb-4">No hay aplicaciones en esta categoría</p>
+                          <Button 
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedCategoryId(category.id);
+                              setShowNewAppDialog(true);
+                            }}
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Agregar aplicación
+                          </Button>
+                        </div>
                       )}
-                    </TableBody>
-                  </Table>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <div className="mx-auto w-16 h-16 mb-4 text-neutral-300">
+                    <AlertTriangle className="w-full h-full" />
+                  </div>
+                  <h3 className="text-lg font-medium text-neutral-700">No hay categorías</h3>
+                  <p className="text-neutral-500 mt-2">Crea categorías para organizar tus aplicaciones</p>
+                  <Button 
+                    className="mt-6"
+                    onClick={() => setShowNewCategoryDialog(true)}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Crear categoría
+                  </Button>
                 </div>
               )}
-            </TabsContent>
-          </div>
-        </Tabs>
-      </DialogContent>
-
-      {/* Category Form Dialog */}
-      <Dialog open={showCategoryForm} onOpenChange={setShowCategoryForm}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{editingCategory ? "Edit Category" : "Add Category"}</DialogTitle>
-          </DialogHeader>
-          <AdminCategoryForm 
-            category={editingCategory}
-            onSave={handleSaveCategory}
-            onCancel={() => setShowCategoryForm(false)}
-          />
-        </DialogContent>
-      </Dialog>
-
-      {/* App Form Dialog */}
-      <Dialog open={showAppForm} onOpenChange={setShowAppForm}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{editingApp ? "Edit App" : "Add App"}</DialogTitle>
-          </DialogHeader>
-          {selectedCategoryId && (
-            <AdminAppForm 
-              app={editingApp?.app}
-              categoryId={selectedCategoryId}
-              categories={categories}
-              onSave={handleSaveApp}
-              onCancel={() => setShowAppForm(false)}
-            />
+            </div>
           )}
+        </main>
+      </div>
+
+      {/* Mobile Navigation */}
+      <MobileNav />
+      
+      {/* Dialogs */}
+      {/* Nueva Categoría */}
+      <Dialog open={showNewCategoryDialog} onOpenChange={setShowNewCategoryDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nueva Categoría</DialogTitle>
+            <DialogDescription>
+              Crea una nueva categoría para organizar tus aplicaciones.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="category-name">Nombre de la categoría</Label>
+              <Input 
+                id="category-name" 
+                placeholder="Ej: Productividad, Diseño, Desarrollo..." 
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowNewCategoryDialog(false);
+                setNewCategoryName("");
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={handleAddCategory}>Crear</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
-    </Dialog>
+      
+      {/* Editar Categoría */}
+      <Dialog open={showEditCategoryDialog} onOpenChange={setShowEditCategoryDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Categoría</DialogTitle>
+            <DialogDescription>
+              Modifica la información de la categoría.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="edit-category-name">Nombre de la categoría</Label>
+              <Input 
+                id="edit-category-name" 
+                placeholder="Nombre de la categoría" 
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowEditCategoryDialog(false);
+                setEditingCategory(null);
+                setNewCategoryName("");
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={handleUpdateCategory}>Guardar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Nueva Aplicación */}
+      <Dialog open={showNewAppDialog} onOpenChange={setShowNewAppDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Nueva Aplicación</DialogTitle>
+            <DialogDescription>
+              Agrega una nueva aplicación a una categoría.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="app-category">Categoría</Label>
+              <select 
+                id="app-category"
+                className="w-full border-neutral-300 rounded-md px-3 py-2"
+                value={selectedCategoryId || ""}
+                onChange={(e) => setSelectedCategoryId(e.target.value)}
+              >
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="app-name">Nombre de la aplicación *</Label>
+              <Input 
+                id="app-name" 
+                placeholder="Ej: Google Drive, Slack, Github..." 
+                value={newAppData.name}
+                onChange={(e) => setNewAppData({...newAppData, name: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="app-url">URL de la aplicación *</Label>
+              <Input 
+                id="app-url" 
+                placeholder="https://www.ejemplo.com" 
+                value={newAppData.url}
+                onChange={(e) => setNewAppData({...newAppData, url: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="app-icon">URL del icono</Label>
+              <Input 
+                id="app-icon" 
+                placeholder="https://www.ejemplo.com/icon.png" 
+                value={newAppData.icon}
+                onChange={(e) => setNewAppData({...newAppData, icon: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="app-description">Descripción</Label>
+              <Textarea 
+                id="app-description" 
+                placeholder="Breve descripción de la aplicación" 
+                value={newAppData.description || ""}
+                onChange={(e) => setNewAppData({...newAppData, description: e.target.value})}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowNewAppDialog(false);
+                setSelectedCategoryId(null);
+                setNewAppData({
+                  name: "",
+                  icon: "",
+                  url: "",
+                  description: ""
+                });
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={handleSaveNewApp}>Crear</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Editar Aplicación */}
+      <Dialog open={showEditAppDialog} onOpenChange={setShowEditAppDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar Aplicación</DialogTitle>
+            <DialogDescription>
+              Modifica la información de la aplicación.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="edit-app-name">Nombre de la aplicación *</Label>
+              <Input 
+                id="edit-app-name" 
+                placeholder="Nombre de la aplicación" 
+                value={newAppData.name}
+                onChange={(e) => setNewAppData({...newAppData, name: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-app-url">URL de la aplicación *</Label>
+              <Input 
+                id="edit-app-url" 
+                placeholder="https://www.ejemplo.com" 
+                value={newAppData.url}
+                onChange={(e) => setNewAppData({...newAppData, url: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-app-icon">URL del icono</Label>
+              <Input 
+                id="edit-app-icon" 
+                placeholder="https://www.ejemplo.com/icon.png" 
+                value={newAppData.icon}
+                onChange={(e) => setNewAppData({...newAppData, icon: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-app-description">Descripción</Label>
+              <Textarea 
+                id="edit-app-description" 
+                placeholder="Breve descripción de la aplicación" 
+                value={newAppData.description || ""}
+                onChange={(e) => setNewAppData({...newAppData, description: e.target.value})}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowEditAppDialog(false);
+                setEditingApp(null);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={handleUpdateApp}>Guardar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Confirmar Eliminar Categoría */}
+      <Dialog open={showDeleteCategoryDialog} onOpenChange={setShowDeleteCategoryDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Eliminar Categoría</DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro de que deseas eliminar esta categoría? Esta acción eliminará también todas las aplicaciones dentro de la categoría y no podrá deshacerse.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowDeleteCategoryDialog(false);
+                setItemToDelete(null);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmDeleteCategory}
+            >
+              Eliminar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Confirmar Eliminar Aplicación */}
+      <Dialog open={showDeleteAppDialog} onOpenChange={setShowDeleteAppDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Eliminar Aplicación</DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro de que deseas eliminar esta aplicación? Esta acción no podrá deshacerse.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowDeleteAppDialog(false);
+                setItemToDelete(null);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmDeleteApp}
+            >
+              Eliminar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

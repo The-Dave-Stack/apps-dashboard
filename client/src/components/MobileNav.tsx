@@ -25,11 +25,21 @@ export default function MobileNav() {
           <Home className="h-5 w-5" />
           <span className="text-xs mt-1">Inicio</span>
         </button>
-        <button className="flex flex-col items-center justify-center p-2 text-neutral-500">
+        <button 
+          className={`flex flex-col items-center justify-center p-2 ${
+            location === "/search" ? "text-primary-600" : "text-neutral-500"
+          }`}
+          onClick={() => setLocation("/search")}
+        >
           <Search className="h-5 w-5" />
           <span className="text-xs mt-1">Buscar</span>
         </button>
-        <button className="flex flex-col items-center justify-center p-2 text-neutral-500">
+        <button 
+          className={`flex flex-col items-center justify-center p-2 ${
+            location === "/settings" ? "text-primary-600" : "text-neutral-500"
+          }`}
+          onClick={() => setLocation("/settings")}
+        >
           <Settings className="h-5 w-5" />
           <span className="text-xs mt-1">Ajustes</span>
         </button>
