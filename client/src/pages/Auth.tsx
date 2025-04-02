@@ -27,7 +27,7 @@ export default function Auth() {
   useEffect(() => {
     if (user) {
       console.log("User is already logged in, redirecting to dashboard");
-      setLocation("/dashboard");
+      setLocation("/");
     }
   }, [user, setLocation]);
 

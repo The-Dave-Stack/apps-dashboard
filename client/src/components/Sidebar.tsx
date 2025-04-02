@@ -1,7 +1,6 @@
 import { useLocation } from "wouter";
-import { auth } from "@/lib/firebase";
-import { signOut } from "firebase/auth";
 import { useAuth } from "@/lib/hooks";
+import { logout } from "@/lib/hooks";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { 
@@ -18,26 +17,15 @@ export default function Sidebar() {
   const [location, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
-  
-  // Usuario simulado para el desarrollo (temporal)
-  const mockUser = {
-    uid: "mock-user-id",
-    email: "usuario@ejemplo.com",
-    displayName: "Usuario de Prueba",
-    photoURL: null
-  };
-  
-  // Durante el desarrollo, usamos el usuario simulado si no hay usuario autenticado
-  const effectiveUser = user || mockUser;
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await logout();
       toast({
         title: "Sesión cerrada",
         description: "Has cerrado sesión correctamente",
       });
-      setLocation("/");
+      setLocation("/auth");
     } catch (error: any) {
       toast({
         title: "Error al cerrar sesión",
@@ -127,17 +115,17 @@ export default function Sidebar() {
       <div className="p-4 border-t border-neutral-200">
         <div className="flex items-center">
           <div className="h-8 w-8 rounded-full bg-neutral-300 overflow-hidden">
-            {effectiveUser?.photoURL ? (
-              <img src={effectiveUser.photoURL} alt="User avatar" className="h-full w-full object-cover" />
+            {user?.photoURL ? (
+              <img src={user.photoURL} alt="User avatar" className="h-full w-full object-cover" />
             ) : (
               <div className="h-full w-full flex items-center justify-center bg-primary-100 text-primary-600">
-                {effectiveUser?.email ? effectiveUser.email[0].toUpperCase() : "U"}
+                {user?.email ? user.email[0].toUpperCase() : "U"}
               </div>
             )}
           </div>
           <div className="ml-3">
             <p className="text-sm font-medium text-neutral-800">
-              {effectiveUser?.displayName || effectiveUser?.email || "User"}
+              {user?.displayName || user?.email || "Usuario"}
             </p>
             <Button 
               variant="link" 
