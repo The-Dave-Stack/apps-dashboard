@@ -104,13 +104,13 @@ export default function Auth() {
                 onClick={() => setIsLogin(true)}
                 className={`flex-1 py-3 font-medium text-center ${isLogin ? 'border-b-2 border-primary-500 text-primary-600' : 'text-neutral-500 hover:text-neutral-700'}`}
               >
-                Login
+                Iniciar Sesión
               </button>
               <button 
                 onClick={() => setIsLogin(false)}
                 className={`flex-1 py-3 font-medium text-center ${!isLogin ? 'border-b-2 border-primary-500 text-primary-600' : 'text-neutral-500 hover:text-neutral-700'}`}
               >
-                Register
+                Registrarse
               </button>
             </div>
 
@@ -118,19 +118,19 @@ export default function Auth() {
             {isLogin ? (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <Label htmlFor="email" className="text-neutral-700">Email</Label>
+                  <Label htmlFor="email" className="text-neutral-700">Correo Electrónico</Label>
                   <Input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your@email.com"
+                    placeholder="tu@correo.com"
                     required
                     className="mt-1"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="password" className="text-neutral-700">Password</Label>
+                  <Label htmlFor="password" className="text-neutral-700">Contraseña</Label>
                   <Input
                     id="password"
                     type="password"
@@ -149,9 +149,9 @@ export default function Auth() {
                       checked={rememberMe}
                       onCheckedChange={(checked) => setRememberMe(checked as boolean)} 
                     />
-                    <Label htmlFor="remember-me" className="text-sm text-neutral-700">Remember me</Label>
+                    <Label htmlFor="remember-me" className="text-sm text-neutral-700">Recordarme</Label>
                   </div>
-                  <a href="#" className="text-sm font-medium text-primary-600 hover:underline">Forgot password?</a>
+                  <a href="#" className="text-sm font-medium text-primary-600 hover:underline">¿Olvidaste tu contraseña?</a>
                 </div>
                 
                 <Button 
@@ -159,7 +159,7 @@ export default function Auth() {
                   className="w-full bg-primary-600 hover:bg-primary-700" 
                   disabled={isLoading}
                 >
-                  {isLoading ? "Signing in..." : "Sign in"}
+                  {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
                 </Button>
               </form>
             ) : (
