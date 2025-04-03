@@ -67,6 +67,17 @@ export async function saveCategory(category: CategoryData): Promise<CategoryData
       throw new Error("Firestore no inicializado");
     }
     
+    // Verificar la conexión a Firestore con una operación simple
+    try {
+      console.log("[Firebase] Verificando conexión a Firestore...");
+      const testRef = collection(db, "test_connection");
+      await getDocs(testRef);
+      console.log("[Firebase] Conexión a Firestore verificada");
+    } catch (connectionError) {
+      console.error("[Firebase] Problema de conexión a Firestore:", connectionError);
+      // Continuar de todos modos, podría ser que la colección no exista
+    }
+    
     if (category.id && category.id.trim() !== "") {
       // Actualizar categoría existente
       console.log("[Firebase] Actualizando categoría con ID:", category.id);
@@ -80,8 +91,41 @@ export async function saveCategory(category: CategoryData): Promise<CategoryData
         
         // Si falla la actualización, intentamos crear una nueva
         console.log("[Firebase] Intentando crear en su lugar...");
-        const newCategoryRef = doc(collection(db, "categories"));
+        try {
+          // Intentar crear con método alternativo
+          const categoriesCollection = collection(db, "categories");
+          const newCategoryRef = doc(categoriesCollection);
+          const newCategory = { name: category.name };
+          
+          await setDoc(newCategoryRef, newCategory);
+          
+          console.log("[Firebase] Categoría creada con éxito, ID:", newCategoryRef.id);
+          return {
+            ...category,
+            id: newCategoryRef.id,
+            apps: []
+          };
+        } catch (createError) {
+          console.error("[Firebase] Error también al crear:", createError);
+          throw createError;
+        }
+      }
+    } else {
+      // Crear nueva categoría
+      console.log("[Firebase] Creando nueva categoría:", category.name);
+      
+      try {
+        // Verificar si podemos acceder a la colección
+        const categoriesCollection = collection(db, "categories");
+        console.log("[Firebase] Colección de categorías accesible");
+        
+        // Crear un nuevo documento con ID automático
+        const newCategoryRef = doc(categoriesCollection);
+        console.log("[Firebase] Referencia creada:", newCategoryRef.id);
+        
         const newCategory = { name: category.name };
+        
+        console.log("[Firebase] Intentando guardar documento...");
         await setDoc(newCategoryRef, newCategory);
         
         console.log("[Firebase] Categoría creada con éxito, ID:", newCategoryRef.id);
@@ -90,22 +134,15 @@ export async function saveCategory(category: CategoryData): Promise<CategoryData
           id: newCategoryRef.id,
           apps: []
         };
+      } catch (createError) {
+        console.error("[Firebase] Error detallado al crear categoría:", createError);
+        if (createError instanceof Error) {
+          console.error("[Firebase] Código:", createError.name);
+          console.error("[Firebase] Mensaje:", createError.message);
+          console.error("[Firebase] Stack:", createError.stack);
+        }
+        throw createError;
       }
-    } else {
-      // Crear nueva categoría
-      console.log("[Firebase] Creando nueva categoría:", category.name);
-      const newCategoryRef = doc(collection(db, "categories"));
-      const newCategory = { name: category.name };
-      
-      console.log("[Firebase] Referencia creada, intentando guardar");
-      await setDoc(newCategoryRef, newCategory);
-      
-      console.log("[Firebase] Categoría creada con éxito, ID:", newCategoryRef.id);
-      return {
-        ...category,
-        id: newCategoryRef.id,
-        apps: []
-      };
     }
   } catch (error) {
     console.error("[Firebase] Error crítico al guardar categoría:", error);
@@ -113,6 +150,16 @@ export async function saveCategory(category: CategoryData): Promise<CategoryData
     if (error instanceof Error) {
       console.error("[Firebase] Mensaje de error:", error.message);
       console.error("[Firebase] Stack de error:", error.stack);
+    }
+    
+    // Para diagnóstico, intentamos una operación muy básica
+    try {
+      const simpleData = { test: true, timestamp: new Date().toISOString() };
+      const testDoc = doc(collection(db, "debug_test"));
+      await setDoc(testDoc, simpleData);
+      console.log("[Firebase] Prueba diagnóstica exitosa, se pudo crear documento de prueba");
+    } catch (testError) {
+      console.error("[Firebase] Incluso la prueba diagnóstica falló:", testError);
     }
     
     // Proporcionar un error amigable para el usuario

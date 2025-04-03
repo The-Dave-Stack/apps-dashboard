@@ -9,7 +9,10 @@ import {
   FolderPlus,
   AppWindow,
   Loader,
-  AlertTriangle
+  AlertTriangle,
+  Shield,
+  AlertCircle,
+  RefreshCw
 } from "lucide-react";
 import MobileNav from "@/components/MobileNav";
 import Sidebar from "@/components/Sidebar";
@@ -20,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { AppData, CategoryData } from "@/lib/types";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { 
   fetchCategories, 
   saveCategory, 
@@ -27,6 +31,7 @@ import {
   saveApp, 
   deleteApp 
 } from "@/lib/firebase";
+import { checkFirebaseConnection } from "@/lib/firebase-check";
 
 export default function AdminPanel() {
   const { toast } = useToast();
@@ -44,6 +49,22 @@ export default function AdminPanel() {
     description: ""
   });
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  
+  // Estado para la verificación de Firebase
+  const [firebaseStatus, setFirebaseStatus] = useState<{
+    connection: boolean;
+    read: boolean;
+    write: boolean;
+    error?: string;
+    lastChecked: Date | null;
+    checking: boolean;
+  }>({
+    connection: false,
+    read: false,
+    write: false,
+    lastChecked: null,
+    checking: false
+  });
   
   // Dialogos
   const [showNewCategoryDialog, setShowNewCategoryDialog] = useState(false);
@@ -143,11 +164,76 @@ export default function AdminPanel() {
     }
   ];
 
+  // Función para verificar la conexión a Firebase
+  const checkFirebaseStatus = async () => {
+    try {
+      setFirebaseStatus(prev => ({ ...prev, checking: true }));
+      
+      const status = await checkFirebaseConnection();
+      
+      setFirebaseStatus({
+        ...status,
+        checking: false,
+        lastChecked: new Date()
+      });
+      
+      if (!status.connection) {
+        toast({
+          title: "Error de conexión",
+          description: "No se pudo conectar a Firebase. Verifique su conexión a internet.",
+          variant: "destructive"
+        });
+        return false;
+      }
+      
+      if (!status.write) {
+        toast({
+          title: "Error de permisos",
+          description: status.error || "No se pudo escribir en Firebase. Verifique las reglas de seguridad.",
+          variant: "destructive"
+        });
+        return false;
+      }
+      
+      if (status.connection && status.read && status.write) {
+        toast({
+          title: "Conexión exitosa",
+          description: "La conexión a Firebase está funcionando correctamente.",
+        });
+        return true;
+      }
+      
+      return false;
+      
+    } catch (error) {
+      console.error("Error al verificar Firebase:", error);
+      setFirebaseStatus(prev => ({ 
+        ...prev, 
+        checking: false,
+        lastChecked: new Date(),
+        error: error instanceof Error ? error.message : "Error desconocido"
+      }));
+      
+      toast({
+        title: "Error",
+        description: "Ocurrió un error al verificar la conexión a Firebase.",
+        variant: "destructive"
+      });
+      
+      return false;
+    }
+  };
+  
   // Cargar datos iniciales
   useEffect(() => {
-    const loadCategories = async () => {
+    const loadInitialData = async () => {
       try {
         setLoading(true);
+        
+        // Primero verificamos la conexión a Firebase
+        await checkFirebaseStatus();
+        
+        // Luego intentamos cargar las categorías
         const data = await fetchCategories();
         setCategories(data);
       } catch (error) {
@@ -162,7 +248,7 @@ export default function AdminPanel() {
       }
     };
     
-    loadCategories();
+    loadInitialData();
   }, [toast]);
 
   // Manejadores para categorías
@@ -179,6 +265,19 @@ export default function AdminPanel() {
     setLoading(true);
     
     try {
+      // Primero verificamos la conexión a Firebase
+      const firebaseReady = await checkFirebaseStatus();
+      
+      // Si no hay conexión a Firebase, no continuamos
+      if (!firebaseReady) {
+        toast({
+          title: "Error de Firebase",
+          description: "No se puede guardar la categoría porque no hay conexión a Firebase o no se tienen los permisos necesarios.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       // Crear nueva categoría en Firebase
       const newCategory: CategoryData = {
         id: "", // Firebase asignará el ID
@@ -186,7 +285,9 @@ export default function AdminPanel() {
         apps: []
       };
       
+      console.log("[AdminPanel] Intentando guardar categoría:", newCategory);
       const savedCategory = await saveCategory(newCategory);
+      console.log("[AdminPanel] Categoría guardada con éxito:", savedCategory);
       
       // Actualizar el estado con los datos desde Firebase
       setCategories([...categories, savedCategory]);
@@ -195,6 +296,10 @@ export default function AdminPanel() {
         title: "Categoría creada",
         description: `Se ha creado la categoría ${newCategory.name}`,
       });
+      
+      // Cerramos el diálogo y limpiamos campos
+      setNewCategoryName("");
+      setShowNewCategoryDialog(false);
     } catch (error) {
       console.error("Error al crear categoría:", error);
       toast({
@@ -204,8 +309,6 @@ export default function AdminPanel() {
       });
     } finally {
       setLoading(false);
-      setNewCategoryName("");
-      setShowNewCategoryDialog(false);
     }
   };
   
@@ -551,6 +654,106 @@ export default function AdminPanel() {
         
         {/* Admin Panel Content */}
         <main className="flex-1 p-4 md:p-6">
+          {/* Estado de Firebase */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold mb-4">Estado de Firebase</h2>
+              <Button 
+                onClick={checkFirebaseStatus} 
+                disabled={firebaseStatus.checking}
+                variant="outline"
+                className="flex items-center"
+              >
+                {firebaseStatus.checking ? (
+                  <>
+                    <Loader className="mr-2 h-4 w-4 animate-spin" />
+                    Verificando...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Verificar Conexión
+                  </>
+                )}
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className={`p-4 rounded-lg border ${firebaseStatus.connection ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                <div className="flex items-center">
+                  {firebaseStatus.connection ? (
+                    <Shield className="h-5 w-5 text-green-500 mr-2" />
+                  ) : (
+                    <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+                  )}
+                  <h3 className="font-medium">Conexión a Firebase</h3>
+                </div>
+                <p className={`text-sm mt-1 ${firebaseStatus.connection ? 'text-green-700' : 'text-red-700'}`}>
+                  {firebaseStatus.connection ? 'Conectado' : 'Desconectado'}
+                </p>
+              </div>
+              
+              <div className={`p-4 rounded-lg border ${firebaseStatus.read ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                <div className="flex items-center">
+                  {firebaseStatus.read ? (
+                    <Shield className="h-5 w-5 text-green-500 mr-2" />
+                  ) : (
+                    <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+                  )}
+                  <h3 className="font-medium">Permisos de Lectura</h3>
+                </div>
+                <p className={`text-sm mt-1 ${firebaseStatus.read ? 'text-green-700' : 'text-red-700'}`}>
+                  {firebaseStatus.read ? 'Disponible' : 'No disponible'}
+                </p>
+              </div>
+              
+              <div className={`p-4 rounded-lg border ${firebaseStatus.write ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                <div className="flex items-center">
+                  {firebaseStatus.write ? (
+                    <Shield className="h-5 w-5 text-green-500 mr-2" />
+                  ) : (
+                    <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+                  )}
+                  <h3 className="font-medium">Permisos de Escritura</h3>
+                </div>
+                <p className={`text-sm mt-1 ${firebaseStatus.write ? 'text-green-700' : 'text-red-700'}`}>
+                  {firebaseStatus.write ? 'Disponible' : 'No disponible'}
+                </p>
+              </div>
+            </div>
+            
+            {firebaseStatus.error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error en Firebase</AlertTitle>
+                <AlertDescription>
+                  {firebaseStatus.error}
+                </AlertDescription>
+              </Alert>
+            )}
+            
+            {!firebaseStatus.write && (
+              <Alert className="mb-4 bg-amber-50 border-amber-200 text-amber-800">
+                <AlertTriangle className="h-4 w-4 text-amber-800" />
+                <AlertTitle>Reglas de seguridad Firestore</AlertTitle>
+                <AlertDescription>
+                  Para permitir escrituras en Firebase Firestore, debes configurar las reglas de seguridad adecuadas en la consola de Firebase. 
+                  Las reglas recomendadas para desarrollo (no para producción) son:
+                  <pre className="mt-2 p-2 bg-amber-100 rounded text-xs overflow-x-auto">
+                    {`rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}`}
+                  </pre>
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+
           {loading ? (
             <div className="flex justify-center items-center h-full">
               <Loader className="h-8 w-8 animate-spin text-primary-600" />
