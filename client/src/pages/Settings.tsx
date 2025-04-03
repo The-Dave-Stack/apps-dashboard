@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Settings as SettingsIcon, User, Bell, Moon, Sun, Globe, Shield, LogOut } from "lucide-react";
-import MobileNav from "@/components/MobileNav";
-import Sidebar from "@/components/Sidebar";
+import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
@@ -76,151 +75,134 @@ export default function Settings() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Sidebar for larger screens */}
-      <Sidebar />
-      
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-y-auto pb-16 md:pb-0">
-        {/* Mobile Header */}
-        <header className="md:hidden bg-white border-b border-neutral-200 p-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-primary-600">AppHub</h1>
-        </header>
-        
-        {/* Desktop Header */}
-        <header className="bg-white border-b border-neutral-200 p-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-neutral-800">Configuración</h1>
-          </div>
-        </header>
-        
-        {/* Settings Content */}
-        <main className="flex-1 p-4 md:p-6">
-          <div className="max-w-3xl mx-auto">
-            <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden mb-6">
-              <div className="p-4 sm:p-6 flex flex-col sm:flex-row items-center sm:items-start gap-4">
-                <div className="w-20 h-20 rounded-full bg-neutral-200 overflow-hidden flex-shrink-0">
-                  {effectiveUser?.photoURL ? (
-                    <img 
-                      src={effectiveUser.photoURL} 
-                      alt="Foto de perfil" 
-                      className="w-full h-full object-cover" 
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-primary-100">
-                      <span className="text-2xl font-medium text-primary-600">
-                        {effectiveUser.email ? effectiveUser.email[0].toUpperCase() : "U"}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="text-center sm:text-left">
-                  <h2 className="text-xl font-semibold text-neutral-800">
-                    {effectiveUser.displayName || "Usuario"}
-                  </h2>
-                  <p className="text-neutral-500">{effectiveUser.email}</p>
-                  <div className="mt-3">
-                    <Button variant="outline" size="sm" className="mr-2">
-                      <User className="h-4 w-4 mr-1" />
-                      Editar perfil
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
-              <div className="p-4 sm:p-6">
-                <h3 className="text-lg font-medium mb-4">Preferencias</h3>
-                
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      {darkMode ? <Moon className="h-5 w-5 text-neutral-700" /> : <Sun className="h-5 w-5 text-neutral-700" />}
-                      <div>
-                        <p className="font-medium">Modo oscuro</p>
-                        <p className="text-sm text-neutral-500">Cambia la apariencia de la aplicación</p>
-                      </div>
-                    </div>
-                    <Switch checked={darkMode} onCheckedChange={handleDarkModeChange} />
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Bell className="h-5 w-5 text-neutral-700" />
-                      <div>
-                        <p className="font-medium">Notificaciones</p>
-                        <p className="text-sm text-neutral-500">Recibe alertas sobre nuevas aplicaciones</p>
-                      </div>
-                    </div>
-                    <Switch checked={notifications} onCheckedChange={handleNotificationsChange} />
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div>
-                    <div className="flex items-center space-x-3 mb-3">
-                      <Globe className="h-5 w-5 text-neutral-700" />
-                      <div>
-                        <p className="font-medium">Idioma</p>
-                        <p className="text-sm text-neutral-500">Selecciona el idioma de la aplicación</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-2 ml-8">
-                      <Button 
-                        variant={language === "es" ? "default" : "outline"} 
-                        size="sm"
-                        onClick={() => handleLanguageChange("es")}
-                      >
-                        Español
-                      </Button>
-                      <Button 
-                        variant={language === "en" ? "default" : "outline"} 
-                        size="sm"
-                        onClick={() => handleLanguageChange("en")}
-                      >
-                        English
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden mt-6">
-              <div className="p-4 sm:p-6">
-                <h3 className="text-lg font-medium mb-4">Seguridad</h3>
-                
-                <div className="space-y-6">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Shield className="h-5 w-5 mr-2" />
-                    Cambiar contraseña
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
-                    onClick={handleLogout}
-                  >
-                    <LogOut className="h-5 w-5 mr-2" />
-                    Cerrar sesión
-                  </Button>
-                </div>
-              </div>
-            </div>
-            
-            <div className="mt-8 text-center text-sm text-neutral-500">
-              <p>AppHub v1.0.0</p>
-              <p className="mt-1">© 2025 AppHub. Todos los derechos reservados.</p>
-            </div>
-          </div>
-        </main>
+    <Layout showSearch={false}>
+      {/* Title */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-primary-600">Configuración</h1>
+        <p className="text-neutral-500 mt-1">Gestiona tus preferencias y datos de usuario</p>
       </div>
-
-      {/* Mobile Navigation */}
-      <MobileNav />
-    </div>
+      
+      {/* Settings Content */}
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden mb-6">
+          <div className="p-4 sm:p-6 flex flex-col sm:flex-row items-center sm:items-start gap-4">
+            <div className="w-20 h-20 rounded-full bg-neutral-200 overflow-hidden flex-shrink-0">
+              {effectiveUser?.photoURL ? (
+                <img 
+                  src={effectiveUser.photoURL} 
+                  alt="Foto de perfil" 
+                  className="w-full h-full object-cover" 
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-primary-100">
+                  <span className="text-2xl font-medium text-primary-600">
+                    {effectiveUser.email ? effectiveUser.email[0].toUpperCase() : "U"}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className="text-center sm:text-left">
+              <h2 className="text-xl font-semibold text-neutral-800">
+                {effectiveUser.displayName || "Usuario"}
+              </h2>
+              <p className="text-neutral-500">{effectiveUser.email}</p>
+              <div className="mt-3">
+                <Button variant="outline" size="sm" className="mr-2">
+                  <User className="h-4 w-4 mr-1" />
+                  Editar perfil
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
+          <div className="p-4 sm:p-6">
+            <h3 className="text-lg font-medium mb-4">Preferencias</h3>
+            
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  {darkMode ? <Moon className="h-5 w-5 text-neutral-700" /> : <Sun className="h-5 w-5 text-neutral-700" />}
+                  <div>
+                    <p className="font-medium">Modo oscuro</p>
+                    <p className="text-sm text-neutral-500">Cambia la apariencia de la aplicación</p>
+                  </div>
+                </div>
+                <Switch checked={darkMode} onCheckedChange={handleDarkModeChange} />
+              </div>
+              
+              <Separator />
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Bell className="h-5 w-5 text-neutral-700" />
+                  <div>
+                    <p className="font-medium">Notificaciones</p>
+                    <p className="text-sm text-neutral-500">Recibe alertas sobre nuevas aplicaciones</p>
+                  </div>
+                </div>
+                <Switch checked={notifications} onCheckedChange={handleNotificationsChange} />
+              </div>
+              
+              <Separator />
+              
+              <div>
+                <div className="flex items-center space-x-3 mb-3">
+                  <Globe className="h-5 w-5 text-neutral-700" />
+                  <div>
+                    <p className="font-medium">Idioma</p>
+                    <p className="text-sm text-neutral-500">Selecciona el idioma de la aplicación</p>
+                  </div>
+                </div>
+                <div className="flex gap-2 ml-8">
+                  <Button 
+                    variant={language === "es" ? "default" : "outline"} 
+                    size="sm"
+                    onClick={() => handleLanguageChange("es")}
+                  >
+                    Español
+                  </Button>
+                  <Button 
+                    variant={language === "en" ? "default" : "outline"} 
+                    size="sm"
+                    onClick={() => handleLanguageChange("en")}
+                  >
+                    English
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden mt-6">
+          <div className="p-4 sm:p-6">
+            <h3 className="text-lg font-medium mb-4">Seguridad</h3>
+            
+            <div className="space-y-6">
+              <Button variant="outline" className="w-full justify-start">
+                <Shield className="h-5 w-5 mr-2" />
+                Cambiar contraseña
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-5 w-5 mr-2" />
+                Cerrar sesión
+              </Button>
+            </div>
+          </div>
+        </div>
+        
+        <div className="mt-8 text-center text-sm text-neutral-500">
+          <p>AppHub v1.0.0</p>
+          <p className="mt-1">© 2025 AppHub. Todos los derechos reservados.</p>
+        </div>
+      </div>
+    </Layout>
   );
 }

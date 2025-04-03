@@ -15,8 +15,7 @@ import {
   RefreshCw,
   Settings
 } from "lucide-react";
-import MobileNav from "@/components/MobileNav";
-import Sidebar from "@/components/Sidebar";
+import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -526,52 +525,52 @@ export default function AdminPanel() {
         appIcon = await getIconForUrl(newAppData.url);
       }
       
-      // Crear nueva aplicación para la categoría seleccionada con el icono obtenido
+      // Crear nueva app en Firebase
       const newApp: AppData = {
         ...newAppData,
-        icon: appIcon,
-        id: `app${Date.now()}` // Esto se reemplazará en Firebase si es necesario
+        icon: appIcon
       };
       
-      // Encontrar la categoría actual
-      const currentCategory = categories.find(cat => cat.id === selectedCategoryId);
-      
-      if (!currentCategory) {
-        throw new Error("La categoría seleccionada ya no existe");
-      }
-      
-      // Actualizar la categoría con la nueva app
-      const updatedCategory: CategoryData = {
-        ...currentCategory,
-        apps: [...currentCategory.apps, newApp]
-      };
-      
-      // Guardar en Firebase
       await saveApp(newApp, selectedCategoryId);
       
       // Actualizar el estado local
-      const updatedCategories = categories.map(cat => 
-        cat.id === selectedCategoryId 
-          ? updatedCategory
-          : cat
-      );
+      const updatedCategories = categories.map(cat => {
+        if (cat.id === selectedCategoryId) {
+          return {
+            ...cat,
+            apps: [...cat.apps, { ...newApp, id: Date.now().toString() }] // ID temporal hasta que recarguemos
+          };
+        }
+        return cat;
+      });
       
       setCategories(updatedCategories);
       
+      // Recargar categorías para obtener la aplicación con su ID real
+      const refreshedCategories = await fetchCategories();
+      setCategories(refreshedCategories);
+      
       toast({
-        title: "Aplicación creada",
-        description: `Se ha creado la aplicación ${newApp.name}`,
+        title: "Aplicación añadida",
+        description: `Se ha añadido ${newApp.name} a la categoría`,
       });
     } catch (error) {
-      console.error("Error al crear aplicación:", error);
+      console.error("Error al añadir aplicación:", error);
       toast({
         title: "Error",
-        description: "No se pudo crear la aplicación. Inténtalo de nuevo más tarde.",
+        description: "No se pudo añadir la aplicación. Inténtalo de nuevo más tarde.",
         variant: "destructive"
       });
     } finally {
       setLoading(false);
       setShowNewAppDialog(false);
+      setNewAppData({
+        name: "",
+        icon: "",
+        url: "",
+        description: ""
+      });
+      setSelectedCategoryId(null);
     }
   };
   
@@ -602,11 +601,9 @@ export default function AdminPanel() {
     setLoading(true);
     
     try {
-      // Si no se proporciona un icono, o si la URL cambió, intentar obtener el icono automáticamente
+      // Si el icono se eliminó, intentar obtenerlo automáticamente
       let appIcon = newAppData.icon;
-      const urlChanged = newAppData.url !== editingApp.app.url;
-      
-      if ((!appIcon || appIcon.trim() === "") || (urlChanged && appIcon === editingApp.app.icon)) {
+      if (!appIcon || appIcon.trim() === "") {
         toast({
           title: "Buscando icono...",
           description: "Intentando obtener el icono automáticamente, esto puede tardar unos segundos",
@@ -617,35 +614,33 @@ export default function AdminPanel() {
         appIcon = await getIconForUrl(newAppData.url);
       }
       
-      // Actualizar aplicación con los nuevos datos y el icono actualizado
+      // Actualizar app en Firebase
       const updatedApp: AppData = { 
-        ...newAppData, 
-        icon: appIcon,
-        id: editingApp.app.id 
+        ...newAppData,
+        id: editingApp.app.id,
+        icon: appIcon
       };
       
-      // Guardar en Firebase
       await saveApp(updatedApp, editingApp.categoryId);
       
       // Actualizar el estado local
-      const updatedCategories = categories.map(cat => 
-        cat.id === editingApp.categoryId 
-          ? { 
-              ...cat, 
-              apps: cat.apps.map(app => 
-                app.id === editingApp.app.id 
-                  ? updatedApp
-                  : app
-              ) 
-            } 
-          : cat
-      );
+      const updatedCategories = categories.map(cat => {
+        if (cat.id === editingApp.categoryId) {
+          return {
+            ...cat,
+            apps: cat.apps.map(app => 
+              app.id === editingApp.app.id ? updatedApp : app
+            )
+          };
+        }
+        return cat;
+      });
       
       setCategories(updatedCategories);
       
       toast({
         title: "Aplicación actualizada",
-        description: `Se ha actualizado la aplicación ${newAppData.name}`,
+        description: `Se ha actualizado la aplicación ${updatedApp.name}`,
       });
     } catch (error) {
       console.error("Error al actualizar aplicación:", error);
@@ -678,15 +673,19 @@ export default function AdminPanel() {
     setLoading(true);
     
     try {
-      // Eliminar aplicación de Firebase
+      // Eliminar app de Firebase
       await deleteApp(itemToDelete.id);
       
       // Actualizar el estado local
-      const updatedCategories = categories.map(cat => 
-        cat.id === itemToDelete.categoryId 
-          ? { ...cat, apps: cat.apps.filter(app => app.id !== itemToDelete.id) } 
-          : cat
-      );
+      const updatedCategories = categories.map(cat => {
+        if (cat.id === itemToDelete.categoryId) {
+          return {
+            ...cat,
+            apps: cat.apps.filter(app => app.id !== itemToDelete.id)
+          };
+        }
+        return cat;
+      });
       
       setCategories(updatedCategories);
       
@@ -707,125 +706,114 @@ export default function AdminPanel() {
       setItemToDelete(null);
     }
   };
-
+  
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Sidebar for larger screens */}
-      <Sidebar />
+    <Layout showSearch={false}>
+      {/* Admin Panel Header */}
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-primary-600">Panel de Administración</h1>
+          <p className="text-neutral-500 mt-1">Gestiona las categorías y aplicaciones del sistema</p>
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={handleAddApp}>
+            <AppWindow className="mr-2 h-4 w-4" />
+            Nueva Aplicación
+          </Button>
+          <Button variant="outline" onClick={() => setShowNewCategoryDialog(true)}>
+            <FolderPlus className="mr-2 h-4 w-4" />
+            Nueva Categoría
+          </Button>
+        </div>
+      </div>
       
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-y-auto pb-16 md:pb-0">
-        {/* Mobile Header */}
-        <header className="md:hidden bg-white border-b border-neutral-200 p-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-primary-600">AppHub</h1>
-        </header>
-        
-        {/* Desktop Header */}
-        <header className="bg-white border-b border-neutral-200 p-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-neutral-800">Panel de Administración</h1>
-            <div className="flex gap-2">
-              <Button onClick={handleAddApp}>
-                <AppWindow className="mr-2 h-4 w-4" />
-                Nueva Aplicación
-              </Button>
-              <Button variant="outline" onClick={() => setShowNewCategoryDialog(true)}>
-                <FolderPlus className="mr-2 h-4 w-4" />
-                Nueva Categoría
-              </Button>
-            </div>
-          </div>
-        </header>
-        
-        {/* Admin Panel Content */}
-        <main className="flex-1 p-4 md:p-6">
-          {/* Estado de Firebase */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold mb-4">Estado de Firebase</h2>
-              <Button 
-                onClick={checkFirebaseStatus} 
-                disabled={firebaseStatus.checking}
-                variant="outline"
-                className="flex items-center"
-              >
-                {firebaseStatus.checking ? (
-                  <>
-                    <Loader className="mr-2 h-4 w-4 animate-spin" />
-                    Verificando...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Verificar Conexión
-                  </>
-                )}
-              </Button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className={`p-4 rounded-lg border ${firebaseStatus.connection ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                <div className="flex items-center">
-                  {firebaseStatus.connection ? (
-                    <Shield className="h-5 w-5 text-green-500 mr-2" />
-                  ) : (
-                    <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
-                  )}
-                  <h3 className="font-medium">Conexión a Firebase</h3>
-                </div>
-                <p className={`text-sm mt-1 ${firebaseStatus.connection ? 'text-green-700' : 'text-red-700'}`}>
-                  {firebaseStatus.connection ? 'Conectado' : 'Desconectado'}
-                </p>
-              </div>
-              
-              <div className={`p-4 rounded-lg border ${firebaseStatus.read ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                <div className="flex items-center">
-                  {firebaseStatus.read ? (
-                    <Shield className="h-5 w-5 text-green-500 mr-2" />
-                  ) : (
-                    <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
-                  )}
-                  <h3 className="font-medium">Permisos de Lectura</h3>
-                </div>
-                <p className={`text-sm mt-1 ${firebaseStatus.read ? 'text-green-700' : 'text-red-700'}`}>
-                  {firebaseStatus.read ? 'Disponible' : 'No disponible'}
-                </p>
-              </div>
-              
-              <div className={`p-4 rounded-lg border ${firebaseStatus.write ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                <div className="flex items-center">
-                  {firebaseStatus.write ? (
-                    <Shield className="h-5 w-5 text-green-500 mr-2" />
-                  ) : (
-                    <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
-                  )}
-                  <h3 className="font-medium">Permisos de Escritura</h3>
-                </div>
-                <p className={`text-sm mt-1 ${firebaseStatus.write ? 'text-green-700' : 'text-red-700'}`}>
-                  {firebaseStatus.write ? 'Disponible' : 'No disponible'}
-                </p>
-              </div>
-            </div>
-            
-            {firebaseStatus.error && (
-              <Alert variant="destructive" className="mb-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error en Firebase</AlertTitle>
-                <AlertDescription>
-                  {firebaseStatus.error}
-                </AlertDescription>
-              </Alert>
+      {/* Estado de Firebase */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold mb-4">Estado de Firebase</h2>
+          <Button 
+            onClick={checkFirebaseStatus} 
+            disabled={firebaseStatus.checking}
+            variant="outline"
+            className="flex items-center"
+          >
+            {firebaseStatus.checking ? (
+              <>
+                <Loader className="mr-2 h-4 w-4 animate-spin" />
+                Verificando...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Verificar Conexión
+              </>
             )}
-            
-            {!firebaseStatus.write && (
-              <Alert className="mb-4 bg-amber-50 border-amber-200 text-amber-800">
-                <AlertTriangle className="h-4 w-4 text-amber-800" />
-                <AlertTitle>Reglas de seguridad Firestore</AlertTitle>
-                <AlertDescription>
-                  Para permitir escrituras en Firebase Firestore, debes configurar las reglas de seguridad adecuadas en la consola de Firebase. 
-                  Las reglas recomendadas para desarrollo (no para producción) son:
-                  <pre className="mt-2 p-2 bg-amber-100 rounded text-xs overflow-x-auto">
-                    {`rules_version = '2';
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className={`p-4 rounded-lg border ${firebaseStatus.connection ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+            <div className="flex items-center">
+              {firebaseStatus.connection ? (
+                <Shield className="h-5 w-5 text-green-500 mr-2" />
+              ) : (
+                <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+              )}
+              <h3 className="font-medium">Conexión a Firebase</h3>
+            </div>
+            <p className={`text-sm mt-1 ${firebaseStatus.connection ? 'text-green-700' : 'text-red-700'}`}>
+              {firebaseStatus.connection ? 'Conectado' : 'Desconectado'}
+            </p>
+          </div>
+          
+          <div className={`p-4 rounded-lg border ${firebaseStatus.read ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+            <div className="flex items-center">
+              {firebaseStatus.read ? (
+                <Shield className="h-5 w-5 text-green-500 mr-2" />
+              ) : (
+                <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+              )}
+              <h3 className="font-medium">Permisos de Lectura</h3>
+            </div>
+            <p className={`text-sm mt-1 ${firebaseStatus.read ? 'text-green-700' : 'text-red-700'}`}>
+              {firebaseStatus.read ? 'Disponible' : 'No disponible'}
+            </p>
+          </div>
+          
+          <div className={`p-4 rounded-lg border ${firebaseStatus.write ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+            <div className="flex items-center">
+              {firebaseStatus.write ? (
+                <Shield className="h-5 w-5 text-green-500 mr-2" />
+              ) : (
+                <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+              )}
+              <h3 className="font-medium">Permisos de Escritura</h3>
+            </div>
+            <p className={`text-sm mt-1 ${firebaseStatus.write ? 'text-green-700' : 'text-red-700'}`}>
+              {firebaseStatus.write ? 'Disponible' : 'No disponible'}
+            </p>
+          </div>
+        </div>
+        
+        {firebaseStatus.error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error en Firebase</AlertTitle>
+            <AlertDescription>
+              {firebaseStatus.error}
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {!firebaseStatus.write && (
+          <Alert className="mb-4 bg-amber-50 border-amber-200 text-amber-800">
+            <AlertTriangle className="h-4 w-4 text-amber-800" />
+            <AlertTitle>Reglas de seguridad Firestore</AlertTitle>
+            <AlertDescription>
+              Para permitir escrituras en Firebase Firestore, debes configurar las reglas de seguridad adecuadas en la consola de Firebase. 
+              Las reglas recomendadas para desarrollo (no para producción) son:
+              <pre className="mt-2 p-2 bg-amber-100 rounded text-xs overflow-x-auto">
+                {`rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /{document=**} {
@@ -833,181 +821,176 @@ service cloud.firestore {
     }
   }
 }`}
-                  </pre>
-                </AlertDescription>
-              </Alert>
-            )}
+              </pre>
+            </AlertDescription>
+          </Alert>
+        )}
+      </div>
+      
+      {/* Configuración de la aplicación */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold mb-4">Configuración de la Aplicación</h2>
+          <Button 
+            onClick={async () => {
+              try {
+                const updatedConfig = await updateAppConfig(appConfig);
+                setAppConfig(updatedConfig);
+                toast({
+                  title: "Configuración actualizada",
+                  description: "La configuración se ha guardado correctamente",
+                  variant: "default"
+                });
+              } catch (error) {
+                console.error("Error al guardar la configuración:", error);
+                toast({
+                  title: "Error",
+                  description: "No se pudo guardar la configuración. Inténtalo de nuevo más tarde.",
+                  variant: "destructive"
+                });
+              }
+            }}
+            variant="outline"
+            className="flex items-center"
+          >
+            <Save className="mr-2 h-4 w-4" />
+            Guardar Configuración
+          </Button>
+        </div>
+        
+        <div className="bg-card rounded-lg border p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-medium">Mostrar pestaña de registro</h3>
+              <p className="text-sm text-muted-foreground">Habilita o deshabilita la pestaña de registro en la página de autenticación</p>
+            </div>
+            <Switch 
+              checked={appConfig.showRegisterTab} 
+              onCheckedChange={(checked) => setAppConfig({...appConfig, showRegisterTab: checked})}
+            />
           </div>
-          
-          {/* Configuración de la aplicación */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold mb-4">Configuración de la Aplicación</h2>
-              <Button 
-                onClick={async () => {
-                  try {
-                    const updatedConfig = await updateAppConfig(appConfig);
-                    setAppConfig(updatedConfig);
-                    toast({
-                      title: "Configuración actualizada",
-                      description: "La configuración se ha guardado correctamente",
-                      variant: "default"
-                    });
-                  } catch (error) {
-                    console.error("Error al guardar la configuración:", error);
-                    toast({
-                      title: "Error",
-                      description: "No se pudo guardar la configuración. Inténtalo de nuevo más tarde.",
-                      variant: "destructive"
-                    });
-                  }
-                }}
-                variant="outline"
-                className="flex items-center"
-              >
-                <Save className="mr-2 h-4 w-4" />
-                Guardar Configuración
-              </Button>
-            </div>
-            
-            <div className="bg-card rounded-lg border p-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">Mostrar pestaña de registro</h3>
-                  <p className="text-sm text-muted-foreground">Habilita o deshabilita la pestaña de registro en la página de autenticación</p>
-                </div>
-                <Switch 
-                  checked={appConfig.showRegisterTab} 
-                  onCheckedChange={(checked) => setAppConfig({...appConfig, showRegisterTab: checked})}
-                />
-              </div>
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="flex justify-center items-center h-full">
-              <Loader className="h-8 w-8 animate-spin text-primary-600" />
-              <span className="ml-2 text-neutral-600">Cargando datos...</span>
-            </div>
-          ) : (
-            <div className="space-y-8">
-              {categories.length > 0 ? (
-                categories.map(category => (
-                  <div key={category.id} className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
-                    <div className="p-4 bg-neutral-50 border-b border-neutral-200 flex justify-between items-center">
-                      <h2 className="text-lg font-medium text-neutral-800">{category.name}</h2>
-                      <div className="flex gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-neutral-600"
-                          onClick={() => handleEditCategory(category)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-red-600"
-                          onClick={() => handleDeleteCategory(category)}
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      {category.apps.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {category.apps.map(app => (
-                            <div key={app.id} className="flex border rounded-lg overflow-hidden">
-                              <div className="w-16 h-16 bg-neutral-100 flex items-center justify-center p-2">
-                                <img 
-                                  src={app.icon || DEFAULT_ICON} 
-                                  alt={app.name} 
-                                  className="max-w-full max-h-full object-contain"
-                                  onError={(e) => (e.currentTarget.src = DEFAULT_ICON)}
-                                />
-                              </div>
-                              <div className="flex-1 p-3">
-                                <div className="flex justify-between">
-                                  <h3 className="font-medium text-neutral-800">{app.name}</h3>
-                                  <div className="flex gap-1">
-                                    <Button 
-                                      variant="ghost" 
-                                      size="sm" 
-                                      className="h-6 w-6 p-0"
-                                      onClick={() => handleEditApp(app, category.id)}
-                                    >
-                                      <Pencil className="h-3 w-3" />
-                                    </Button>
-                                    <Button 
-                                      variant="ghost" 
-                                      size="sm" 
-                                      className="h-6 w-6 p-0 text-red-600"
-                                      onClick={() => app.id && handleDeleteApp(app.id, category.id)}
-                                    >
-                                      <Trash className="h-3 w-3" />
-                                    </Button>
-                                  </div>
-                                </div>
-                                <p className="text-xs text-neutral-500 truncate">{app.url}</p>
-                                <p className="text-xs text-neutral-600 mt-1 line-clamp-1">{app.description}</p>
-                              </div>
-                            </div>
-                          ))}
-                          <div 
-                            className="border border-dashed rounded-lg p-4 flex flex-col items-center justify-center text-neutral-500 cursor-pointer hover:bg-neutral-50 transition-colors"
-                            onClick={() => {
-                              setSelectedCategoryId(category.id);
-                              setShowNewAppDialog(true);
-                            }}
-                          >
-                            <PlusCircle className="h-8 w-8 mb-2" />
-                            <p>Agregar aplicación a {category.name}</p>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="text-center py-8">
-                          <p className="text-neutral-500 mb-4">No hay aplicaciones en esta categoría</p>
-                          <Button 
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedCategoryId(category.id);
-                              setShowNewAppDialog(true);
-                            }}
-                          >
-                            <Plus className="h-4 w-4 mr-2" />
-                            Agregar aplicación
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-12">
-                  <div className="mx-auto w-16 h-16 mb-4 text-neutral-300">
-                    <AlertTriangle className="w-full h-full" />
-                  </div>
-                  <h3 className="text-lg font-medium text-neutral-700">No hay categorías</h3>
-                  <p className="text-neutral-500 mt-2">Crea categorías para organizar tus aplicaciones</p>
-                  <Button 
-                    className="mt-6"
-                    onClick={() => setShowNewCategoryDialog(true)}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Crear categoría
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
-        </main>
+        </div>
       </div>
 
-      {/* Mobile Navigation */}
-      <MobileNav />
-      
+      {loading ? (
+        <div className="flex justify-center items-center h-full">
+          <Loader className="h-8 w-8 animate-spin text-primary-600" />
+          <span className="ml-2 text-neutral-600">Cargando datos...</span>
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {categories.length > 0 ? (
+            categories.map(category => (
+              <div key={category.id} className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
+                <div className="p-4 bg-neutral-50 border-b border-neutral-200 flex justify-between items-center">
+                  <h2 className="text-lg font-medium text-neutral-800">{category.name}</h2>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-neutral-600"
+                      onClick={() => handleEditCategory(category)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-red-600"
+                      onClick={() => handleDeleteCategory(category)}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="p-4">
+                  {category.apps.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {category.apps.map(app => (
+                        <div key={app.id} className="flex border rounded-lg overflow-hidden">
+                          <div className="w-16 h-16 bg-neutral-100 flex items-center justify-center p-2">
+                            <img 
+                              src={app.icon || DEFAULT_ICON} 
+                              alt={app.name} 
+                              className="max-w-full max-h-full object-contain"
+                              onError={(e) => (e.currentTarget.src = DEFAULT_ICON)}
+                            />
+                          </div>
+                          <div className="flex-1 p-3">
+                            <div className="flex justify-between">
+                              <h3 className="font-medium text-neutral-800">{app.name}</h3>
+                              <div className="flex gap-1">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-6 w-6 p-0"
+                                  onClick={() => handleEditApp(app, category.id)}
+                                >
+                                  <Pencil className="h-3 w-3" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-6 w-6 p-0 text-red-600"
+                                  onClick={() => app.id && handleDeleteApp(app.id, category.id)}
+                                >
+                                  <Trash className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                            <p className="text-xs text-neutral-500 truncate">{app.url}</p>
+                            <p className="text-xs text-neutral-600 mt-1 line-clamp-1">{app.description}</p>
+                          </div>
+                        </div>
+                      ))}
+                      <div 
+                        className="border border-dashed rounded-lg p-4 flex flex-col items-center justify-center text-neutral-500 cursor-pointer hover:bg-neutral-50 transition-colors"
+                        onClick={() => {
+                          setSelectedCategoryId(category.id);
+                          setShowNewAppDialog(true);
+                        }}
+                      >
+                        <PlusCircle className="h-8 w-8 mb-2" />
+                        <p>Agregar aplicación a {category.name}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-neutral-500 mb-4">No hay aplicaciones en esta categoría</p>
+                      <Button 
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedCategoryId(category.id);
+                          setShowNewAppDialog(true);
+                        }}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Agregar aplicación
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-12">
+              <div className="mx-auto w-16 h-16 mb-4 text-neutral-300">
+                <AlertTriangle className="w-full h-full" />
+              </div>
+              <h3 className="text-lg font-medium text-neutral-700">No hay categorías</h3>
+              <p className="text-neutral-500 mt-2">Crea categorías para organizar tus aplicaciones</p>
+              <Button 
+                className="mt-6"
+                onClick={() => setShowNewCategoryDialog(true)}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Crear categoría
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Dialogs */}
       {/* Nueva Categoría */}
       <Dialog open={showNewCategoryDialog} onOpenChange={setShowNewCategoryDialog}>
@@ -1080,156 +1063,13 @@ service cloud.firestore {
         </DialogContent>
       </Dialog>
       
-      {/* Nueva Aplicación */}
-      <Dialog open={showNewAppDialog} onOpenChange={setShowNewAppDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Nueva Aplicación</DialogTitle>
-            <DialogDescription>
-              Agrega una nueva aplicación a una categoría.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label htmlFor="app-category">Categoría</Label>
-              <select 
-                id="app-category"
-                className="w-full border-neutral-300 rounded-md px-3 py-2"
-                value={selectedCategoryId || ""}
-                onChange={(e) => setSelectedCategoryId(e.target.value)}
-              >
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="app-name">Nombre de la aplicación *</Label>
-              <Input 
-                id="app-name" 
-                placeholder="Ej: Google Drive, Slack, Github..." 
-                value={newAppData.name}
-                onChange={(e) => setNewAppData({...newAppData, name: e.target.value})}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="app-url">URL de la aplicación *</Label>
-              <Input 
-                id="app-url" 
-                placeholder="https://www.ejemplo.com" 
-                value={newAppData.url}
-                onChange={(e) => setNewAppData({...newAppData, url: e.target.value})}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="app-icon">URL del icono</Label>
-              <Input 
-                id="app-icon" 
-                placeholder="https://www.ejemplo.com/icon.png" 
-                value={newAppData.icon}
-                onChange={(e) => setNewAppData({...newAppData, icon: e.target.value})}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="app-description">Descripción</Label>
-              <Textarea 
-                id="app-description" 
-                placeholder="Breve descripción de la aplicación" 
-                value={newAppData.description || ""}
-                onChange={(e) => setNewAppData({...newAppData, description: e.target.value})}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setShowNewAppDialog(false);
-                setSelectedCategoryId(null);
-                setNewAppData({
-                  name: "",
-                  icon: "",
-                  url: "",
-                  description: ""
-                });
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button onClick={handleSaveNewApp}>Crear</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Editar Aplicación */}
-      <Dialog open={showEditAppDialog} onOpenChange={setShowEditAppDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Editar Aplicación</DialogTitle>
-            <DialogDescription>
-              Modifica la información de la aplicación.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label htmlFor="edit-app-name">Nombre de la aplicación *</Label>
-              <Input 
-                id="edit-app-name" 
-                placeholder="Nombre de la aplicación" 
-                value={newAppData.name}
-                onChange={(e) => setNewAppData({...newAppData, name: e.target.value})}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-app-url">URL de la aplicación *</Label>
-              <Input 
-                id="edit-app-url" 
-                placeholder="https://www.ejemplo.com" 
-                value={newAppData.url}
-                onChange={(e) => setNewAppData({...newAppData, url: e.target.value})}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-app-icon">URL del icono</Label>
-              <Input 
-                id="edit-app-icon" 
-                placeholder="https://www.ejemplo.com/icon.png" 
-                value={newAppData.icon}
-                onChange={(e) => setNewAppData({...newAppData, icon: e.target.value})}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-app-description">Descripción</Label>
-              <Textarea 
-                id="edit-app-description" 
-                placeholder="Breve descripción de la aplicación" 
-                value={newAppData.description || ""}
-                onChange={(e) => setNewAppData({...newAppData, description: e.target.value})}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setShowEditAppDialog(false);
-                setEditingApp(null);
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button onClick={handleUpdateApp}>Guardar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
       {/* Confirmar Eliminar Categoría */}
       <Dialog open={showDeleteCategoryDialog} onOpenChange={setShowDeleteCategoryDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Eliminar Categoría</DialogTitle>
             <DialogDescription>
-              ¿Estás seguro de que deseas eliminar esta categoría? Esta acción eliminará también todas las aplicaciones dentro de la categoría y no podrá deshacerse.
+              ¿Estás seguro de que deseas eliminar esta categoría y todas sus aplicaciones? Esta acción no podrá deshacerse.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -1248,6 +1088,161 @@ service cloud.firestore {
             >
               Eliminar
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Nueva Aplicación */}
+      <Dialog open={showNewAppDialog} onOpenChange={setShowNewAppDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nueva Aplicación</DialogTitle>
+            <DialogDescription>
+              Añade una nueva aplicación a una categoría.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="app-category">Categoría</Label>
+              <select 
+                id="app-category"
+                className="w-full p-2 border rounded-md"
+                value={selectedCategoryId || ""}
+                onChange={(e) => setSelectedCategoryId(e.target.value)}
+              >
+                <option value="" disabled>Selecciona una categoría</option>
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="app-name">Nombre de la aplicación</Label>
+              <Input 
+                id="app-name" 
+                placeholder="Ej: Google Workspace, Slack..." 
+                value={newAppData.name}
+                onChange={(e) => setNewAppData({...newAppData, name: e.target.value})}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="app-url">URL</Label>
+              <Input 
+                id="app-url" 
+                placeholder="https://ejemplo.com" 
+                value={newAppData.url}
+                onChange={(e) => setNewAppData({...newAppData, url: e.target.value})}
+              />
+              <p className="text-xs text-neutral-500">El icono de la aplicación se intentará obtener automáticamente de la URL si no se proporciona.</p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="app-icon">URL del icono (opcional)</Label>
+              <Input 
+                id="app-icon" 
+                placeholder="https://ejemplo.com/icon.png" 
+                value={newAppData.icon || ""}
+                onChange={(e) => setNewAppData({...newAppData, icon: e.target.value})}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="app-description">Descripción (opcional)</Label>
+              <Textarea 
+                id="app-description" 
+                placeholder="Breve descripción de la aplicación..." 
+                value={newAppData.description || ""}
+                onChange={(e) => setNewAppData({...newAppData, description: e.target.value})}
+                className="min-h-[80px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowNewAppDialog(false);
+                setNewAppData({
+                  name: "",
+                  icon: "",
+                  url: "",
+                  description: ""
+                });
+                setSelectedCategoryId(null);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={handleSaveNewApp}>Añadir</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Editar Aplicación */}
+      <Dialog open={showEditAppDialog} onOpenChange={setShowEditAppDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Aplicación</DialogTitle>
+            <DialogDescription>
+              Modifica la información de la aplicación.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="edit-app-name">Nombre de la aplicación</Label>
+              <Input 
+                id="edit-app-name" 
+                placeholder="Nombre de la aplicación" 
+                value={newAppData.name}
+                onChange={(e) => setNewAppData({...newAppData, name: e.target.value})}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="edit-app-url">URL</Label>
+              <Input 
+                id="edit-app-url" 
+                placeholder="https://ejemplo.com" 
+                value={newAppData.url}
+                onChange={(e) => setNewAppData({...newAppData, url: e.target.value})}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="edit-app-icon">URL del icono</Label>
+              <Input 
+                id="edit-app-icon" 
+                placeholder="https://ejemplo.com/icon.png" 
+                value={newAppData.icon || ""}
+                onChange={(e) => setNewAppData({...newAppData, icon: e.target.value})}
+              />
+              <p className="text-xs text-neutral-500">Deja en blanco para obtener automáticamente de la URL.</p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="edit-app-description">Descripción</Label>
+              <Textarea 
+                id="edit-app-description" 
+                placeholder="Descripción de la aplicación" 
+                value={newAppData.description || ""}
+                onChange={(e) => setNewAppData({...newAppData, description: e.target.value})}
+                className="min-h-[80px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowEditAppDialog(false);
+                setEditingApp(null);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={handleUpdateApp}>Guardar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1280,6 +1275,6 @@ service cloud.firestore {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </Layout>
   );
 }
