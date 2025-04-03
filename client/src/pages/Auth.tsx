@@ -6,8 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader } from "lucide-react";
+import { Loader, AlertTriangle } from "lucide-react";
 import { getAppConfig } from "@/lib/appConfig";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { collection, doc, getDoc } from "firebase/firestore";
+import { getFirebaseInstances } from "@/lib/firebase-init";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -19,25 +22,60 @@ export default function Auth() {
   const [rememberMe, setRememberMe] = useState(false);
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const [showRegisterTab, setShowRegisterTab] = useState(true);
+  const [showRegisterTab, setShowRegisterTab] = useState(false); // Default to false (hide register tab)
   const [loadingConfig, setLoadingConfig] = useState(true);
+  const [configError, setConfigError] = useState<string | null>(null);
   
   // Carga la configuración al iniciar
   useEffect(() => {
     const loadConfig = async () => {
       try {
         setLoadingConfig(true);
-        const config = await getAppConfig();
-        setShowRegisterTab(config.showRegisterTab);
-        console.log("[Auth] Configuración cargada:", config);
+        setConfigError(null);
+        
+        // Intentamos obtener la configuración directamente de Firestore
+        // para evitar problemas de permisos con la función getAppConfig
+        const { db } = getFirebaseInstances();
+        const configRef = collection(db, "appConfig");
+        const configDocId = "globalConfig";
+        const docRef = doc(configRef, configDocId);
+        
+        try {
+          const docSnap = await getDoc(docRef);
+          
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            // Valor explícito
+            setShowRegisterTab(data.showRegisterTab === true);
+            console.log("[Auth] Configuración cargada directamente:", data);
+          } else {
+            // Si no existe el documento, ocultamos la pestaña de registro por seguridad
+            setShowRegisterTab(false);
+            console.log("[Auth] No se encontró configuración, ocultando pestaña de registro");
+          }
+        } catch (firestoreError: any) {
+          console.error("Error al obtener configuración directamente:", firestoreError);
+          
+          // Si hay error de permisos, intentamos con el método normal
+          // pero asumimos que si hay error, la pestaña debe estar oculta (seguridad)
+          setShowRegisterTab(false);
+          setConfigError(firestoreError.message || "Error al cargar la configuración");
+          
+          if (firestoreError.code === "permission-denied") {
+            setConfigError("No tienes permisos para acceder a la configuración. Las reglas de seguridad Firestore podrían necesitar ajustes.");
+          }
+        }
         
         // Si la pestaña de registro está deshabilitada y estamos en registro, forzar login
-        if (!config.showRegisterTab && !isLogin) {
+        if (!showRegisterTab && !isLogin) {
           setIsLogin(true);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error al cargar la configuración:", error);
-        // Si hay error, por defecto mostramos la pestaña de registro
+        setConfigError(error.message || "Error desconocido al cargar la configuración");
+        // Si hay error, por defecto ocultamos la pestaña de registro por seguridad
+        setShowRegisterTab(false);
+        if (!isLogin) setIsLogin(true);
       } finally {
         setLoadingConfig(false);
       }
@@ -114,6 +152,15 @@ export default function Auth() {
                 <h1 className="text-3xl font-bold text-primary-600">AppHub</h1>
                 <p className="text-neutral-500 mt-2">Accede a todas tus aplicaciones favoritas en un solo lugar</p>
               </div>
+              
+              {configError && (
+                <Alert className="mb-4 bg-amber-50 border-amber-200 text-amber-800">
+                  <AlertTriangle className="h-4 w-4 text-amber-800" />
+                  <AlertDescription className="text-xs">
+                    {configError}
+                  </AlertDescription>
+                </Alert>
+              )}
 
               {/* Toggle between Login and Register */}
               <div className="flex border-b border-neutral-200 mb-6">
