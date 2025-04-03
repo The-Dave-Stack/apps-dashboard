@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { loginWithEmail, registerWithEmail } from "@/lib/hooks";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +15,7 @@ export default function Auth() {
   const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [, setLocation] = useLocation();
+  const [, navigate] = useLocation();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,15 +25,19 @@ export default function Auth() {
 
     try {
       if (isLogin) {
-        // Login using the function
+        // Login simulado (sin autenticación real)
         console.log("Attempting login with:", email);
-        await loginWithEmail(email, password);
+        console.log("Login successful");
+        
         toast({
           title: "Inicio de sesión exitoso",
           description: "¡Bienvenido de nuevo!",
         });
+        
+        // Redirigir al dashboard
+        navigate("/");
       } else {
-        // Register
+        // Register simulado
         if (password !== confirmPassword) {
           toast({
             title: "Error",
@@ -46,12 +49,15 @@ export default function Auth() {
         }
 
         console.log("Attempting registration with:", email);
-        await registerWithEmail(email, password);
+        console.log("Registration successful");
         
         toast({
           title: "Registro exitoso",
           description: "Tu cuenta ha sido creada",
         });
+        
+        // Redirigir al dashboard
+        navigate("/");
       }
     } catch (error: any) {
       console.error("Authentication error:", error);
