@@ -21,6 +21,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Label } from "@/components/ui/label";
 import { AppData, CategoryData } from "@/lib/types";
 import { useAuth } from "@/lib/hooks";
+import { 
+  fetchCategories, 
+  saveCategory, 
+  deleteCategory, 
+  saveApp, 
+  deleteApp 
+} from "@/lib/firebase";
 
 export default function AdminPanel() {
   const { toast } = useToast();
@@ -140,15 +147,33 @@ export default function AdminPanel() {
 
   // Cargar datos iniciales
   useEffect(() => {
-    // Simulación de carga de datos
-    setTimeout(() => {
-      setCategories(mockCategories);
-      setLoading(false);
-    }, 1000);
-  }, []);
+    // Redirigir si no hay usuario
+    if (!user) {
+      return;
+    }
+    
+    const loadCategories = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchCategories();
+        setCategories(data);
+      } catch (error) {
+        console.error("Error al cargar las categorías:", error);
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar las categorías. Inténtalo de nuevo más tarde.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadCategories();
+  }, [user, toast]);
 
   // Manejadores para categorías
-  const handleAddCategory = () => {
+  const handleAddCategory = async () => {
     if (!newCategoryName.trim()) {
       toast({
         title: "Error",
@@ -158,20 +183,37 @@ export default function AdminPanel() {
       return;
     }
     
-    const newCategory: CategoryData = {
-      id: `cat${Date.now()}`,
-      name: newCategoryName,
-      apps: []
-    };
+    setLoading(true);
     
-    setCategories([...categories, newCategory]);
-    setNewCategoryName("");
-    setShowNewCategoryDialog(false);
-    
-    toast({
-      title: "Categoría creada",
-      description: `Se ha creado la categoría ${newCategory.name}`,
-    });
+    try {
+      // Crear nueva categoría en Firebase
+      const newCategory: CategoryData = {
+        id: "", // Firebase asignará el ID
+        name: newCategoryName,
+        apps: []
+      };
+      
+      const savedCategory = await saveCategory(newCategory);
+      
+      // Actualizar el estado con los datos desde Firebase
+      setCategories([...categories, savedCategory]);
+      
+      toast({
+        title: "Categoría creada",
+        description: `Se ha creado la categoría ${newCategory.name}`,
+      });
+    } catch (error) {
+      console.error("Error al crear categoría:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo crear la categoría. Inténtalo de nuevo más tarde.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+      setNewCategoryName("");
+      setShowNewCategoryDialog(false);
+    }
   };
   
   const handleEditCategory = (category: CategoryData) => {
@@ -180,7 +222,7 @@ export default function AdminPanel() {
     setShowEditCategoryDialog(true);
   };
   
-  const handleUpdateCategory = () => {
+  const handleUpdateCategory = async () => {
     if (!editingCategory || !newCategoryName.trim()) {
       toast({
         title: "Error",
@@ -190,21 +232,43 @@ export default function AdminPanel() {
       return;
     }
     
-    const updatedCategories = categories.map(cat => 
-      cat.id === editingCategory.id 
-        ? { ...cat, name: newCategoryName } 
-        : cat
-    );
+    setLoading(true);
     
-    setCategories(updatedCategories);
-    setShowEditCategoryDialog(false);
-    setEditingCategory(null);
-    setNewCategoryName("");
-    
-    toast({
-      title: "Categoría actualizada",
-      description: `Se ha actualizado la categoría a ${newCategoryName}`,
-    });
+    try {
+      // Actualizar categoría en Firebase
+      const updatedCategory: CategoryData = {
+        ...editingCategory,
+        name: newCategoryName
+      };
+      
+      await saveCategory(updatedCategory);
+      
+      // Actualizar el estado local
+      const updatedCategories = categories.map(cat => 
+        cat.id === editingCategory.id 
+          ? { ...cat, name: newCategoryName } 
+          : cat
+      );
+      
+      setCategories(updatedCategories);
+      
+      toast({
+        title: "Categoría actualizada",
+        description: `Se ha actualizado la categoría a ${newCategoryName}`,
+      });
+    } catch (error) {
+      console.error("Error al actualizar categoría:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar la categoría. Inténtalo de nuevo más tarde.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+      setShowEditCategoryDialog(false);
+      setEditingCategory(null);
+      setNewCategoryName("");
+    }
   };
   
   const handleDeleteCategory = (category: CategoryData) => {
@@ -215,18 +279,35 @@ export default function AdminPanel() {
     setShowDeleteCategoryDialog(true);
   };
   
-  const confirmDeleteCategory = () => {
+  const confirmDeleteCategory = async () => {
     if (!itemToDelete) return;
     
-    const updatedCategories = categories.filter(cat => cat.id !== itemToDelete.id);
-    setCategories(updatedCategories);
-    setShowDeleteCategoryDialog(false);
-    setItemToDelete(null);
+    setLoading(true);
     
-    toast({
-      title: "Categoría eliminada",
-      description: "La categoría ha sido eliminada correctamente",
-    });
+    try {
+      // Eliminar categoría de Firebase
+      await deleteCategory(itemToDelete.id);
+      
+      // Actualizar el estado local
+      const updatedCategories = categories.filter(cat => cat.id !== itemToDelete.id);
+      setCategories(updatedCategories);
+      
+      toast({
+        title: "Categoría eliminada",
+        description: "La categoría ha sido eliminada correctamente",
+      });
+    } catch (error) {
+      console.error("Error al eliminar categoría:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la categoría. Inténtalo de nuevo más tarde.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+      setShowDeleteCategoryDialog(false);
+      setItemToDelete(null);
+    }
   };
   
   // Manejadores para aplicaciones

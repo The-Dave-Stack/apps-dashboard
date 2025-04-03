@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth, logout } from "@/lib/hooks";
-import { db } from "@/lib/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { fetchCategories } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import MobileNav from "@/components/MobileNav";
 import Sidebar from "@/components/Sidebar";
@@ -20,146 +19,35 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Usuario simulado para el desarrollo (temporal)
-  const mockUser = {
-    uid: "mock-user-id",
-    email: "usuario@ejemplo.com",
-    displayName: "Usuario de Prueba",
-    photoURL: null
-  };
-  
   useEffect(() => {
-    // Durante el desarrollo, no redirigimos si no hay usuario
-    // Cuando reactivemos la autenticación, descomenta esto:
-    /*
+    // Redirigir a la página de autenticación si no hay usuario
     if (!user) {
-      setLocation("/");
+      console.log("Usuario no autenticado, redirigiendo a /auth");
+      setLocation("/auth");
       return;
     }
-    */
-
-    // Datos de ejemplo para desarrollo
-    const mockCategories: CategoryData[] = [
-      {
-        id: "cat1",
-        name: "Productividad",
-        apps: [
-          {
-            id: "app1",
-            name: "Google Workspace",
-            icon: "https://www.gstatic.com/images/branding/product/2x/hh_drive_96dp.png",
-            url: "https://workspace.google.com/",
-            description: "Suite de herramientas de productividad: Gmail, Drive, Docs, Calendar"
-          },
-          {
-            id: "app2",
-            name: "Microsoft 365",
-            icon: "https://img-prod-cms-rt-microsoft-com.akamaized.net/cms/api/am/imageFileData/RE1Mu3b?ver=5c31",
-            url: "https://www.microsoft.com/microsoft-365",
-            description: "Aplicaciones de Office en la nube: Word, Excel, PowerPoint, Teams"
-          },
-          {
-            id: "app3",
-            name: "Slack",
-            icon: "https://a.slack-edge.com/80588/marketing/img/meta/slack_hash_128.png",
-            url: "https://slack.com/",
-            description: "Plataforma de comunicación para equipos de trabajo"
-          }
-        ]
-      },
-      {
-        id: "cat2",
-        name: "Diseño",
-        apps: [
-          {
-            id: "app4",
-            name: "Figma",
-            icon: "https://cdn.sanity.io/images/599r6htc/localized/46a76c802176eb17b04e12108de7e7e0f3736dc6-1024x1024.png?w=804&h=804&q=75&fit=max&auto=format",
-            url: "https://figma.com/",
-            description: "Herramienta de diseño colaborativo en la nube"
-          },
-          {
-            id: "app5",
-            name: "Canva",
-            icon: "https://static.canva.com/static/images/canva-logo-blue.svg",
-            url: "https://canva.com/",
-            description: "Plataforma de diseño gráfico y composición de imágenes"
-          }
-        ]
-      },
-      {
-        id: "cat3",
-        name: "Desarrollo",
-        apps: [
-          {
-            id: "app6",
-            name: "GitHub",
-            icon: "https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png",
-            url: "https://github.com/",
-            description: "Plataforma de desarrollo colaborativo basado en Git"
-          },
-          {
-            id: "app7",
-            name: "Replit",
-            icon: "https://replit.com/cdn-cgi/image/width=64,quality=80/https://storage.googleapis.com/replit/images/1664475603315_1442b3c69cc612aff6ef60cce0c69328.png",
-            url: "https://replit.com/",
-            description: "Entorno de desarrollo integrado en la nube"
-          },
-          {
-            id: "app8",
-            name: "CodeSandbox",
-            icon: "https://codesandbox.io/favicon.ico",
-            url: "https://codesandbox.io/",
-            description: "Entorno de desarrollo instantáneo para aplicaciones web"
-          }
-        ]
-      }
-    ];
 
     const fetchCategoriesData = async () => {
       try {
         setLoading(true);
         
-        // Durante el desarrollo, utilizamos los datos simulados en lugar de Firestore
-        console.log("Usando datos de desarrollo simulados");
+        // Cargar los datos desde Firebase usando nuestra función
+        const categoriesData = await fetchCategories();
         
-        // Simulamos un pequeño retraso para ver la carga
-        setTimeout(() => {
-          setCategories(mockCategories);
-          setLoading(false);
-        }, 1500);
-        
-        // CUANDO REACTIVEMOS FIRESTORE, DESCOMENTAR ESTO:
-        /*
-        // Intenta cargar los datos de Firestore
-        const categoriesCol = collection(db, "categories");
-        const categoriesSnapshot = await getDocs(categoriesCol);
-        
-        if (categoriesSnapshot.empty) {
-          console.log("No categories found in Firestore");
-          // No hay categorías, establecemos un array vacío
-          setCategories([]);
+        // Si no hay categorías, mostramos un mensaje
+        if (categoriesData.length === 0) {
+          console.log("No se encontraron categorías en Firebase");
           
           // Mostramos un mensaje indicativo al usuario
           toast({
             title: "Información",
             description: "No hay aplicaciones configuradas todavía. Un administrador debe agregarlas.",
           });
-        } else {
-          // Procesamos los datos de las categorías
-          const categoriesData: CategoryData[] = [];
-          categoriesSnapshot.forEach((doc) => {
-            const data = doc.data() as CategoryData;
-            categoriesData.push({
-              id: doc.id,
-              name: data.name,
-              apps: data.apps || []
-            });
-          });
-          
-          setCategories(categoriesData);
         }
-        */
+        
+        // Establecemos las categorías en el estado
+        setCategories(categoriesData);
+        setLoading(false);
       } catch (error: any) {
         console.error("Error fetching data:", error);
         
@@ -187,12 +75,9 @@ export default function Dashboard() {
     )
   })).filter(category => category.apps.length > 0);
 
-  // Durante el desarrollo, usamos el usuario simulado si no hay usuario autenticado
-  const effectiveUser = user || mockUser;
-  
-  // A partir de aquí, siempre tenemos un usuario (real o simulado)
-  const userEmail = effectiveUser.email || "";
-  const userPhotoURL = effectiveUser.photoURL;
+  // En este punto siempre tenemos un usuario autenticado debido al redirect
+  const userEmail = user?.email || "";
+  const userPhotoURL = user?.photoURL;
   
   // Función para cerrar sesión
   const handleLogout = async () => {
