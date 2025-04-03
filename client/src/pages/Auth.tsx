@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { loginWithEmail, registerWithEmail, useAuthState } from "@/lib/hooks";
+import { loginWithEmail, registerWithEmail } from "@/lib/hooks";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,32 +18,6 @@ export default function Auth() {
   const [rememberMe, setRememberMe] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { user, loading } = useAuthState();
-
-  console.log("Auth component rendered, user:", user ? "logged in" : "not logged in");
-
-  // Redirect if already logged in
-  const [hasRedirected, setHasRedirected] = useState(false);
-  
-  useEffect(() => {
-    if (user && !hasRedirected) {
-      console.log("User is already logged in, redirecting to dashboard");
-      setHasRedirected(true);
-      setLocation("/");
-    }
-  }, [user, setLocation, hasRedirected]);
-
-  // Si estamos cargando, mostramos un indicador de carga
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-neutral-50">
-        <div className="h-12 w-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  // Si el usuario ya está autenticado, no renderizamos nada (se redirigirá por el efecto)
-  if (user) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
