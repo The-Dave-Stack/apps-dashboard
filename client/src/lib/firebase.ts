@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Operaciones con Firebase Firestore para AppHub
+ * Este módulo proporciona funciones para interactuar con Firestore,
+ * permitiendo operaciones CRUD para categorías y aplicaciones.
+ * @module lib/firebase
+ */
+
 import { 
   collection, 
   doc, 
@@ -15,14 +22,30 @@ import {
 import type { CategoryData, AppData } from "@/lib/types";
 import { getFirebaseInstances } from "./firebase-init";
 
-// Obtener instancias de Firebase (inicialización controlada)
+/**
+ * Instancias de Firebase obtenidas mediante inicialización controlada
+ * Usa el patrón Singleton para evitar múltiples inicializaciones
+ */
 const { app, auth, db } = getFirebaseInstances();
 
-// Colecciones
+/**
+ * Referencias a las colecciones principales en Firestore
+ */
 export const categoriesRef = collection(db, "categories");
 export const appsRef = collection(db, "apps");
 
-// Funciones para la gestión de categorías
+/**
+ * Obtiene todas las categorías almacenadas en Firestore, incluyendo sus aplicaciones asociadas.
+ * Realiza dos consultas: una para las categorías y otra para las aplicaciones de cada categoría.
+ * 
+ * @async
+ * @returns {Promise<CategoryData[]>} Una promesa que resuelve a un array de categorías con sus aplicaciones
+ * @throws {Error} Si ocurre un error durante la consulta a Firestore
+ * @example
+ * // Obtener todas las categorías con sus aplicaciones
+ * const categories = await fetchCategories();
+ * console.log(`Se encontraron ${categories.length} categorías`);
+ */
 export async function fetchCategories(): Promise<CategoryData[]> {
   try {
     const categoriesSnapshot = await getDocs(categoriesRef);
@@ -57,6 +80,21 @@ export async function fetchCategories(): Promise<CategoryData[]> {
   }
 }
 
+/**
+ * Guarda una categoría en Firestore, ya sea creando una nueva o actualizando una existente.
+ * Incluye manejo de errores robusto y reintentos automáticos para mayor tolerancia a fallos.
+ * 
+ * @async
+ * @param {CategoryData} category - Datos de la categoría a guardar
+ * @returns {Promise<CategoryData>} La categoría guardada con su ID asignado
+ * @throws {Error} Si no se puede guardar la categoría en Firebase
+ * @example
+ * // Crear una nueva categoría
+ * const newCategory = await saveCategory({name: "Nueva Categoría", apps: []});
+ * 
+ * // Actualizar una categoría existente
+ * await saveCategory({id: "abc123", name: "Categoría Actualizada", apps: []});
+ */
 export async function saveCategory(category: CategoryData): Promise<CategoryData> {
   try {
     // Log para depuración
@@ -167,6 +205,18 @@ export async function saveCategory(category: CategoryData): Promise<CategoryData
   }
 }
 
+/**
+ * Elimina una categoría y todas sus aplicaciones asociadas de Firestore.
+ * Primero elimina todas las aplicaciones que pertenecen a la categoría y luego elimina la categoría.
+ * 
+ * @async
+ * @param {string} categoryId - ID de la categoría a eliminar
+ * @returns {Promise<void>} Promesa que se resuelve cuando se completa la eliminación
+ * @throws {Error} Si no se puede eliminar la categoría de Firebase
+ * @example
+ * // Eliminar una categoría y todas sus aplicaciones
+ * await deleteCategory("abc123");
+ */
 export async function deleteCategory(categoryId: string): Promise<void> {
   try {
     console.log("[Firebase] Intento de eliminar categoría con ID:", categoryId);
@@ -208,7 +258,28 @@ export async function deleteCategory(categoryId: string): Promise<void> {
   }
 }
 
-// Funciones para la gestión de aplicaciones
+/**
+ * Funciones para la gestión de aplicaciones
+ */
+
+/**
+ * Guarda una aplicación en Firestore, ya sea creando una nueva o actualizando una existente.
+ * Gestiona errores de forma robusta y realiza reintento automático en caso de fallo.
+ * 
+ * @async
+ * @param {AppData} app - Datos de la aplicación a guardar
+ * @param {string} categoryId - ID de la categoría a la que pertenece la aplicación
+ * @returns {Promise<AppData>} La aplicación guardada con su ID asignado
+ * @throws {Error} Si no se puede guardar la aplicación en Firebase
+ * @example
+ * // Crear una nueva aplicación
+ * const newApp = await saveApp({
+ *   name: "Nueva App",
+ *   icon: "https://example.com/icon.png",
+ *   url: "https://example.com",
+ *   description: "Descripción de la app"
+ * }, "categoria123");
+ */
 export async function saveApp(app: AppData, categoryId: string): Promise<AppData> {
   try {
     console.log("[Firebase] Intento de guardar aplicación:", app, "en categoría:", categoryId);
@@ -284,6 +355,17 @@ export async function saveApp(app: AppData, categoryId: string): Promise<AppData
   }
 }
 
+/**
+ * Elimina una aplicación de Firestore por su ID.
+ * 
+ * @async
+ * @param {string} appId - ID de la aplicación a eliminar
+ * @returns {Promise<void>} Promesa que se resuelve cuando se completa la eliminación
+ * @throws {Error} Si no se puede eliminar la aplicación de Firebase
+ * @example
+ * // Eliminar una aplicación específica
+ * await deleteApp("app123");
+ */
 export async function deleteApp(appId: string): Promise<void> {
   try {
     console.log("[Firebase] Intento de eliminar aplicación con ID:", appId);

@@ -1,7 +1,23 @@
+/**
+ * @fileoverview Utilidades de diagnóstico para comprobar la conexión con Firebase
+ * Este módulo proporciona funciones para verificar la disponibilidad y el estado
+ * de los servicios de Firebase, incluyendo Firestore y Authentication.
+ * @module lib/firebase-check
+ */
+
 import { getFirebaseInstances } from './firebase-init';
 import { collection, getDocs, doc, setDoc, getDoc } from 'firebase/firestore';
 import { getCurrentUser } from "./auth";
 
+/**
+ * Interfaz que define el resultado de la comprobación de Firebase
+ * @interface FirebaseCheckResult
+ * @property {boolean} connection - Indica si se pudo establecer conexión con Firebase
+ * @property {boolean} read - Indica si se pudieron leer datos de Firestore
+ * @property {boolean} write - Indica si se pudieron escribir datos en Firestore
+ * @property {boolean} auth - Indica si hay un usuario autenticado
+ * @property {string} [error] - Mensaje de error, si ocurrió alguno
+ */
 interface FirebaseCheckResult {
   connection: boolean;
   read: boolean;
@@ -11,8 +27,18 @@ interface FirebaseCheckResult {
 }
 
 /**
- * Función que intenta comprobar el estado de la conexión a Firebase
- * y los permisos para leer/escribir en Firestore
+ * Realiza una verificación completa de la conexión y permisos con Firebase.
+ * Comprueba autenticación, conexión a Firestore, y permisos de lectura y escritura.
+ * 
+ * @async
+ * @returns {Promise<FirebaseCheckResult>} Resultado detallado de la comprobación
+ * @example
+ * const checkResult = await checkFirebaseConnection();
+ * if (checkResult.connection && checkResult.read && checkResult.write) {
+ *   console.log("Firebase funciona correctamente");
+ * } else {
+ *   console.error("Problema con Firebase:", checkResult.error);
+ * }
  */
 export async function checkFirebaseConnection(): Promise<FirebaseCheckResult> {
   const result: FirebaseCheckResult = {

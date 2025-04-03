@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Componente AppCard - Tarjeta de aplicación reutilizable
+ * Este componente renderiza una tarjeta individual para cada aplicación,
+ * incluyendo funcionalidades para marcar como favorito y registrar accesos.
+ * @module components/AppCard
+ */
+
 import { useEffect } from "react";
 import { AppData } from "@/lib/types";
 import { DEFAULT_ICON } from "@/lib/utils";
@@ -9,10 +16,23 @@ import { getFirebaseInstances } from "@/lib/firebase-init";
 import { Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+/**
+ * Props para el componente AppCard
+ * @interface AppCardProps
+ * @property {AppData} app - Datos de la aplicación a mostrar
+ */
 interface AppCardProps {
   app: AppData;
 }
 
+/**
+ * Componente que muestra una tarjeta de aplicación con funcionalidad para
+ * marcar como favorito y registrar historial de uso.
+ *
+ * @component
+ * @param {AppCardProps} props - Propiedades del componente
+ * @returns {JSX.Element} Componente AppCard renderizado
+ */
 export default function AppCard({ app }: AppCardProps) {
   const { user } = useAuth();
   const { db } = getFirebaseInstances();
@@ -20,8 +40,14 @@ export default function AppCard({ app }: AppCardProps) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Verifica si esta app está en favoritos
+  /**
+   * Efecto para verificar si la aplicación está en favoritos del usuario actual
+   */
   useEffect(() => {
+    /**
+     * Consulta Firestore para verificar si esta app está marcada como favorita
+     * @async
+     */
     const checkIfFavorite = async () => {
       if (!user || !app.id) return;
       
@@ -38,6 +64,10 @@ export default function AppCard({ app }: AppCardProps) {
     checkIfFavorite();
   }, [user, app.id, db]);
 
+  /**
+   * Registra el acceso del usuario a una aplicación en Firestore
+   * @async
+   */
   const handleAppClick = async () => {
     if (user && app.id) {
       try {
@@ -54,6 +84,11 @@ export default function AppCard({ app }: AppCardProps) {
     }
   };
 
+  /**
+   * Alterna el estado de favorito de una aplicación
+   * @async
+   * @param {React.MouseEvent} e - Evento del click
+   */
   const toggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault(); // Evita abrir el enlace
     e.stopPropagation(); // Evita la propagación del evento

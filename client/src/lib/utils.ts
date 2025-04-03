@@ -1,6 +1,18 @@
+/**
+ * @fileoverview Utilidades generales para la aplicación AppHub
+ * Este módulo contiene funciones de utilidad para manejo de clases CSS, 
+ * extracción y verificación de iconos de sitios web, y otras utilidades globales.
+ * @module lib/utils
+ */
+
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
+/**
+ * Combina clases CSS con clsx y tailwind-merge para evitar conflictos
+ * @param {...ClassValue[]} inputs - Las clases CSS a combinar
+ * @returns {string} Cadena de texto con las clases combinadas y optimizadas
+ */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
