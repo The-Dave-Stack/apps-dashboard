@@ -1,10 +1,6 @@
-import { useAuth } from "@/lib/hooks";
-import { logout } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,39 +12,28 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { LogOut, Settings, User, ShieldAlert } from "lucide-react";
 
+// Usuario simulado para desarrollo
+const mockUser = {
+  uid: "mock-user-id",
+  email: "usuario@ejemplo.com",
+  displayName: "Usuario de Prueba",
+  photoURL: null
+};
+
 export default function UserProfile() {
-  const { user } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  const [userRole, setUserRole] = useState<string>("user");
-  const [loading, setLoading] = useState(true);
+  const [userRole] = useState<string>("admin"); // Asumimos rol de admin para desarrollo
 
-  // Obtener datos adicionales del usuario desde Firestore
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (user) {
-        try {
-          setLoading(true);
-          // Intentamos obtener los datos del usuario desde Firestore
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setUserRole(userData.role || "user");
-          }
-        } catch (error) {
-          console.error("Error al obtener datos del usuario:", error);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-    
-    fetchUserData();
-  }, [user]);
+  // Usamos el usuario simulado ya que hemos eliminado la autenticación
+  const user = mockUser;
 
   const handleLogout = async () => {
     try {
-      await logout();
+      // Simulamos el logout
+      console.log("Logout attempt");
+      console.log("Logout successful");
+      
       toast({
         title: "Sesión cerrada",
         description: "Has cerrado sesión correctamente",
@@ -62,8 +47,6 @@ export default function UserProfile() {
       });
     }
   };
-
-  if (!user) return null;
 
   return (
     <DropdownMenu>

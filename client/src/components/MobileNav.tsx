@@ -5,43 +5,14 @@ import {
   Star,
   Clock,
   Settings, 
-  ShieldAlert 
+  ShieldAlert,
+  UserCircle
 } from "lucide-react";
-import { useAuth } from "@/lib/hooks";
-import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 
 export default function MobileNav() {
   const [location, setLocation] = useLocation();
-  const { user } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
-  
-  // Comprobar rol de administrador desde Firestore
-  useEffect(() => {
-    const checkAdminRole = async () => {
-      if (user) {
-        try {
-          // Intentamos obtener los datos del usuario desde Firestore
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            // Si el usuario tiene rol de administrador
-            setIsAdmin(userData.role === "admin");
-          } else {
-            setIsAdmin(false);
-          }
-        } catch (error) {
-          console.error("Error al verificar el rol de administrador:", error);
-          setIsAdmin(false);
-        }
-      } else {
-        setIsAdmin(false);
-      }
-    };
-    
-    checkAdminRole();
-  }, [user]);
+  // Usamos un valor fijo de administrador para desarrollo
+  const isAdmin = true;
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 z-10">
@@ -78,12 +49,12 @@ export default function MobileNav() {
         
         <button 
           className={`flex flex-col items-center justify-center p-2 ${
-            location === "/recent" ? "text-primary-600" : "text-neutral-500"
+            location === "/settings" ? "text-primary-600" : "text-neutral-500"
           }`}
-          onClick={() => setLocation("/recent")}
+          onClick={() => setLocation("/settings")}
         >
-          <Clock className="h-5 w-5" />
-          <span className="text-xs mt-1">Recientes</span>
+          <Settings className="h-5 w-5" />
+          <span className="text-xs mt-1">Ajustes</span>
         </button>
         
         {isAdmin && (
