@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { useAuth, logout } from "@/lib/hooks";
 import { fetchCategories } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import MobileNav from "@/components/MobileNav";
@@ -13,20 +12,12 @@ import { Search, LogOut } from "lucide-react";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
-  const { user } = useAuth();
   const { toast } = useToast();
   const [categories, setCategories] = useState<CategoryData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    // Redirigir a la página de autenticación si no hay usuario
-    if (!user) {
-      console.log("Usuario no autenticado, redirigiendo a /auth");
-      setLocation("/auth");
-      return;
-    }
-
     const fetchCategoriesData = async () => {
       try {
         setLoading(true);
@@ -65,7 +56,7 @@ export default function Dashboard() {
     };
 
     fetchCategoriesData();
-  }, [user, toast, setLocation]);
+  }, [toast, setLocation]);
 
   // Filter apps based on search term
   const filteredCategories = categories.map(category => ({
@@ -75,27 +66,13 @@ export default function Dashboard() {
     )
   })).filter(category => category.apps.length > 0);
 
-  // En este punto siempre tenemos un usuario autenticado debido al redirect
-  const userEmail = user?.email || "";
-  const userPhotoURL = user?.photoURL;
+  // Usuario de prueba (sin autenticación)
+  const userEmail = "usuario@ejemplo.com";
+  const userPhotoURL = null;
   
-  // Función para cerrar sesión
-  const handleLogout = async () => {
-    try {
-      await logout();
-      toast({
-        title: "Sesión cerrada",
-        description: "Has cerrado sesión correctamente",
-      });
-      setLocation("/");
-    } catch (error) {
-      console.error("Error al cerrar sesión:", error);
-      toast({
-        title: "Error",
-        description: "No se pudo cerrar la sesión. Intenta de nuevo.",
-        variant: "destructive",
-      });
-    }
+  // Función para cerrar sesión (ahora solo navega)
+  const handleLogout = () => {
+    setLocation("/auth");
   };
 
   return (
