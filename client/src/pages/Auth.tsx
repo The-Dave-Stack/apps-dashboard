@@ -53,15 +53,15 @@ export default function Auth() {
         console.log("Attempting login with:", email);
         await loginWithEmail(email, password);
         toast({
-          title: "Login successful",
-          description: "Welcome back!",
+          title: "Inicio de sesión exitoso",
+          description: "¡Bienvenido de nuevo!",
         });
       } else {
         // Register
         if (password !== confirmPassword) {
           toast({
             title: "Error",
-            description: "Passwords do not match",
+            description: "Las contraseñas no coinciden",
             variant: "destructive",
           });
           setIsLoading(false);
@@ -72,15 +72,15 @@ export default function Auth() {
         await registerWithEmail(email, password);
         
         toast({
-          title: "Registration successful",
-          description: "Your account has been created",
+          title: "Registro exitoso",
+          description: "Tu cuenta ha sido creada",
         });
       }
     } catch (error: any) {
       console.error("Authentication error:", error);
       toast({
-        title: "Authentication Error",
-        description: error.message || "Failed to authenticate",
+        title: "Error de autenticación",
+        description: error.message || "Fallo al autenticar",
         variant: "destructive",
       });
     } finally {
@@ -95,7 +95,7 @@ export default function Auth() {
           <div className="px-6 py-8">
             <div className="text-center mb-6">
               <h1 className="text-3xl font-bold text-primary-600">AppHub</h1>
-              <p className="text-neutral-500 mt-2">Access all your favorite web apps in one place</p>
+              <p className="text-neutral-500 mt-2">Accede a todas tus aplicaciones favoritas en un solo lugar</p>
             </div>
 
             {/* Toggle between Login and Register */}
@@ -165,31 +165,31 @@ export default function Auth() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <Label htmlFor="name" className="text-neutral-700">Full Name</Label>
+                  <Label htmlFor="name" className="text-neutral-700">Nombre Completo</Label>
                   <Input
                     id="name"
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="John Doe"
+                    placeholder="Juan Pérez"
                     required
                     className="mt-1"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="reg-email" className="text-neutral-700">Email</Label>
+                  <Label htmlFor="reg-email" className="text-neutral-700">Correo Electrónico</Label>
                   <Input
                     id="reg-email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your@email.com"
+                    placeholder="tu@correo.com"
                     required
                     className="mt-1"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="reg-password" className="text-neutral-700">Password</Label>
+                  <Label htmlFor="reg-password" className="text-neutral-700">Contraseña</Label>
                   <Input
                     id="reg-password"
                     type="password"
@@ -201,7 +201,7 @@ export default function Auth() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="confirm-password" className="text-neutral-700">Confirm Password</Label>
+                  <Label htmlFor="confirm-password" className="text-neutral-700">Confirmar Contraseña</Label>
                   <Input
                     id="confirm-password"
                     type="password"
@@ -218,7 +218,7 @@ export default function Auth() {
                   className="w-full bg-primary-600 hover:bg-primary-700" 
                   disabled={isLoading}
                 >
-                  {isLoading ? "Creating Account..." : "Create Account"}
+                  {isLoading ? "Creando cuenta..." : "Crear Cuenta"}
                 </Button>
               </form>
             )}
