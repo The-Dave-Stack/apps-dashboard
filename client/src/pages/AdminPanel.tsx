@@ -491,23 +491,40 @@ export default function AdminPanel() {
     setShowDeleteAppDialog(true);
   };
   
-  const confirmDeleteApp = () => {
+  const confirmDeleteApp = async () => {
     if (!itemToDelete || !itemToDelete.categoryId) return;
     
-    const updatedCategories = categories.map(cat => 
-      cat.id === itemToDelete.categoryId 
-        ? { ...cat, apps: cat.apps.filter(app => app.id !== itemToDelete.id) } 
-        : cat
-    );
+    setLoading(true);
     
-    setCategories(updatedCategories);
-    setShowDeleteAppDialog(false);
-    setItemToDelete(null);
-    
-    toast({
-      title: "Aplicación eliminada",
-      description: "La aplicación ha sido eliminada correctamente",
-    });
+    try {
+      // Eliminar aplicación de Firebase
+      await deleteApp(itemToDelete.id);
+      
+      // Actualizar el estado local
+      const updatedCategories = categories.map(cat => 
+        cat.id === itemToDelete.categoryId 
+          ? { ...cat, apps: cat.apps.filter(app => app.id !== itemToDelete.id) } 
+          : cat
+      );
+      
+      setCategories(updatedCategories);
+      
+      toast({
+        title: "Aplicación eliminada",
+        description: "La aplicación ha sido eliminada correctamente",
+      });
+    } catch (error) {
+      console.error("Error al eliminar aplicación:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la aplicación. Inténtalo de nuevo más tarde.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+      setShowDeleteAppDialog(false);
+      setItemToDelete(null);
+    }
   };
 
   return (

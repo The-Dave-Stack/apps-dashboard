@@ -1,7 +1,7 @@
 import { Switch, Route, useLocation } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import { useAuth, logout } from "@/lib/hooks";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 // Importamos las páginas
@@ -18,14 +18,16 @@ import AdminPanel from "./pages/AdminPanel";
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { user, loading } = useAuth();
   const [, setLocation] = useLocation();
+  const [redirected, setRedirected] = useState(false);
 
   useEffect(() => {
     // Si no estamos cargando y no hay usuario, redirigir a la página de autenticación
-    if (!loading && !user) {
+    if (!loading && !user && !redirected) {
       console.log("Usuario no autenticado, redirigiendo a /auth");
+      setRedirected(true);
       setLocation("/auth");
     }
-  }, [user, loading, setLocation]);
+  }, [user, loading, setLocation, redirected]);
 
   // Mientras se verifica la autenticación, mostramos un indicador de carga
   if (loading) {

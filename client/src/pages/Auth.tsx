@@ -23,12 +23,15 @@ export default function Auth() {
   console.log("Auth component rendered, user:", user ? "logged in" : "not logged in");
 
   // Redirect if already logged in
+  const [hasRedirected, setHasRedirected] = useState(false);
+  
   useEffect(() => {
-    if (user) {
+    if (user && !hasRedirected) {
       console.log("User is already logged in, redirecting to dashboard");
+      setHasRedirected(true);
       setLocation("/");
     }
-  }, [user, setLocation]);
+  }, [user, setLocation, hasRedirected]);
 
   // Si estamos cargando, mostramos un indicador de carga
   if (loading) {
