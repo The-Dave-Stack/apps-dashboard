@@ -328,7 +328,7 @@ export default function AdminPanel() {
     setShowEditAppDialog(true);
   };
   
-  const handleSaveNewApp = () => {
+  const handleSaveNewApp = async () => {
     if (!selectedCategoryId) {
       toast({
         title: "Error",
@@ -359,27 +359,58 @@ export default function AdminPanel() {
       return;
     }
     
-    const newApp: AppData = {
-      ...newAppData,
-      id: `app${Date.now()}`
-    };
+    setLoading(true);
     
-    const updatedCategories = categories.map(cat => 
-      cat.id === selectedCategoryId 
-        ? { ...cat, apps: [...cat.apps, newApp] } 
-        : cat
-    );
-    
-    setCategories(updatedCategories);
-    setShowNewAppDialog(false);
-    
-    toast({
-      title: "Aplicación creada",
-      description: `Se ha creado la aplicación ${newApp.name}`,
-    });
+    try {
+      // Crear nueva aplicación para la categoría seleccionada
+      const newApp: AppData = {
+        ...newAppData,
+        id: `app${Date.now()}` // Esto se reemplazará en Firebase si es necesario
+      };
+      
+      // Encontrar la categoría actual
+      const currentCategory = categories.find(cat => cat.id === selectedCategoryId);
+      
+      if (!currentCategory) {
+        throw new Error("La categoría seleccionada ya no existe");
+      }
+      
+      // Actualizar la categoría con la nueva app
+      const updatedCategory: CategoryData = {
+        ...currentCategory,
+        apps: [...currentCategory.apps, newApp]
+      };
+      
+      // Guardar en Firebase
+      await saveApp(newApp, selectedCategoryId);
+      
+      // Actualizar el estado local
+      const updatedCategories = categories.map(cat => 
+        cat.id === selectedCategoryId 
+          ? updatedCategory
+          : cat
+      );
+      
+      setCategories(updatedCategories);
+      
+      toast({
+        title: "Aplicación creada",
+        description: `Se ha creado la aplicación ${newApp.name}`,
+      });
+    } catch (error) {
+      console.error("Error al crear aplicación:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo crear la aplicación. Inténtalo de nuevo más tarde.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+      setShowNewAppDialog(false);
+    }
   };
   
-  const handleUpdateApp = () => {
+  const handleUpdateApp = async () => {
     if (!editingApp) return;
     
     if (!newAppData.name || !newAppData.url) {
@@ -403,27 +434,50 @@ export default function AdminPanel() {
       return;
     }
     
-    const updatedCategories = categories.map(cat => 
-      cat.id === editingApp.categoryId 
-        ? { 
-            ...cat, 
-            apps: cat.apps.map(app => 
-              app.id === editingApp.app.id 
-                ? { ...newAppData, id: app.id } 
-                : app
-            ) 
-          } 
-        : cat
-    );
+    setLoading(true);
     
-    setCategories(updatedCategories);
-    setShowEditAppDialog(false);
-    setEditingApp(null);
-    
-    toast({
-      title: "Aplicación actualizada",
-      description: `Se ha actualizado la aplicación ${newAppData.name}`,
-    });
+    try {
+      // Actualizar aplicación con los nuevos datos
+      const updatedApp: AppData = { 
+        ...newAppData, 
+        id: editingApp.app.id 
+      };
+      
+      // Guardar en Firebase
+      await saveApp(updatedApp, editingApp.categoryId);
+      
+      // Actualizar el estado local
+      const updatedCategories = categories.map(cat => 
+        cat.id === editingApp.categoryId 
+          ? { 
+              ...cat, 
+              apps: cat.apps.map(app => 
+                app.id === editingApp.app.id 
+                  ? updatedApp
+                  : app
+              ) 
+            } 
+          : cat
+      );
+      
+      setCategories(updatedCategories);
+      
+      toast({
+        title: "Aplicación actualizada",
+        description: `Se ha actualizado la aplicación ${newAppData.name}`,
+      });
+    } catch (error) {
+      console.error("Error al actualizar aplicación:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar la aplicación. Inténtalo de nuevo más tarde.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+      setShowEditAppDialog(false);
+      setEditingApp(null);
+    }
   };
   
   const handleDeleteApp = (appId: string | undefined, categoryId: string) => {
