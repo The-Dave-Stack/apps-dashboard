@@ -2,6 +2,7 @@
 export { 
   loginWithEmail,
   registerWithEmail,
+  loginAnonymously,
   logout,
   getCurrentUser
 } from "./auth";
@@ -9,8 +10,10 @@ export {
 // Hook para comprobar si un usuario está autenticado
 import { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "./firebase";
 import type { User } from "firebase/auth";
+import { getFirebaseInstances } from "./firebase-init";
+
+const { auth } = getFirebaseInstances();
 
 // Hook para gestionar el estado de autenticación
 export function useAuthState() {

@@ -91,19 +91,35 @@ export default function Auth() {
 
     try {
       if (isLogin) {
-        // Login simulado (sin autenticación real)
-        console.log("Attempting login with:", email);
-        console.log("Login successful");
-        
-        toast({
-          title: "Inicio de sesión exitoso",
-          description: "¡Bienvenido de nuevo!",
-        });
-        
-        // Redirigir al dashboard
-        navigate("/");
+        try {
+          // Importación dinámica para evitar problemas circulares
+          const { loginWithEmail, loginAnonymously } = await import('@/lib/hooks');
+          
+          // Si es un entorno de desarrollo y se usa una cuenta específica, usamos login anónimo
+          if (process.env.NODE_ENV === 'development' && email === 'test@example.com') {
+            await loginAnonymously();
+          } else {
+            await loginWithEmail(email, password);
+          }
+          
+          toast({
+            title: "Inicio de sesión exitoso",
+            description: "¡Bienvenido de nuevo!",
+          });
+          
+          // Redirigir al dashboard
+          navigate("/");
+        } catch (loginError: any) {
+          console.error("Login error:", loginError);
+          toast({
+            title: "Error de inicio de sesión",
+            description: loginError.message || "No se pudo iniciar sesión. Verifica tus credenciales.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+        }
       } else {
-        // Register simulado
+        // Verificación de registro
         if (password !== confirmPassword) {
           toast({
             title: "Error",
@@ -114,16 +130,27 @@ export default function Auth() {
           return;
         }
 
-        console.log("Attempting registration with:", email);
-        console.log("Registration successful");
-        
-        toast({
-          title: "Registro exitoso",
-          description: "Tu cuenta ha sido creada",
-        });
-        
-        // Redirigir al dashboard
-        navigate("/");
+        try {
+          // Importación dinámica para evitar problemas circulares
+          const { registerWithEmail } = await import('@/lib/hooks');
+          await registerWithEmail(email, password);
+          
+          toast({
+            title: "Registro exitoso",
+            description: "Tu cuenta ha sido creada",
+          });
+          
+          // Redirigir al dashboard
+          navigate("/");
+        } catch (registerError: any) {
+          console.error("Registration error:", registerError);
+          toast({
+            title: "Error de registro",
+            description: registerError.message || "No se pudo completar el registro.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+        }
       }
     } catch (error: any) {
       console.error("Authentication error:", error);
@@ -132,7 +159,6 @@ export default function Auth() {
         description: error.message || "Fallo al autenticar",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };

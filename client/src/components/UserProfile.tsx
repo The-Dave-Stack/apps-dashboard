@@ -1,6 +1,9 @@
+import { useAuth, logout } from "@/lib/hooks";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { getFirebaseInstances } from "@/lib/firebase-init";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,30 +13,55 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, Settings, User, ShieldAlert } from "lucide-react";
-
-// Usuario simulado para desarrollo
-const mockUser = {
-  uid: "mock-user-id",
-  email: "usuario@ejemplo.com",
-  displayName: "Usuario de Prueba",
-  photoURL: null
-};
+import { LogOut, Settings, User as UserIcon, ShieldAlert, UserCircle2 } from "lucide-react";
 
 export default function UserProfile() {
+  const { user } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  const [userRole] = useState<string>("admin"); // Asumimos rol de admin para desarrollo
+  const [userRole, setUserRole] = useState<string>("user");
+  const [loading, setLoading] = useState(true);
 
-  // Usamos el usuario simulado ya que hemos eliminado la autenticación
-  const user = mockUser;
+  // Si no hay usuario autenticado, mostramos un usuario visual de muestra
+  const fallbackUser = {
+    uid: "guest",
+    email: "invitado@ejemplo.com",
+    displayName: "Invitado",
+    photoURL: null
+  };
+  
+  // El usuario a mostrar (autenticado o fallback)
+  const displayUser = user || fallbackUser;
+
+  // Efecto para cargar el rol de usuario (si está autenticado)
+  useEffect(() => {
+    const loadUserRole = async () => {
+      if (user) {
+        try {
+          const { db } = getFirebaseInstances();
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            setUserRole(userDoc.data().role || "user");
+          } else {
+            // Si el usuario existe en Auth pero no en Firestore, asumimos el rol "admin" para desarrollo
+            setUserRole("admin");
+          }
+        } catch (error) {
+          console.error("Error al cargar rol de usuario:", error);
+          // Por seguridad, si hay error, asumimos "admin" para poder acceder a todo durante desarrollo
+          setUserRole("admin");
+        }
+      } else {
+        setUserRole("user");
+      }
+    };
+    
+    loadUserRole();
+  }, [user]);
 
   const handleLogout = async () => {
     try {
-      // Simulamos el logout
-      console.log("Logout attempt");
-      console.log("Logout successful");
-      
+      await logout();
       toast({
         title: "Sesión cerrada",
         description: "Has cerrado sesión correctamente",
@@ -52,11 +80,11 @@ export default function UserProfile() {
     <DropdownMenu>
       <DropdownMenuTrigger className="outline-none">
         <div className="h-9 w-9 rounded-full bg-neutral-200 overflow-hidden border border-neutral-300 hover:border-primary-500 transition-colors">
-          {user.photoURL ? (
-            <img src={user.photoURL} alt="Avatar de usuario" className="h-full w-full object-cover" />
+          {displayUser.photoURL ? (
+            <img src={displayUser.photoURL} alt="Avatar de usuario" className="h-full w-full object-cover" />
           ) : (
             <div className="h-full w-full flex items-center justify-center bg-primary-100 text-primary-600 font-medium">
-              {user.email ? user.email[0].toUpperCase() : "U"}
+              {displayUser.email ? displayUser.email[0].toUpperCase() : "U"}
             </div>
           )}
         </div>
@@ -65,7 +93,7 @@ export default function UserProfile() {
         <DropdownMenuLabel className="pb-2">
           <div className="flex flex-col space-y-1">
             <div className="flex items-center justify-between">
-              <span className="font-semibold">{user.displayName || "Usuario"}</span>
+              <span className="font-semibold">{displayUser.displayName || "Usuario"}</span>
               {userRole === "admin" && (
                 <Badge variant="outline" className="ml-2 bg-primary-50 text-primary-700 border-primary-200">
                   <ShieldAlert className="h-3 w-3 mr-1" />
@@ -73,12 +101,12 @@ export default function UserProfile() {
                 </Badge>
               )}
             </div>
-            <span className="text-xs text-neutral-500 truncate">{user.email}</span>
+            <span className="text-xs text-neutral-500 truncate">{displayUser.email}</span>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => setLocation("/settings/profile")}>
-          <User className="mr-2 h-4 w-4" />
+          <UserIcon className="mr-2 h-4 w-4" />
           <span>Perfil</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setLocation("/settings")}>

@@ -4,13 +4,55 @@ import { useToast } from "@/hooks/use-toast";
 import CategorySection from "@/components/CategorySection";
 import { CategoryData } from "@/lib/types";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, AlertTriangle, InfoIcon } from "lucide-react";
+import { checkFirebaseConnection } from "@/lib/firebase-check";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function Dashboard() {
   const { toast } = useToast();
   const [categories, setCategories] = useState<CategoryData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [firebaseStatus, setFirebaseStatus] = useState<{
+    connection: boolean;
+    read: boolean;
+    write: boolean;
+    auth: boolean;
+    error?: string;
+  } | null>(null);
+
+  useEffect(() => {
+    const checkFirebase = async () => {
+      try {
+        const status = await checkFirebaseConnection();
+        setFirebaseStatus(status);
+        
+        if (!status.connection) {
+          toast({
+            title: "Error de conexión",
+            description: "No se pudo conectar con Firebase. Verifica tu conexión a internet.",
+            variant: "destructive",
+          });
+        } else if (!status.auth) {
+          toast({
+            title: "No autenticado",
+            description: "Es necesario iniciar sesión para acceder a todas las funcionalidades.",
+            variant: "destructive",
+          });
+        } else if (!status.read) {
+          toast({
+            title: "Error de permisos",
+            description: "No tienes permisos para leer datos en Firestore.",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Error checking Firebase:", error);
+      }
+    };
+    
+    checkFirebase();
+  }, [toast]);
 
   useEffect(() => {
     const fetchCategoriesData = async () => {
@@ -34,14 +76,22 @@ export default function Dashboard() {
         // Establecemos las categorías en el estado
         setCategories(categoriesData);
       } catch (error: any) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching categories:", error);
         
         // Muestra mensaje de error pero no bloquea la aplicación
-        toast({
-          title: "Error al cargar datos",
-          description: "No se pudieron cargar las aplicaciones. Por favor, intente más tarde.",
-          variant: "destructive",
-        });
+        if (error?.code === "permission-denied") {
+          toast({
+            title: "Error de permisos",
+            description: "No tienes permisos para leer las categorías. Verifica que estés autenticado.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Error al cargar datos",
+            description: "No se pudieron cargar las aplicaciones. Por favor, intente más tarde.",
+            variant: "destructive",
+          });
+        }
         
         // Establecemos un array vacío para que la UI pueda renderizarse sin errores
         setCategories([]);
@@ -50,8 +100,12 @@ export default function Dashboard() {
       }
     };
 
-    fetchCategoriesData();
-  }, [toast]);
+    if (firebaseStatus && firebaseStatus.connection) {
+      fetchCategoriesData();
+    } else {
+      setLoading(false);
+    }
+  }, [toast, firebaseStatus]);
 
   // Filter apps based on search term
   const filteredCategories = categories.map(category => ({
@@ -69,6 +123,34 @@ export default function Dashboard() {
         <h1 className="text-2xl font-bold text-primary-600">Dashboard</h1>
         <p className="text-neutral-500 mt-1">Explora y gestiona todas tus aplicaciones</p>
       </div>
+      
+      {/* Firebase Status Alert */}
+      {firebaseStatus && !firebaseStatus.connection && (
+        <Alert className="mb-6 bg-red-50 border-red-200">
+          <AlertTriangle className="h-4 w-4 text-red-800" />
+          <AlertDescription className="text-red-800">
+            No hay conexión con Firebase. Verifica tu conexión a internet y vuelve a intentarlo.
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {firebaseStatus && firebaseStatus.connection && !firebaseStatus.auth && (
+        <Alert className="mb-6 bg-amber-50 border-amber-200">
+          <AlertTriangle className="h-4 w-4 text-amber-800" />
+          <AlertDescription className="text-amber-800">
+            No has iniciado sesión. Algunas funciones estarán limitadas hasta que inicies sesión.
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {firebaseStatus && firebaseStatus.auth && !firebaseStatus.read && (
+        <Alert className="mb-6 bg-red-50 border-red-200">
+          <AlertTriangle className="h-4 w-4 text-red-800" />
+          <AlertDescription className="text-red-800">
+            Error de permisos: No tienes acceso para leer datos. Contacta al administrador.
+          </AlertDescription>
+        </Alert>
+      )}
       
       {/* Desktop Search (El móvil está en Topbar) */}
       <div className="hidden md:block mb-6">

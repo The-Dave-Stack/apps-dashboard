@@ -4,9 +4,13 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signOut
+  signOut,
+  signInAnonymously
 } from "firebase/auth";
-import { auth } from "./firebase";
+import { getFirebaseInstances } from "./firebase-init";
+
+// Obtenemos la instancia de autenticación de Firebase
+const { auth } = getFirebaseInstances();
 
 // Función para iniciar sesión con email y contraseña
 export async function loginWithEmail(email: string, password: string): Promise<User> {
@@ -17,6 +21,19 @@ export async function loginWithEmail(email: string, password: string): Promise<U
     return userCredential.user;
   } catch (error) {
     console.error("Login error:", error);
+    throw error;
+  }
+}
+
+// Función para iniciar sesión anónima (útil para desarrollo)
+export async function loginAnonymously(): Promise<User> {
+  console.log("Anonymous login attempt");
+  try {
+    const userCredential = await signInAnonymously(auth);
+    console.log("Anonymous login successful");
+    return userCredential.user;
+  } catch (error) {
+    console.error("Anonymous login error:", error);
     throw error;
   }
 }
@@ -33,8 +50,6 @@ export async function registerWithEmail(email: string, password: string): Promis
     throw error;
   }
 }
-
-// La función loginWithGoogle fue eliminada ya que no se requiere
 
 // Función para cerrar sesión
 export async function logout(): Promise<void> {
