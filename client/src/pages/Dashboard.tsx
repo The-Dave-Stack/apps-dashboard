@@ -152,19 +152,7 @@ export default function Dashboard() {
         </Alert>
       )}
       
-      {/* Desktop Search (El móvil está en Topbar) */}
-      <div className="hidden md:block mb-6">
-        <div className="relative max-w-md">
-          <Input
-            type="text" 
-            className="w-full pl-10 h-10" 
-            placeholder="Buscar aplicaciones..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <Search className="h-5 w-5 text-neutral-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-        </div>
-      </div>
+      {/* Eliminamos barra de búsqueda duplicada. Ya hay una en el topbar */}
       
       {/* Dashboard Content */}
       {loading ? (
