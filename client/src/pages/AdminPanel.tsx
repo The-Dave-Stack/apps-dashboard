@@ -12,7 +12,8 @@ import {
   AlertTriangle,
   Shield,
   AlertCircle,
-  RefreshCw
+  RefreshCw,
+  Settings
 } from "lucide-react";
 import MobileNav from "@/components/MobileNav";
 import Sidebar from "@/components/Sidebar";
@@ -22,6 +23,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
 import { AppData, CategoryData } from "@/lib/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { DEFAULT_ICON } from "@/lib/utils";
@@ -33,6 +36,7 @@ import {
   deleteApp 
 } from "@/lib/firebase";
 import { checkFirebaseConnection } from "@/lib/firebase-check";
+import { AppConfig, getAppConfig, updateAppConfig } from "@/lib/appConfig";
 
 export default function AdminPanel() {
   const { toast } = useToast();
@@ -50,6 +54,11 @@ export default function AdminPanel() {
     description: ""
   });
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  
+  // Estado para la configuración de la aplicación
+  const [appConfig, setAppConfig] = useState<AppConfig>({
+    showRegisterTab: true
+  });
   
   // Estado para la verificación de Firebase
   const [firebaseStatus, setFirebaseStatus] = useState<{
@@ -237,6 +246,15 @@ export default function AdminPanel() {
         // Luego intentamos cargar las categorías
         const data = await fetchCategories();
         setCategories(data);
+        
+        // Cargar la configuración de la aplicación
+        try {
+          const config = await getAppConfig();
+          setAppConfig(config);
+          console.log("[AdminPanel] Configuración cargada:", config);
+        } catch (configError) {
+          console.error("Error al cargar la configuración:", configError);
+        }
       } catch (error) {
         console.error("Error al cargar las categorías:", error);
         toast({
@@ -251,6 +269,42 @@ export default function AdminPanel() {
     
     loadInitialData();
   }, [toast]);
+  
+  // Manejador para actualizar la configuración
+  const handleToggleRegisterTab = async (show: boolean) => {
+    try {
+      setLoading(true);
+      
+      // Verificar conexión a Firebase
+      const firebaseReady = await checkFirebaseStatus();
+      if (!firebaseReady) {
+        toast({
+          title: "Error de Firebase",
+          description: "No se puede actualizar la configuración porque no hay conexión a Firebase o no se tienen los permisos necesarios.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Actualizar la configuración
+      const updatedConfig = await updateAppConfig({ showRegisterTab: show });
+      setAppConfig(updatedConfig);
+      
+      toast({
+        title: "Configuración actualizada",
+        description: `La pestaña de registro ha sido ${show ? 'activada' : 'desactivada'}`
+      });
+    } catch (error) {
+      console.error("Error al actualizar la configuración:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar la configuración. Inténtalo de nuevo más tarde.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Manejadores para categorías
   const handleAddCategory = async () => {
@@ -783,6 +837,51 @@ service cloud.firestore {
                 </AlertDescription>
               </Alert>
             )}
+          </div>
+          
+          {/* Configuración de la aplicación */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold mb-4">Configuración de la Aplicación</h2>
+              <Button 
+                onClick={async () => {
+                  try {
+                    const updatedConfig = await updateAppConfig(appConfig);
+                    setAppConfig(updatedConfig);
+                    toast({
+                      title: "Configuración actualizada",
+                      description: "La configuración se ha guardado correctamente",
+                      variant: "default"
+                    });
+                  } catch (error) {
+                    console.error("Error al guardar la configuración:", error);
+                    toast({
+                      title: "Error",
+                      description: "No se pudo guardar la configuración. Inténtalo de nuevo más tarde.",
+                      variant: "destructive"
+                    });
+                  }
+                }}
+                variant="outline"
+                className="flex items-center"
+              >
+                <Save className="mr-2 h-4 w-4" />
+                Guardar Configuración
+              </Button>
+            </div>
+            
+            <div className="bg-card rounded-lg border p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium">Mostrar pestaña de registro</h3>
+                  <p className="text-sm text-muted-foreground">Habilita o deshabilita la pestaña de registro en la página de autenticación</p>
+                </div>
+                <Switch 
+                  checked={appConfig.showRegisterTab} 
+                  onCheckedChange={(checked) => setAppConfig({...appConfig, showRegisterTab: checked})}
+                />
+              </div>
+            </div>
           </div>
 
           {loading ? (
