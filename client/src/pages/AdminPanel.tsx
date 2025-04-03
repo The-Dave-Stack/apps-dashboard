@@ -24,6 +24,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Label } from "@/components/ui/label";
 import { AppData, CategoryData } from "@/lib/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { DEFAULT_ICON } from "@/lib/utils";
 import { 
   fetchCategories, 
   saveCategory, 
@@ -458,9 +459,23 @@ export default function AdminPanel() {
     setLoading(true);
     
     try {
-      // Crear nueva aplicación para la categoría seleccionada
+      // Si no se proporciona un icono, intentar obtenerlo automáticamente
+      let appIcon = newAppData.icon;
+      if (!appIcon || appIcon.trim() === "") {
+        toast({
+          title: "Buscando icono...",
+          description: "Intentando obtener el icono automáticamente, esto puede tardar unos segundos",
+        });
+        
+        // Importamos aquí para evitar problemas circulares
+        const { getIconForUrl } = await import("@/lib/utils");
+        appIcon = await getIconForUrl(newAppData.url);
+      }
+      
+      // Crear nueva aplicación para la categoría seleccionada con el icono obtenido
       const newApp: AppData = {
         ...newAppData,
+        icon: appIcon,
         id: `app${Date.now()}` // Esto se reemplazará en Firebase si es necesario
       };
       
@@ -533,9 +548,25 @@ export default function AdminPanel() {
     setLoading(true);
     
     try {
-      // Actualizar aplicación con los nuevos datos
+      // Si no se proporciona un icono, o si la URL cambió, intentar obtener el icono automáticamente
+      let appIcon = newAppData.icon;
+      const urlChanged = newAppData.url !== editingApp.app.url;
+      
+      if ((!appIcon || appIcon.trim() === "") || (urlChanged && appIcon === editingApp.app.icon)) {
+        toast({
+          title: "Buscando icono...",
+          description: "Intentando obtener el icono automáticamente, esto puede tardar unos segundos",
+        });
+        
+        // Importamos aquí para evitar problemas circulares
+        const { getIconForUrl } = await import("@/lib/utils");
+        appIcon = await getIconForUrl(newAppData.url);
+      }
+      
+      // Actualizar aplicación con los nuevos datos y el icono actualizado
       const updatedApp: AppData = { 
         ...newAppData, 
+        icon: appIcon,
         id: editingApp.app.id 
       };
       
@@ -792,10 +823,10 @@ service cloud.firestore {
                             <div key={app.id} className="flex border rounded-lg overflow-hidden">
                               <div className="w-16 h-16 bg-neutral-100 flex items-center justify-center p-2">
                                 <img 
-                                  src={app.icon || "https://placehold.co/100x100?text=No+Icon"} 
+                                  src={app.icon || DEFAULT_ICON} 
                                   alt={app.name} 
                                   className="max-w-full max-h-full object-contain"
-                                  onError={(e) => (e.currentTarget.src = "https://placehold.co/100x100?text=No+Icon")}
+                                  onError={(e) => (e.currentTarget.src = DEFAULT_ICON)}
                                 />
                               </div>
                               <div className="flex-1 p-3">

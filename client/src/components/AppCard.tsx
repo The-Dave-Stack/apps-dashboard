@@ -1,4 +1,5 @@
 import { AppData } from "@/lib/types";
+import { DEFAULT_ICON } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 
 interface AppCardProps {
@@ -11,10 +12,10 @@ export default function AppCard({ app }: AppCardProps) {
       <a href={app.url} target="_blank" rel="noopener noreferrer" className="block p-4 h-full">
         <div className="flex flex-col items-center text-center h-full">
           <img 
-            src={app.icon} 
+            src={app.icon || DEFAULT_ICON} 
             alt={app.name} 
             className="w-16 h-16 mb-3 object-contain"
-            onError={(e) => (e.currentTarget.src = "https://placehold.co/100x100?text=No+Icon")}
+            onError={(e) => (e.currentTarget.src = DEFAULT_ICON)}
           />
           <h3 className="font-medium text-neutral-800">{app.name}</h3>
           <p className="text-xs text-neutral-500 mt-1 flex-grow">{app.description || ""}</p>
