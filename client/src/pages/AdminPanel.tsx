@@ -15,7 +15,6 @@ import {
   RefreshCw,
   Settings
 } from "lucide-react";
-import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -531,14 +530,14 @@ export default function AdminPanel() {
         icon: appIcon
       };
       
-      await saveApp(newApp, selectedCategoryId);
+      const savedApp = await saveApp(newApp, selectedCategoryId);
       
       // Actualizar el estado local
       const updatedCategories = categories.map(cat => {
         if (cat.id === selectedCategoryId) {
           return {
             ...cat,
-            apps: [...cat.apps, { ...newApp, id: Date.now().toString() }] // ID temporal hasta que recarguemos
+            apps: [...cat.apps, savedApp]
           };
         }
         return cat;
@@ -546,23 +545,12 @@ export default function AdminPanel() {
       
       setCategories(updatedCategories);
       
-      // Recargar categorías para obtener la aplicación con su ID real
-      const refreshedCategories = await fetchCategories();
-      setCategories(refreshedCategories);
+      toast({
+        title: "Aplicación creada",
+        description: `Se ha creado la aplicación ${newApp.name}`,
+      });
       
-      toast({
-        title: "Aplicación añadida",
-        description: `Se ha añadido ${newApp.name} a la categoría`,
-      });
-    } catch (error) {
-      console.error("Error al añadir aplicación:", error);
-      toast({
-        title: "Error",
-        description: "No se pudo añadir la aplicación. Inténtalo de nuevo más tarde.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
+      // Cerramos el diálogo y limpiamos campos
       setShowNewAppDialog(false);
       setNewAppData({
         name: "",
@@ -570,7 +558,15 @@ export default function AdminPanel() {
         url: "",
         description: ""
       });
-      setSelectedCategoryId(null);
+    } catch (error) {
+      console.error("Error al crear aplicación:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo crear la aplicación. Inténtalo de nuevo más tarde.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -601,7 +597,7 @@ export default function AdminPanel() {
     setLoading(true);
     
     try {
-      // Si el icono se eliminó, intentar obtenerlo automáticamente
+      // Si el icono cambió a vacío, intentar obtenerlo automáticamente
       let appIcon = newAppData.icon;
       if (!appIcon || appIcon.trim() === "") {
         toast({
@@ -642,6 +638,16 @@ export default function AdminPanel() {
         title: "Aplicación actualizada",
         description: `Se ha actualizado la aplicación ${updatedApp.name}`,
       });
+      
+      // Cerramos el diálogo y limpiamos campos
+      setShowEditAppDialog(false);
+      setEditingApp(null);
+      setNewAppData({
+        name: "",
+        icon: "",
+        url: "",
+        description: ""
+      });
     } catch (error) {
       console.error("Error al actualizar aplicación:", error);
       toast({
@@ -651,14 +657,10 @@ export default function AdminPanel() {
       });
     } finally {
       setLoading(false);
-      setShowEditAppDialog(false);
-      setEditingApp(null);
     }
   };
   
-  const handleDeleteApp = (appId: string | undefined, categoryId: string) => {
-    if (!appId) return;
-    
+  const handleDeleteApp = (appId: string, categoryId: string) => {
     setItemToDelete({
       id: appId,
       type: 'app',
@@ -678,7 +680,7 @@ export default function AdminPanel() {
       
       // Actualizar el estado local
       const updatedCategories = categories.map(cat => {
-        if (cat.id === itemToDelete.categoryId) {
+        if (cat.id === itemToDelete?.categoryId) {
           return {
             ...cat,
             apps: cat.apps.filter(app => app.id !== itemToDelete.id)
@@ -708,7 +710,7 @@ export default function AdminPanel() {
   };
   
   return (
-    <Layout showSearch={false}>
+    <>
       {/* Admin Panel Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
@@ -720,7 +722,7 @@ export default function AdminPanel() {
             <AppWindow className="mr-2 h-4 w-4" />
             Nueva Aplicación
           </Button>
-          <Button variant="outline" onClick={() => setShowNewCategoryDialog(true)}>
+          <Button onClick={() => setShowNewCategoryDialog(true)} variant="outline">
             <FolderPlus className="mr-2 h-4 w-4" />
             Nueva Categoría
           </Button>
@@ -797,7 +799,7 @@ export default function AdminPanel() {
         
         {firebaseStatus.error && (
           <Alert variant="destructive" className="mb-4">
-            <AlertCircle className="h-4 w-4" />
+            <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Error en Firebase</AlertTitle>
             <AlertDescription>
               {firebaseStatus.error}
@@ -1092,13 +1094,13 @@ service cloud.firestore {
         </DialogContent>
       </Dialog>
       
-      {/* Nueva Aplicación */}
+      {/* Nueva App */}
       <Dialog open={showNewAppDialog} onOpenChange={setShowNewAppDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Nueva Aplicación</DialogTitle>
             <DialogDescription>
-              Añade una nueva aplicación a una categoría.
+              Agrega una nueva aplicación a tu colección.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
@@ -1106,7 +1108,7 @@ service cloud.firestore {
               <Label htmlFor="app-category">Categoría</Label>
               <select 
                 id="app-category"
-                className="w-full p-2 border rounded-md"
+                className="flex h-10 w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 value={selectedCategoryId || ""}
                 onChange={(e) => setSelectedCategoryId(e.target.value)}
               >
@@ -1118,32 +1120,32 @@ service cloud.firestore {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="app-name">Nombre de la aplicación</Label>
+              <Label htmlFor="app-name">Nombre de la aplicación *</Label>
               <Input 
                 id="app-name" 
-                placeholder="Ej: Google Workspace, Slack..." 
+                placeholder="Ej: Google Drive, Slack, Notion..." 
                 value={newAppData.name}
                 onChange={(e) => setNewAppData({...newAppData, name: e.target.value})}
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="app-url">URL</Label>
+              <Label htmlFor="app-url">URL *</Label>
               <Input 
                 id="app-url" 
                 placeholder="https://ejemplo.com" 
                 value={newAppData.url}
                 onChange={(e) => setNewAppData({...newAppData, url: e.target.value})}
               />
-              <p className="text-xs text-neutral-500">El icono de la aplicación se intentará obtener automáticamente de la URL si no se proporciona.</p>
+              <p className="text-xs text-neutral-500">Si no se proporciona un icono, intentaremos obtenerlo automáticamente desde la URL.</p>
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="app-icon">URL del icono (opcional)</Label>
               <Input 
                 id="app-icon" 
-                placeholder="https://ejemplo.com/icon.png" 
-                value={newAppData.icon || ""}
+                placeholder="https://ejemplo.com/icono.png" 
+                value={newAppData.icon}
                 onChange={(e) => setNewAppData({...newAppData, icon: e.target.value})}
               />
             </div>
@@ -1152,10 +1154,9 @@ service cloud.firestore {
               <Label htmlFor="app-description">Descripción (opcional)</Label>
               <Textarea 
                 id="app-description" 
-                placeholder="Breve descripción de la aplicación..." 
-                value={newAppData.description || ""}
+                placeholder="Breve descripción de la aplicación" 
+                value={newAppData.description}
                 onChange={(e) => setNewAppData({...newAppData, description: e.target.value})}
-                className="min-h-[80px]"
               />
             </div>
           </div>
@@ -1170,19 +1171,18 @@ service cloud.firestore {
                   url: "",
                   description: ""
                 });
-                setSelectedCategoryId(null);
               }}
             >
               Cancelar
             </Button>
-            <Button onClick={handleSaveNewApp}>Añadir</Button>
+            <Button onClick={handleSaveNewApp}>Crear</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
       
-      {/* Editar Aplicación */}
+      {/* Editar App */}
       <Dialog open={showEditAppDialog} onOpenChange={setShowEditAppDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Editar Aplicación</DialogTitle>
             <DialogDescription>
@@ -1191,7 +1191,7 @@ service cloud.firestore {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="edit-app-name">Nombre de la aplicación</Label>
+              <Label htmlFor="edit-app-name">Nombre de la aplicación *</Label>
               <Input 
                 id="edit-app-name" 
                 placeholder="Nombre de la aplicación" 
@@ -1201,7 +1201,7 @@ service cloud.firestore {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-app-url">URL</Label>
+              <Label htmlFor="edit-app-url">URL *</Label>
               <Input 
                 id="edit-app-url" 
                 placeholder="https://ejemplo.com" 
@@ -1214,21 +1214,20 @@ service cloud.firestore {
               <Label htmlFor="edit-app-icon">URL del icono</Label>
               <Input 
                 id="edit-app-icon" 
-                placeholder="https://ejemplo.com/icon.png" 
-                value={newAppData.icon || ""}
+                placeholder="https://ejemplo.com/icono.png" 
+                value={newAppData.icon}
                 onChange={(e) => setNewAppData({...newAppData, icon: e.target.value})}
               />
-              <p className="text-xs text-neutral-500">Deja en blanco para obtener automáticamente de la URL.</p>
+              <p className="text-xs text-neutral-500">Si se deja en blanco, intentaremos obtener el icono automáticamente desde la URL.</p>
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="edit-app-description">Descripción</Label>
               <Textarea 
                 id="edit-app-description" 
-                placeholder="Descripción de la aplicación" 
-                value={newAppData.description || ""}
+                placeholder="Breve descripción de la aplicación" 
+                value={newAppData.description}
                 onChange={(e) => setNewAppData({...newAppData, description: e.target.value})}
-                className="min-h-[80px]"
               />
             </div>
           </div>
@@ -1238,6 +1237,12 @@ service cloud.firestore {
               onClick={() => {
                 setShowEditAppDialog(false);
                 setEditingApp(null);
+                setNewAppData({
+                  name: "",
+                  icon: "",
+                  url: "",
+                  description: ""
+                });
               }}
             >
               Cancelar
@@ -1247,7 +1252,7 @@ service cloud.firestore {
         </DialogContent>
       </Dialog>
       
-      {/* Confirmar Eliminar Aplicación */}
+      {/* Confirmar Eliminar App */}
       <Dialog open={showDeleteAppDialog} onOpenChange={setShowDeleteAppDialog}>
         <DialogContent>
           <DialogHeader>
@@ -1275,6 +1280,6 @@ service cloud.firestore {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </Layout>
+    </>
   );
 }

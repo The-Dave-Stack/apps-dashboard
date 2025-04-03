@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Settings as SettingsIcon, User, Bell, Moon, Sun, Globe, Shield, LogOut } from "lucide-react";
-import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
@@ -75,7 +74,7 @@ export default function Settings() {
   };
 
   return (
-    <Layout showSearch={false}>
+    <>
       {/* Title */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-primary-600">Configuración</h1>
@@ -203,6 +202,6 @@ export default function Settings() {
           <p className="mt-1">© 2025 AppHub. Todos los derechos reservados.</p>
         </div>
       </div>
-    </Layout>
+    </>
   );
 }
