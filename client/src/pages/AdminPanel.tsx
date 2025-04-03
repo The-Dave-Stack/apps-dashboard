@@ -20,7 +20,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { AppData, CategoryData } from "@/lib/types";
-import { useAuth } from "@/lib/hooks";
 import { 
   fetchCategories, 
   saveCategory, 
@@ -31,7 +30,6 @@ import {
 
 export default function AdminPanel() {
   const { toast } = useToast();
-  const { user } = useAuth();
   
   // Estados para la gestión de categorías y aplicaciones
   const [categories, setCategories] = useState<CategoryData[]>([]);
@@ -64,8 +62,8 @@ export default function AdminPanel() {
     photoURL: null
   };
 
-  // Durante el desarrollo, usamos el usuario simulado si no hay usuario autenticado
-  const effectiveUser = user || mockUser;
+  // Usamos el usuario simulado ya que hemos eliminado la autenticación
+  const effectiveUser = mockUser;
   
   // Datos de ejemplo para desarrollo
   const mockCategories: CategoryData[] = [
@@ -147,11 +145,6 @@ export default function AdminPanel() {
 
   // Cargar datos iniciales
   useEffect(() => {
-    // Redirigir si no hay usuario
-    if (!user) {
-      return;
-    }
-    
     const loadCategories = async () => {
       try {
         setLoading(true);
@@ -170,7 +163,7 @@ export default function AdminPanel() {
     };
     
     loadCategories();
-  }, [user, toast]);
+  }, [toast]);
 
   // Manejadores para categorías
   const handleAddCategory = async () => {
