@@ -6,10 +6,12 @@ import { CategoryData } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import { Search, AlertTriangle, InfoIcon } from "lucide-react";
 import { checkFirebaseConnection } from "@/lib/firebase-check";
+import { useTranslation } from "react-i18next";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function Dashboard() {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [categories, setCategories] = useState<CategoryData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -29,20 +31,20 @@ export default function Dashboard() {
         
         if (!status.connection) {
           toast({
-            title: "Error de conexión",
-            description: "No se pudo conectar con Firebase. Verifica tu conexión a internet.",
+            title: t("errors.connectionError"),
+            description: t("errors.firebaseConnection"),
             variant: "destructive",
           });
         } else if (!status.auth) {
           toast({
-            title: "No autenticado",
-            description: "Es necesario iniciar sesión para acceder a todas las funcionalidades.",
+            title: t("errors.notAuthenticated"),
+            description: t("errors.loginRequired"),
             variant: "destructive",
           });
         } else if (!status.read) {
           toast({
-            title: "Error de permisos",
-            description: "No tienes permisos para leer datos en Firestore.",
+            title: t("errors.permissionError"),
+            description: t("errors.readPermissionDenied"),
             variant: "destructive",
           });
         }
@@ -68,8 +70,8 @@ export default function Dashboard() {
           
           // Mostramos un mensaje indicativo al usuario
           toast({
-            title: "Información",
-            description: "No hay aplicaciones configuradas todavía. Un administrador debe agregarlas.",
+            title: t("common.information"),
+            description: t("dashboard.noAppsConfigured"),
           });
         }
         
@@ -81,14 +83,14 @@ export default function Dashboard() {
         // Muestra mensaje de error pero no bloquea la aplicación
         if (error?.code === "permission-denied") {
           toast({
-            title: "Error de permisos",
-            description: "No tienes permisos para leer las categorías. Verifica que estés autenticado.",
+            title: t("errors.permissionError"),
+            description: t("errors.categoryReadPermission"),
             variant: "destructive",
           });
         } else {
           toast({
-            title: "Error al cargar datos",
-            description: "No se pudieron cargar las aplicaciones. Por favor, intente más tarde.",
+            title: t("errors.dataLoadError"),
+            description: t("errors.appLoadError"),
             variant: "destructive",
           });
         }
@@ -120,8 +122,8 @@ export default function Dashboard() {
     <>
       {/* Dashboard Title */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-primary-600">Dashboard</h1>
-        <p className="text-neutral-500 mt-1">Explora y gestiona todas tus aplicaciones</p>
+        <h1 className="text-2xl font-bold text-primary-600">{t("navigation.dashboard")}</h1>
+        <p className="text-neutral-500 mt-1">{t("dashboard.subtitle")}</p>
       </div>
       
       {/* Firebase Status Alert */}
@@ -129,7 +131,7 @@ export default function Dashboard() {
         <Alert className="mb-6 bg-red-50 border-red-200">
           <AlertTriangle className="h-4 w-4 text-red-800" />
           <AlertDescription className="text-red-800">
-            No hay conexión con Firebase. Verifica tu conexión a internet y vuelve a intentarlo.
+            {t("errors.firebaseConnectionRetry")}
           </AlertDescription>
         </Alert>
       )}
@@ -138,7 +140,7 @@ export default function Dashboard() {
         <Alert className="mb-6 bg-amber-50 border-amber-200">
           <AlertTriangle className="h-4 w-4 text-amber-800" />
           <AlertDescription className="text-amber-800">
-            No has iniciado sesión. Algunas funciones estarán limitadas hasta que inicies sesión.
+            {t("errors.notLoggedInLimited")}
           </AlertDescription>
         </Alert>
       )}
@@ -147,7 +149,7 @@ export default function Dashboard() {
         <Alert className="mb-6 bg-red-50 border-red-200">
           <AlertTriangle className="h-4 w-4 text-red-800" />
           <AlertDescription className="text-red-800">
-            Error de permisos: No tienes acceso para leer datos. Contacta al administrador.
+            {t("errors.permissionContactAdmin")}
           </AlertDescription>
         </Alert>
       )}
@@ -158,11 +160,11 @@ export default function Dashboard() {
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="bg-white rounded-lg shadow-sm border border-neutral-200 p-6 h-64 animate-pulse">
-              <div className="h-8 w-1/2 bg-neutral-200 rounded mb-4"></div>
+            <div key={i} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-neutral-200 dark:border-gray-700 p-6 h-64 animate-pulse">
+              <div className="h-8 w-1/2 bg-neutral-200 dark:bg-gray-700 rounded mb-4"></div>
               <div className="grid grid-cols-2 gap-4">
                 {[...Array(4)].map((_, j) => (
-                  <div key={j} className="h-24 bg-neutral-100 rounded"></div>
+                  <div key={j} className="h-24 bg-neutral-100 dark:bg-gray-700 rounded"></div>
                 ))}
               </div>
             </div>
@@ -175,25 +177,25 @@ export default function Dashboard() {
               <CategorySection key={category.id} category={category} />
             ))
           ) : (
-            <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-neutral-200">
+            <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-neutral-200 dark:border-gray-700">
               {categories.length > 0 ? (
                 // Si hay categorías pero el filtro no encontró resultados
                 <>
-                  <h3 className="text-lg font-medium text-neutral-700">No se encontraron resultados</h3>
-                  <p className="text-neutral-500 mt-2">Intenta ajustar los términos de búsqueda</p>
+                  <h3 className="text-lg font-medium text-neutral-700 dark:text-neutral-200">{t("common.noResults")}</h3>
+                  <p className="text-neutral-500 dark:text-neutral-400 mt-2">{t("dashboard.adjustSearchTerms")}</p>
                 </>
               ) : (
                 // Si no hay categorías en absoluto
                 <>
-                  <div className="mx-auto w-16 h-16 mb-4 text-neutral-300">
+                  <div className="mx-auto w-16 h-16 mb-4 text-neutral-300 dark:text-neutral-600">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-medium text-neutral-700">No hay aplicaciones disponibles</h3>
-                  <p className="text-neutral-500 mt-2">Un administrador debe configurar las aplicaciones primero</p>
-                  <p className="text-neutral-400 text-sm mt-4 max-w-md mx-auto">
-                    Puedes contactar con el administrador para solicitar que se agreguen tus aplicaciones favoritas.
+                  <h3 className="text-lg font-medium text-neutral-700 dark:text-neutral-200">{t("dashboard.noAppsAvailable")}</h3>
+                  <p className="text-neutral-500 dark:text-neutral-400 mt-2">{t("dashboard.adminMustConfigure")}</p>
+                  <p className="text-neutral-400 dark:text-neutral-500 text-sm mt-4 max-w-md mx-auto">
+                    {t("dashboard.contactAdmin")}
                   </p>
                 </>
               )}

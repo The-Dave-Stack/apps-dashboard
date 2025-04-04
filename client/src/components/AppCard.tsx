@@ -15,6 +15,7 @@ import { doc, setDoc, deleteDoc, serverTimestamp, collection, getDoc } from "fir
 import { getFirebaseInstances } from "@/lib/firebase-init";
 import { Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 /**
  * Props para el componente AppCard
@@ -37,6 +38,7 @@ export default function AppCard({ app }: AppCardProps) {
   const { user } = useAuth();
   const { db } = getFirebaseInstances();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -95,8 +97,8 @@ export default function AppCard({ app }: AppCardProps) {
     
     if (!user || !app.id) {
       toast({
-        title: "Inicio de sesión requerido",
-        description: "Debes iniciar sesión para guardar favoritos",
+        title: t('common.favorites.loginRequired'),
+        description: t('common.favorites.loginMessage'),
         variant: "destructive",
       });
       return;
@@ -111,8 +113,8 @@ export default function AppCard({ app }: AppCardProps) {
         await deleteDoc(favoriteRef);
         setIsFavorite(false);
         toast({
-          title: "Eliminado de favoritos",
-          description: `${app.name} se ha eliminado de tus favoritos`,
+          title: t('common.favorites.removedFromFavorites'),
+          description: t('common.favorites.removeMessage', { name: app.name }),
         });
       } else {
         // Añadir a favoritos
@@ -121,15 +123,15 @@ export default function AppCard({ app }: AppCardProps) {
         });
         setIsFavorite(true);
         toast({
-          title: "Añadido a favoritos",
-          description: `${app.name} se ha añadido a tus favoritos`,
+          title: t('common.favorites.addedToFavorites'),
+          description: t('common.favorites.addMessage', { name: app.name }),
         });
       }
     } catch (error) {
       console.error("Error al gestionar favorito:", error);
       toast({
-        title: "Error",
-        description: "No se pudo completar la operación. Inténtalo de nuevo más tarde.",
+        title: t('common.favorites.error'),
+        description: t('common.favorites.errorMessage'),
         variant: "destructive",
       });
     } finally {
@@ -147,7 +149,7 @@ export default function AppCard({ app }: AppCardProps) {
         } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
         onClick={toggleFavorite}
         disabled={loading}
-        aria-label={isFavorite ? "Eliminar de favoritos" : "Añadir a favoritos"}
+        aria-label={isFavorite ? t('common.favorites.removeFromFavorites') : t('common.favorites.addToFavorites')}
       >
         <Star className={`h-4 w-4 ${isFavorite ? 'fill-yellow-500' : ''}`} />
       </button>

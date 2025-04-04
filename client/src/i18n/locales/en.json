@@ -42,7 +42,15 @@
     "recentlyAccessed": "Recently Accessed",
     "favorites": "Favorites",
     "popularApps": "Popular Apps",
-    "allCategories": "All Categories"
+    "allCategories": "All Categories",
+    "subtitle": "Explore and manage all your applications",
+    "noAppsConfigured": "No applications configured yet. An administrator must add them.",
+    "adjustSearchTerms": "Try adjusting the search terms",
+    "noAppsAvailable": "No applications available",
+    "adminMustConfigure": "An administrator must configure the applications first",
+    "contactAdmin": "You can contact the administrator to request your favorite applications to be added.",
+    "viewAll": "View all",
+    "viewCategory": "View category"
   },
   "admin": {
     "title": "Admin Panel",
@@ -94,6 +102,12 @@
       "appDescriptionPlaceholder": "Brief description of the application"
     }
   },
+  "notFound": {
+    "title": "404 Page Not Found",
+    "description": "The page you are looking for does not exist.",
+    "suggestionRouteMissing": "Did you forget to add the page to the router?",
+    "backToHome": "Back to Home"
+  },
   "common": {
     "loading": "Loading data...",
     "cancel": "Cancel",
@@ -109,7 +123,20 @@
     "configSaved": "The settings have been saved successfully",
     "configError": "The settings could not be saved. Please try again later.",
     "required": "* Required field",
-    "user": "User"
+    "user": "User",
+    "information": "Information",
+    "favorites": {
+      "loginRequired": "Login required",
+      "loginMessage": "You must be logged in to save favorites",
+      "addedToFavorites": "Added to favorites",
+      "addMessage": "{name} has been added to your favorites",
+      "removedFromFavorites": "Removed from favorites",
+      "removeMessage": "{name} has been removed from your favorites",
+      "error": "Error managing favorite",
+      "errorMessage": "The operation could not be completed. Please try again later.",
+      "addToFavorites": "Add to favorites",
+      "removeFromFavorites": "Remove from favorites"
+    }
   },
   "search": {
     "placeholder": "Search applications...",
@@ -126,5 +153,28 @@
       "en": "English",
       "es": "Spanish"
     }
+  },
+  "errors": {
+    "authFailed": "Authentication error",
+    "emailRequired": "Email address is required",
+    "validEmail": "Enter a valid email address",
+    "passwordRequired": "Password is required",
+    "passwordLength": "Password must be at least 6 characters",
+    "confirmPasswordMatch": "Passwords do not match",
+    "loginFailed": "Could not log in. Check your credentials.",
+    "registrationFailed": "Registration could not be completed. Try again.",
+    "anonymousLoginFailed": "Could not log in anonymously.",
+    "connectionError": "Connection error",
+    "firebaseConnection": "Could not connect to Firebase. Check your internet connection.",
+    "firebaseConnectionRetry": "No connection to Firebase. Check your internet connection and try again.",
+    "notAuthenticated": "Not authenticated",
+    "loginRequired": "You need to log in to access all features.",
+    "notLoggedInLimited": "You are not logged in. Some features will be limited until you log in.",
+    "permissionError": "Permission error",
+    "readPermissionDenied": "You don't have permission to read data from Firestore.",
+    "categoryReadPermission": "You don't have permission to read categories. Verify that you are authenticated.",
+    "permissionContactAdmin": "Permission error: You don't have access to read data. Contact the administrator.",
+    "dataLoadError": "Error loading data",
+    "appLoadError": "Could not load applications. Please try again later."
   }
 }

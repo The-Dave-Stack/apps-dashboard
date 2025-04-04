@@ -42,7 +42,15 @@
     "recentlyAccessed": "Accedidos recientemente",
     "favorites": "Favoritos",
     "popularApps": "Aplicaciones populares",
-    "allCategories": "Todas las categorías"
+    "allCategories": "Todas las categorías",
+    "subtitle": "Explora y gestiona todas tus aplicaciones",
+    "noAppsConfigured": "No hay aplicaciones configuradas todavía. Un administrador debe agregarlas.",
+    "adjustSearchTerms": "Intenta ajustar los términos de búsqueda",
+    "noAppsAvailable": "No hay aplicaciones disponibles",
+    "adminMustConfigure": "Un administrador debe configurar las aplicaciones primero",
+    "contactAdmin": "Puedes contactar con el administrador para solicitar que se agreguen tus aplicaciones favoritas.",
+    "viewAll": "Ver todos",
+    "viewCategory": "Ver categoría"
   },
   "admin": {
     "title": "Panel de Administración",
@@ -94,6 +102,12 @@
       "appDescriptionPlaceholder": "Breve descripción de la aplicación"
     }
   },
+  "notFound": {
+    "title": "404 Página No Encontrada",
+    "description": "La página que buscas no existe.",
+    "suggestionRouteMissing": "¿Olvidaste añadir la página al enrutador?",
+    "backToHome": "Volver al Inicio"
+  },
   "common": {
     "loading": "Cargando datos...",
     "cancel": "Cancelar",
@@ -109,7 +123,20 @@
     "configSaved": "La configuración se ha guardado correctamente",
     "configError": "No se pudo guardar la configuración. Inténtalo de nuevo más tarde.",
     "required": "* Campo requerido",
-    "user": "Usuario"
+    "user": "Usuario",
+    "information": "Información",
+    "favorites": {
+      "loginRequired": "Inicio de sesión requerido",
+      "loginMessage": "Debes iniciar sesión para guardar favoritos",
+      "addedToFavorites": "Añadido a favoritos",
+      "addMessage": "{name} se ha añadido a tus favoritos",
+      "removedFromFavorites": "Eliminado de favoritos",
+      "removeMessage": "{name} se ha eliminado de tus favoritos",
+      "error": "Error al gestionar favorito",
+      "errorMessage": "No se pudo completar la operación. Inténtalo de nuevo más tarde.",
+      "addToFavorites": "Añadir a favoritos",
+      "removeFromFavorites": "Eliminar de favoritos"
+    }
   },
   "search": {
     "placeholder": "Buscar aplicaciones...",
@@ -126,5 +153,28 @@
       "en": "Inglés",
       "es": "Español"
     }
+  },
+  "errors": {
+    "authFailed": "Error de autenticación",
+    "emailRequired": "Se requiere dirección de correo electrónico",
+    "validEmail": "Introduce una dirección de correo electrónico válida",
+    "passwordRequired": "Se requiere contraseña",
+    "passwordLength": "La contraseña debe tener al menos 6 caracteres",
+    "confirmPasswordMatch": "Las contraseñas no coinciden",
+    "loginFailed": "No se pudo iniciar sesión. Verifica tus credenciales.",
+    "registrationFailed": "No se pudo completar el registro. Intenta de nuevo.",
+    "anonymousLoginFailed": "No se pudo iniciar sesión de forma anónima.",
+    "connectionError": "Error de conexión",
+    "firebaseConnection": "No se pudo conectar con Firebase. Verifica tu conexión a internet.",
+    "firebaseConnectionRetry": "No hay conexión con Firebase. Verifica tu conexión a internet y vuelve a intentarlo.",
+    "notAuthenticated": "No autenticado",
+    "loginRequired": "Es necesario iniciar sesión para acceder a todas las funcionalidades.",
+    "notLoggedInLimited": "No has iniciado sesión. Algunas funciones estarán limitadas hasta que inicies sesión.",
+    "permissionError": "Error de permisos",
+    "readPermissionDenied": "No tienes permisos para leer datos en Firestore.",
+    "categoryReadPermission": "No tienes permisos para leer las categorías. Verifica que estés autenticado.",
+    "permissionContactAdmin": "Error de permisos: No tienes acceso para leer datos. Contacta al administrador.",
+    "dataLoadError": "Error al cargar datos",
+    "appLoadError": "No se pudieron cargar las aplicaciones. Por favor, intente más tarde."
   }
 }
