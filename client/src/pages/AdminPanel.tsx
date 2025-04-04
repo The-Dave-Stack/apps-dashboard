@@ -714,8 +714,8 @@ export default function AdminPanel() {
       {/* Admin Panel Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-primary-600">Panel de Administración</h1>
-          <p className="text-neutral-500 mt-1">Gestiona las categorías y aplicaciones del sistema</p>
+          <h1 className="text-2xl font-bold text-primary">Panel de Administración</h1>
+          <p className="text-muted-foreground mt-1">Gestiona las categorías y aplicaciones del sistema</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={handleAddApp}>
@@ -877,15 +877,15 @@ service cloud.firestore {
       {loading ? (
         <div className="flex justify-center items-center h-full">
           <Loader className="h-8 w-8 animate-spin text-primary-600" />
-          <span className="ml-2 text-neutral-600">Cargando datos...</span>
+          <span className="ml-2 text-muted-foreground">Cargando datos...</span>
         </div>
       ) : (
         <div className="space-y-8">
           {categories.length > 0 ? (
             categories.map(category => (
-              <div key={category.id} className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
-                <div className="p-4 bg-neutral-50 border-b border-neutral-200 flex justify-between items-center">
-                  <h2 className="text-lg font-medium text-neutral-800">{category.name}</h2>
+              <div key={category.id} className="bg-card rounded-lg border border-border overflow-hidden">
+                <div className="p-4 bg-muted border-b border-border flex justify-between items-center">
+                  <h2 className="text-lg font-medium text-card-foreground">{category.name}</h2>
                   <div className="flex gap-2">
                     <Button 
                       variant="ghost" 
@@ -909,8 +909,8 @@ service cloud.firestore {
                   {category.apps.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {category.apps.map(app => (
-                        <div key={app.id} className="flex border rounded-lg overflow-hidden">
-                          <div className="w-16 h-16 bg-neutral-100 flex items-center justify-center p-2">
+                        <div key={app.id} className="flex border border-border rounded-lg overflow-hidden">
+                          <div className="w-16 h-16 bg-muted flex items-center justify-center p-2">
                             <img 
                               src={app.icon || DEFAULT_ICON} 
                               alt={app.name} 
@@ -920,7 +920,7 @@ service cloud.firestore {
                           </div>
                           <div className="flex-1 p-3">
                             <div className="flex justify-between">
-                              <h3 className="font-medium text-neutral-800">{app.name}</h3>
+                              <h3 className="font-medium text-card-foreground">{app.name}</h3>
                               <div className="flex gap-1">
                                 <Button 
                                   variant="ghost" 
@@ -940,13 +940,13 @@ service cloud.firestore {
                                 </Button>
                               </div>
                             </div>
-                            <p className="text-xs text-neutral-500 truncate">{app.url}</p>
-                            <p className="text-xs text-neutral-600 mt-1 line-clamp-1">{app.description}</p>
+                            <p className="text-xs text-muted-foreground truncate">{app.url}</p>
+                            <p className="text-xs text-muted-foreground/80 mt-1 line-clamp-1">{app.description}</p>
                           </div>
                         </div>
                       ))}
                       <div 
-                        className="border border-dashed rounded-lg p-4 flex flex-col items-center justify-center text-neutral-500 cursor-pointer hover:bg-neutral-50 transition-colors"
+                        className="border border-dashed border-border rounded-lg p-4 flex flex-col items-center justify-center text-muted-foreground cursor-pointer hover:bg-muted transition-colors"
                         onClick={() => {
                           setSelectedCategoryId(category.id);
                           setShowNewAppDialog(true);
@@ -958,7 +958,7 @@ service cloud.firestore {
                     </div>
                   ) : (
                     <div className="text-center py-8">
-                      <p className="text-neutral-500 mb-4">No hay aplicaciones en esta categoría</p>
+                      <p className="text-muted-foreground mb-4">No hay aplicaciones en esta categoría</p>
                       <Button 
                         variant="outline"
                         onClick={() => {
@@ -976,11 +976,11 @@ service cloud.firestore {
             ))
           ) : (
             <div className="text-center py-12">
-              <div className="mx-auto w-16 h-16 mb-4 text-neutral-300">
+              <div className="mx-auto w-16 h-16 mb-4 text-muted-foreground/60">
                 <AlertTriangle className="w-full h-full" />
               </div>
-              <h3 className="text-lg font-medium text-neutral-700">No hay categorías</h3>
-              <p className="text-neutral-500 mt-2">Crea categorías para organizar tus aplicaciones</p>
+              <h3 className="text-lg font-medium text-foreground">No hay categorías</h3>
+              <p className="text-muted-foreground mt-2">Crea categorías para organizar tus aplicaciones</p>
               <Button 
                 className="mt-6"
                 onClick={() => setShowNewCategoryDialog(true)}
@@ -1108,7 +1108,7 @@ service cloud.firestore {
               <Label htmlFor="app-category">Categoría</Label>
               <select 
                 id="app-category"
-                className="flex h-10 w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 value={selectedCategoryId || ""}
                 onChange={(e) => setSelectedCategoryId(e.target.value)}
               >
@@ -1137,7 +1137,7 @@ service cloud.firestore {
                 value={newAppData.url}
                 onChange={(e) => setNewAppData({...newAppData, url: e.target.value})}
               />
-              <p className="text-xs text-neutral-500">Si no se proporciona un icono, intentaremos obtenerlo automáticamente desde la URL.</p>
+              <p className="text-xs text-muted-foreground">Si no se proporciona un icono, intentaremos obtenerlo automáticamente desde la URL.</p>
             </div>
             
             <div className="space-y-2">
@@ -1218,7 +1218,7 @@ service cloud.firestore {
                 value={newAppData.icon}
                 onChange={(e) => setNewAppData({...newAppData, icon: e.target.value})}
               />
-              <p className="text-xs text-neutral-500">Si se deja en blanco, intentaremos obtener el icono automáticamente desde la URL.</p>
+              <p className="text-xs text-muted-foreground">Si se deja en blanco, intentaremos obtener el icono automáticamente desde la URL.</p>
             </div>
             
             <div className="space-y-2">
