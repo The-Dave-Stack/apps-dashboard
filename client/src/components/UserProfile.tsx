@@ -79,11 +79,11 @@ export default function UserProfile() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="outline-none">
-        <div className="h-9 w-9 rounded-full bg-neutral-200 overflow-hidden border border-neutral-300 hover:border-primary-500 transition-colors">
+        <div className="h-9 w-9 rounded-full bg-muted overflow-hidden border border-border hover:border-primary transition-colors">
           {displayUser.photoURL ? (
             <img src={displayUser.photoURL} alt="Avatar de usuario" className="h-full w-full object-cover" />
           ) : (
-            <div className="h-full w-full flex items-center justify-center bg-primary-100 text-primary-600 font-medium">
+            <div className="h-full w-full flex items-center justify-center bg-primary/10 text-primary font-medium">
               {displayUser.email ? displayUser.email[0].toUpperCase() : "U"}
             </div>
           )}
@@ -95,13 +95,13 @@ export default function UserProfile() {
             <div className="flex items-center justify-between">
               <span className="font-semibold">{displayUser.displayName || "Usuario"}</span>
               {userRole === "admin" && (
-                <Badge variant="outline" className="ml-2 bg-primary-50 text-primary-700 border-primary-200">
+                <Badge variant="outline" className="ml-2 bg-primary/10 text-primary border-primary/20">
                   <ShieldAlert className="h-3 w-3 mr-1" />
                   Administrador
                 </Badge>
               )}
             </div>
-            <span className="text-xs text-neutral-500 truncate">{displayUser.email}</span>
+            <span className="text-xs text-muted-foreground truncate">{displayUser.email}</span>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -120,7 +120,7 @@ export default function UserProfile() {
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-500">
+        <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
           <LogOut className="mr-2 h-4 w-4" />
           <span>Cerrar sesión</span>
         </DropdownMenuItem>

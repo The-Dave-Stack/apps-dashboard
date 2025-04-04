@@ -23,7 +23,7 @@ export default function Topbar({ toggleMobileMenu, showSearch = true }: TopbarPr
   };
 
   return (
-    <header className="bg-white border-b border-neutral-200 sticky top-0 z-10">
+    <header className="bg-card border-b border-border sticky top-0 z-10">
       <div className="container mx-auto py-3 px-4">
         <div className="flex items-center justify-between">
           {/* Left side - Mobile menu toggle and logo */}
@@ -36,7 +36,7 @@ export default function Topbar({ toggleMobileMenu, showSearch = true }: TopbarPr
             >
               <Menu className="h-5 w-5" />
             </Button>
-            <h1 className="text-xl font-bold text-primary-600 md:hidden">AppHub</h1>
+            <h1 className="text-xl font-bold text-primary md:hidden">AppHub</h1>
           </div>
 
           {/* Center - Search bar */}
@@ -51,7 +51,7 @@ export default function Topbar({ toggleMobileMenu, showSearch = true }: TopbarPr
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
-                  <Search className="h-4 w-4 text-neutral-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                  <Search className="h-4 w-4 text-muted-foreground absolute left-3 top-1/2 transform -translate-y-1/2" />
                 </div>
               </form>
             </div>
@@ -68,11 +68,11 @@ export default function Topbar({ toggleMobileMenu, showSearch = true }: TopbarPr
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <Search className="h-4 w-4 text-neutral-400 absolute left-2 top-1/2 transform -translate-y-1/2" />
+                <Search className="h-4 w-4 text-muted-foreground absolute left-2 top-1/2 transform -translate-y-1/2" />
               </div>
             )}
             
-            <Button variant="ghost" size="icon" className="text-neutral-500 h-9 w-9 relative">
+            <Button variant="ghost" size="icon" className="h-9 w-9 relative">
               <Bell className="h-5 w-5" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </Button>

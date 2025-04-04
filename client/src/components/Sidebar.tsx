@@ -40,9 +40,9 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="hidden md:flex md:flex-col md:w-64 bg-white border-r border-neutral-200">
-      <div className="p-4 border-b border-neutral-200">
-        <h1 className="text-2xl font-bold text-primary-600">AppHub</h1>
+    <div className="hidden md:flex md:flex-col md:w-64 bg-card border-r border-border">
+      <div className="p-4 border-b border-border">
+        <h1 className="text-2xl font-bold text-primary">AppHub</h1>
       </div>
       
       <nav className="flex-1 overflow-y-auto p-4">
@@ -60,7 +60,7 @@ export default function Sidebar() {
           <li>
             <Button 
               variant={location === "/search" ? "secondary" : "ghost"} 
-              className="w-full justify-start text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
+              className="w-full justify-start"
               onClick={() => setLocation("/search")}
             >
               <Search className="mr-3 h-5 w-5" />
@@ -70,7 +70,7 @@ export default function Sidebar() {
           <li>
             <Button 
               variant={location === "/favorites" ? "secondary" : "ghost"} 
-              className="w-full justify-start text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
+              className="w-full justify-start"
               onClick={() => setLocation("/favorites")}
             >
               <Star className="mr-3 h-5 w-5" />
@@ -80,7 +80,7 @@ export default function Sidebar() {
           <li>
             <Button 
               variant={location === "/recent" ? "secondary" : "ghost"} 
-              className="w-full justify-start text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
+              className="w-full justify-start"
               onClick={() => setLocation("/recent")}
             >
               <Clock className="mr-3 h-5 w-5" />
@@ -88,10 +88,10 @@ export default function Sidebar() {
             </Button>
           </li>
           
-          <li className="pt-6 mt-6 border-t border-neutral-200">
+          <li className="pt-6 mt-6 border-t border-border">
             <Button 
               variant={location === "/admin" ? "secondary" : "ghost"} 
-              className="w-full justify-start text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
+              className="w-full justify-start"
               onClick={navigateToAdmin}
             >
               <ShieldAlert className="mr-3 h-5 w-5" />
@@ -102,7 +102,7 @@ export default function Sidebar() {
           <li>
             <Button 
               variant={location === "/settings" ? "secondary" : "ghost"} 
-              className="w-full justify-start text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
+              className="w-full justify-start"
               onClick={() => setLocation("/settings")}
             >
               <Settings className="mr-3 h-5 w-5" />
@@ -112,25 +112,25 @@ export default function Sidebar() {
         </ul>
       </nav>
       
-      <div className="p-4 border-t border-neutral-200">
+      <div className="p-4 border-t border-border">
         <div className="flex items-center">
-          <div className="h-8 w-8 rounded-full bg-neutral-300 overflow-hidden">
+          <div className="h-8 w-8 rounded-full bg-muted overflow-hidden">
             {user?.photoURL ? (
               <img src={user.photoURL} alt="User avatar" className="h-full w-full object-cover" />
             ) : (
-              <div className="h-full w-full flex items-center justify-center bg-primary-100 text-primary-600">
+              <div className="h-full w-full flex items-center justify-center bg-primary/10 text-primary">
                 {user?.email ? user.email[0].toUpperCase() : "U"}
               </div>
             )}
           </div>
           <div className="ml-3">
-            <p className="text-sm font-medium text-neutral-800">
+            <p className="text-sm font-medium text-card-foreground">
               {user?.displayName || user?.email || "Usuario"}
             </p>
             <Button 
               variant="link" 
               size="sm" 
-              className="text-xs text-neutral-500 hover:text-primary-600 p-0 h-auto"
+              className="text-xs text-muted-foreground hover:text-primary p-0 h-auto"
               onClick={handleLogout}
             >
               <LogOut className="h-3 w-3 mr-1" />

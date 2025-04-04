@@ -15,11 +15,11 @@ export default function MobileNav() {
   const isAdmin = true;
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 z-10">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-10">
       <div className="flex justify-around py-2">
         <button 
           className={`flex flex-col items-center justify-center p-2 ${
-            location === "/" ? "text-primary-600" : "text-neutral-500"
+            location === "/" ? "text-primary" : "text-muted-foreground"
           }`}
           onClick={() => setLocation("/")}
         >
@@ -29,7 +29,7 @@ export default function MobileNav() {
         
         <button 
           className={`flex flex-col items-center justify-center p-2 ${
-            location === "/search" ? "text-primary-600" : "text-neutral-500"
+            location === "/search" ? "text-primary" : "text-muted-foreground"
           }`}
           onClick={() => setLocation("/search")}
         >
@@ -39,7 +39,7 @@ export default function MobileNav() {
         
         <button 
           className={`flex flex-col items-center justify-center p-2 ${
-            location === "/favorites" ? "text-primary-600" : "text-neutral-500"
+            location === "/favorites" ? "text-primary" : "text-muted-foreground"
           }`}
           onClick={() => setLocation("/favorites")}
         >
@@ -49,7 +49,7 @@ export default function MobileNav() {
         
         <button 
           className={`flex flex-col items-center justify-center p-2 ${
-            location === "/settings" ? "text-primary-600" : "text-neutral-500"
+            location === "/settings" ? "text-primary" : "text-muted-foreground"
           }`}
           onClick={() => setLocation("/settings")}
         >
@@ -60,7 +60,7 @@ export default function MobileNav() {
         {isAdmin && (
           <button 
             className={`flex flex-col items-center justify-center p-2 ${
-              location === "/admin" ? "text-primary-600" : "text-neutral-500"
+              location === "/admin" ? "text-primary" : "text-muted-foreground"
             }`}
             onClick={() => setLocation("/admin")}
           >
