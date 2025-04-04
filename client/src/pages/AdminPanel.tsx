@@ -777,10 +777,10 @@ export default function AdminPanel() {
               ) : (
                 <AlertCircle className="h-5 w-5 text-red-500 dark:text-red-400 mr-2" />
               )}
-              <h3 className="font-medium text-foreground">Permisos de Lectura</h3>
+              <h3 className="font-medium text-foreground">{t('admin.readPermissions')}</h3>
             </div>
             <p className={`text-sm mt-1 ${firebaseStatus.read ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
-              {firebaseStatus.read ? 'Disponible' : 'No disponible'}
+              {firebaseStatus.read ? t('admin.available') : t('admin.notAvailable')}
             </p>
           </div>
           
@@ -791,10 +791,10 @@ export default function AdminPanel() {
               ) : (
                 <AlertCircle className="h-5 w-5 text-red-500 dark:text-red-400 mr-2" />
               )}
-              <h3 className="font-medium text-foreground">Permisos de Escritura</h3>
+              <h3 className="font-medium text-foreground">{t('admin.writePermissions')}</h3>
             </div>
             <p className={`text-sm mt-1 ${firebaseStatus.write ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
-              {firebaseStatus.write ? 'Disponible' : 'No disponible'}
+              {firebaseStatus.write ? t('admin.available') : t('admin.notAvailable')}
             </p>
           </div>
         </div>
@@ -802,7 +802,7 @@ export default function AdminPanel() {
         {firebaseStatus.error && (
           <Alert variant="destructive" className="mb-4">
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Error en Firebase</AlertTitle>
+            <AlertTitle>{t('admin.firebaseError')}</AlertTitle>
             <AlertDescription>
               {firebaseStatus.error}
             </AlertDescription>
@@ -812,10 +812,9 @@ export default function AdminPanel() {
         {!firebaseStatus.write && (
           <Alert className="mb-4 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-700 text-amber-800 dark:text-amber-400">
             <AlertTriangle className="h-4 w-4 text-amber-800 dark:text-amber-400" />
-            <AlertTitle>Reglas de seguridad Firestore</AlertTitle>
+            <AlertTitle>{t('admin.securityRules')}</AlertTitle>
             <AlertDescription className="dark:text-amber-300">
-              Para permitir escrituras en Firebase Firestore, debes configurar las reglas de seguridad adecuadas en la consola de Firebase. 
-              Las reglas recomendadas para desarrollo (no para producción) son:
+              {t('admin.securityRulesDescription')}
               <pre className="mt-2 p-2 bg-amber-100 dark:bg-amber-900/50 rounded text-xs overflow-x-auto dark:text-amber-200">
                 {`rules_version = '2';
 service cloud.firestore {
@@ -834,7 +833,7 @@ service cloud.firestore {
       {/* Configuración de la aplicación */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold mb-4">Configuración de la Aplicación</h2>
+          <h2 className="text-xl font-semibold mb-4">{t('admin.configHeader')}</h2>
           <Button 
             onClick={async () => {
               try {
@@ -858,15 +857,15 @@ service cloud.firestore {
             className="flex items-center"
           >
             <Save className="mr-2 h-4 w-4" />
-            Guardar Configuración
+            {t('admin.saveConfig')}
           </Button>
         </div>
         
         <div className="bg-card rounded-lg border p-4 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-medium">Mostrar pestaña de registro</h3>
-              <p className="text-sm text-muted-foreground">Habilita o deshabilita la pestaña de registro en la página de autenticación</p>
+              <h3 className="font-medium">{t('admin.showRegisterTab')}</h3>
+              <p className="text-sm text-muted-foreground">{t('admin.showRegisterTabDesc')}</p>
             </div>
             <Switch 
               checked={appConfig.showRegisterTab} 
@@ -879,7 +878,7 @@ service cloud.firestore {
       {loading ? (
         <div className="flex justify-center items-center h-full">
           <Loader className="h-8 w-8 animate-spin text-primary-600" />
-          <span className="ml-2 text-muted-foreground">Cargando datos...</span>
+          <span className="ml-2 text-muted-foreground">{t('admin.loadingData')}</span>
         </div>
       ) : (
         <div className="space-y-8">
@@ -955,12 +954,12 @@ service cloud.firestore {
                         }}
                       >
                         <PlusCircle className="h-8 w-8 mb-2" />
-                        <p>Agregar aplicación a {category.name}</p>
+                        <p>{t('admin.apps.addAppTo', {category: category.name})}</p>
                       </div>
                     </div>
                   ) : (
                     <div className="text-center py-8">
-                      <p className="text-muted-foreground mb-4">No hay aplicaciones en esta categoría</p>
+                      <p className="text-muted-foreground mb-4">{t('admin.categories.noApps')}</p>
                       <Button 
                         variant="outline"
                         onClick={() => {
@@ -969,7 +968,7 @@ service cloud.firestore {
                         }}
                       >
                         <Plus className="h-4 w-4 mr-2" />
-                        Agregar aplicación
+                        {t('admin.apps.addApp')}
                       </Button>
                     </div>
                   )}
@@ -981,14 +980,14 @@ service cloud.firestore {
               <div className="mx-auto w-16 h-16 mb-4 text-muted-foreground/60">
                 <AlertTriangle className="w-full h-full" />
               </div>
-              <h3 className="text-lg font-medium text-foreground">No hay categorías</h3>
-              <p className="text-muted-foreground mt-2">Crea categorías para organizar tus aplicaciones</p>
+              <h3 className="text-lg font-medium text-foreground">{t('admin.noCategories')}</h3>
+              <p className="text-muted-foreground mt-2">{t('admin.createCategoriesHint')}</p>
               <Button 
                 className="mt-6"
                 onClick={() => setShowNewCategoryDialog(true)}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Crear categoría
+                {t('admin.createCategory')}
               </Button>
             </div>
           )}
@@ -1000,17 +999,17 @@ service cloud.firestore {
       <Dialog open={showNewCategoryDialog} onOpenChange={setShowNewCategoryDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nueva Categoría</DialogTitle>
+            <DialogTitle>{t('admin.categories.createCategory')}</DialogTitle>
             <DialogDescription>
-              Crea una nueva categoría para organizar tus aplicaciones.
+              {t('admin.categories.createCategoryPrompt')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="category-name">Nombre de la categoría</Label>
+              <Label htmlFor="category-name">{t('admin.categories.categoryName')}</Label>
               <Input 
                 id="category-name" 
-                placeholder="Ej: Productividad, Diseño, Desarrollo..." 
+                placeholder={t('admin.categories.categoryNamePlaceholder')}
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
               />
@@ -1024,9 +1023,9 @@ service cloud.firestore {
                 setNewCategoryName("");
               }}
             >
-              Cancelar
+              {t('common.cancel')}
             </Button>
-            <Button onClick={handleAddCategory}>Crear</Button>
+            <Button onClick={handleAddCategory}>{t('common.create')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1035,17 +1034,17 @@ service cloud.firestore {
       <Dialog open={showEditCategoryDialog} onOpenChange={setShowEditCategoryDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Editar Categoría</DialogTitle>
+            <DialogTitle>{t('admin.categories.editCategory')}</DialogTitle>
             <DialogDescription>
-              Modifica la información de la categoría.
+              {t('admin.categories.modify')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="edit-category-name">Nombre de la categoría</Label>
+              <Label htmlFor="edit-category-name">{t('admin.categories.categoryName')}</Label>
               <Input 
                 id="edit-category-name" 
-                placeholder="Nombre de la categoría" 
+                placeholder={t('admin.categories.categoryName')}
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
               />
@@ -1060,9 +1059,9 @@ service cloud.firestore {
                 setNewCategoryName("");
               }}
             >
-              Cancelar
+              {t('common.cancel')}
             </Button>
-            <Button onClick={handleUpdateCategory}>Guardar</Button>
+            <Button onClick={handleUpdateCategory}>{t('common.save')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1071,9 +1070,9 @@ service cloud.firestore {
       <Dialog open={showDeleteCategoryDialog} onOpenChange={setShowDeleteCategoryDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Eliminar Categoría</DialogTitle>
+            <DialogTitle>{t('admin.categories.deleteCategory')}</DialogTitle>
             <DialogDescription>
-              ¿Estás seguro de que deseas eliminar esta categoría y todas sus aplicaciones? Esta acción no podrá deshacerse.
+              {t('admin.categories.deleteConfirmation')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -1084,13 +1083,13 @@ service cloud.firestore {
                 setItemToDelete(null);
               }}
             >
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button 
               variant="destructive" 
               onClick={confirmDeleteCategory}
             >
-              Eliminar
+              {t('common.delete')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1100,21 +1099,21 @@ service cloud.firestore {
       <Dialog open={showNewAppDialog} onOpenChange={setShowNewAppDialog}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Nueva Aplicación</DialogTitle>
+            <DialogTitle>{t('admin.apps.newApp')}</DialogTitle>
             <DialogDescription>
-              Agrega una nueva aplicación a tu colección.
+              {t('admin.apps.addAppDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="app-category">Categoría</Label>
+              <Label htmlFor="app-category">{t('admin.apps.selectCategory')}</Label>
               <select 
                 id="app-category"
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 value={selectedCategoryId || ""}
                 onChange={(e) => setSelectedCategoryId(e.target.value)}
               >
-                <option value="" disabled>Selecciona una categoría</option>
+                <option value="" disabled>{t('admin.apps.selectCategory')}</option>
                 {categories.map(cat => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))}
@@ -1122,10 +1121,10 @@ service cloud.firestore {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="app-name">Nombre de la aplicación *</Label>
+              <Label htmlFor="app-name">{t('admin.apps.appName')} *</Label>
               <Input 
                 id="app-name" 
-                placeholder="Ej: Google Drive, Slack, Notion..." 
+                placeholder={t('admin.apps.appNamePlaceholder')} 
                 value={newAppData.name}
                 onChange={(e) => setNewAppData({...newAppData, name: e.target.value})}
               />
@@ -1135,28 +1134,28 @@ service cloud.firestore {
               <Label htmlFor="app-url">URL *</Label>
               <Input 
                 id="app-url" 
-                placeholder="https://ejemplo.com" 
+                placeholder={t('admin.apps.urlPlaceholder')} 
                 value={newAppData.url}
                 onChange={(e) => setNewAppData({...newAppData, url: e.target.value})}
               />
-              <p className="text-xs text-muted-foreground">Si no se proporciona un icono, intentaremos obtenerlo automáticamente desde la URL.</p>
+              <p className="text-xs text-muted-foreground">{t('admin.apps.autoIconInfo')}</p>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="app-icon">URL del icono (opcional)</Label>
+              <Label htmlFor="app-icon">{t('admin.apps.iconUrl')} ({t('common.optional')})</Label>
               <Input 
                 id="app-icon" 
-                placeholder="https://ejemplo.com/icono.png" 
+                placeholder={t('admin.apps.iconUrlPlaceholder')} 
                 value={newAppData.icon}
                 onChange={(e) => setNewAppData({...newAppData, icon: e.target.value})}
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="app-description">Descripción (opcional)</Label>
+              <Label htmlFor="app-description">{t('admin.apps.description')} ({t('common.optional')})</Label>
               <Textarea 
                 id="app-description" 
-                placeholder="Breve descripción de la aplicación" 
+                placeholder={t('admin.apps.descriptionPlaceholder')} 
                 value={newAppData.description}
                 onChange={(e) => setNewAppData({...newAppData, description: e.target.value})}
               />
@@ -1175,9 +1174,9 @@ service cloud.firestore {
                 });
               }}
             >
-              Cancelar
+              {t('common.cancel')}
             </Button>
-            <Button onClick={handleSaveNewApp}>Crear</Button>
+            <Button onClick={handleSaveNewApp}>{t('common.create')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1186,17 +1185,17 @@ service cloud.firestore {
       <Dialog open={showEditAppDialog} onOpenChange={setShowEditAppDialog}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Editar Aplicación</DialogTitle>
+            <DialogTitle>{t('admin.apps.editApp')}</DialogTitle>
             <DialogDescription>
-              Modifica la información de la aplicación.
+              {t('admin.apps.editAppDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="edit-app-name">Nombre de la aplicación *</Label>
+              <Label htmlFor="edit-app-name">{t('admin.apps.appName')} *</Label>
               <Input 
                 id="edit-app-name" 
-                placeholder="Nombre de la aplicación" 
+                placeholder={t('admin.apps.appNamePlaceholder')} 
                 value={newAppData.name}
                 onChange={(e) => setNewAppData({...newAppData, name: e.target.value})}
               />
@@ -1206,28 +1205,28 @@ service cloud.firestore {
               <Label htmlFor="edit-app-url">URL *</Label>
               <Input 
                 id="edit-app-url" 
-                placeholder="https://ejemplo.com" 
+                placeholder={t('admin.apps.urlPlaceholder')} 
                 value={newAppData.url}
                 onChange={(e) => setNewAppData({...newAppData, url: e.target.value})}
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-app-icon">URL del icono</Label>
+              <Label htmlFor="edit-app-icon">{t('admin.apps.iconUrl')}</Label>
               <Input 
                 id="edit-app-icon" 
-                placeholder="https://ejemplo.com/icono.png" 
+                placeholder={t('admin.apps.iconUrlPlaceholder')} 
                 value={newAppData.icon}
                 onChange={(e) => setNewAppData({...newAppData, icon: e.target.value})}
               />
-              <p className="text-xs text-muted-foreground">Si se deja en blanco, intentaremos obtener el icono automáticamente desde la URL.</p>
+              <p className="text-xs text-muted-foreground">{t('admin.apps.autoIconInfo')}</p>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-app-description">Descripción</Label>
+              <Label htmlFor="edit-app-description">{t('admin.apps.description')}</Label>
               <Textarea 
                 id="edit-app-description" 
-                placeholder="Breve descripción de la aplicación" 
+                placeholder={t('admin.apps.descriptionPlaceholder')} 
                 value={newAppData.description}
                 onChange={(e) => setNewAppData({...newAppData, description: e.target.value})}
               />
@@ -1247,9 +1246,9 @@ service cloud.firestore {
                 });
               }}
             >
-              Cancelar
+              {t('common.cancel')}
             </Button>
-            <Button onClick={handleUpdateApp}>Guardar</Button>
+            <Button onClick={handleUpdateApp}>{t('common.save')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1258,9 +1257,9 @@ service cloud.firestore {
       <Dialog open={showDeleteAppDialog} onOpenChange={setShowDeleteAppDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Eliminar Aplicación</DialogTitle>
+            <DialogTitle>{t('admin.apps.deleteApp')}</DialogTitle>
             <DialogDescription>
-              ¿Estás seguro de que deseas eliminar esta aplicación? Esta acción no podrá deshacerse.
+              {t('admin.apps.deleteConfirmation')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -1271,13 +1270,13 @@ service cloud.firestore {
                 setItemToDelete(null);
               }}
             >
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button 
               variant="destructive" 
               onClick={confirmDeleteApp}
             >
-              Eliminar
+              {t('common.delete')}
             </Button>
           </DialogFooter>
         </DialogContent>
