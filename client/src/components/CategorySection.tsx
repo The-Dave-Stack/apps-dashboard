@@ -11,8 +11,8 @@ export default function CategorySection({ category }: CategorySectionProps) {
   return (
     <section>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-neutral-800">{category.name}</h2>
-        <Link href={`/category/${category.id}`} className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center cursor-pointer">
+        <h2 className="text-xl font-semibold text-foreground">{category.name}</h2>
+        <Link href={`/category/${category.id}`} className="text-primary hover:text-primary/90 text-sm font-medium flex items-center cursor-pointer">
           <span>Ver todos</span>
           <ChevronRight className="ml-1 h-4 w-4" />
         </Link>

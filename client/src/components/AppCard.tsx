@@ -138,12 +138,12 @@ export default function AppCard({ app }: AppCardProps) {
   };
 
   return (
-    <Card className="bg-white rounded-lg shadow-sm border border-neutral-200 overflow-hidden hover:shadow-md transition-shadow h-full relative">
+    <Card className="bg-card rounded-lg shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow h-full relative">
       <button 
         className={`absolute top-2 right-2 z-10 p-1.5 rounded-full transition-colors ${
           isFavorite 
-            ? 'bg-yellow-100 text-yellow-500 hover:bg-yellow-200' 
-            : 'bg-neutral-100 text-neutral-400 hover:bg-neutral-200'
+            ? 'bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30' 
+            : 'bg-muted text-muted-foreground hover:bg-muted/80'
         } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
         onClick={toggleFavorite}
         disabled={loading}
@@ -166,8 +166,8 @@ export default function AppCard({ app }: AppCardProps) {
             className="w-16 h-16 mb-3 object-contain"
             onError={(e) => (e.currentTarget.src = DEFAULT_ICON)}
           />
-          <h3 className="font-medium text-neutral-800">{app.name}</h3>
-          <p className="text-xs text-neutral-500 mt-1 flex-grow">{app.description || ""}</p>
+          <h3 className="font-medium text-card-foreground">{app.name}</h3>
+          <p className="text-xs text-muted-foreground mt-1 flex-grow">{app.description || ""}</p>
         </div>
       </a>
     </Card>
