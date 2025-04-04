@@ -1,0 +1,125 @@
+{
+  "app": {
+    "title": "AppHub",
+    "description": "Centralized Link Manager"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "categories": "Categories",
+    "favorites": "Favorites",
+    "recent": "Recent",
+    "search": "Search",
+    "settings": "Settings",
+    "admin": "Admin",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "viewAll": "View all"
+  },
+  "auth": {
+    "welcome": "Welcome to AppHub",
+    "loginTab": "Login",
+    "registerTab": "Register",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "loginButton": "Login",
+    "registerButton": "Register",
+    "loginWithGoogle": "Login with Google",
+    "orDivider": "or",
+    "anonymousLogin": "Login anonymously",
+    "alreadyAccount": "Already have an account?",
+    "noAccount": "Don't have an account?",
+    "loginHere": "Login here",
+    "registerHere": "Register here"
+  },
+  "dashboard": {
+    "welcome": "Welcome",
+    "recentlyAccessed": "Recently Accessed",
+    "favorites": "Favorites",
+    "popularApps": "Popular Apps",
+    "allCategories": "All Categories"
+  },
+  "admin": {
+    "title": "Admin Panel",
+    "statusHeader": "Firebase Status",
+    "firebaseConnection": "Firebase Connection",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "readPermissions": "Read Permissions",
+    "writePermissions": "Write Permissions",
+    "available": "Available",
+    "notAvailable": "Not available",
+    "firebaseError": "Firebase Error",
+    "securityRules": "Firestore Security Rules",
+    "securityRulesDescription": "To allow writes to Firebase Firestore, you need to configure the appropriate security rules in the Firebase console. Recommended rules for development (not for production) are:",
+    "configHeader": "Application Settings",
+    "saveConfig": "Save Settings",
+    "showRegisterTab": "Show register tab",
+    "showRegisterTabDescription": "Enable or disable the registration tab on the authentication page",
+    "categories": {
+      "noCategories": "No categories",
+      "createCategoryPrompt": "Create categories to organize your applications",
+      "createCategory": "Create category",
+      "editCategory": "Edit Category",
+      "deleteCategory": "Delete Category",
+      "deleteConfirmation": "Are you sure you want to delete this category and all its applications? This action cannot be undone.",
+      "categoryName": "Category name",
+      "categoryNamePlaceholder": "E.g.: Productivity, Design, Development...",
+      "modify": "Modify the category information."
+    },
+    "apps": {
+      "noApps": "No applications in this category",
+      "addApp": "Add application",
+      "addAppTo": "Add application to {{category}}",
+      "newApp": "New Application",
+      "addAppDescription": "Add a new application to your collection.",
+      "editApp": "Edit Application",
+      "editAppDescription": "Modify the application information.",
+      "deleteApp": "Delete Application",
+      "deleteConfirmation": "Are you sure you want to delete this application? This action cannot be undone.",
+      "selectCategory": "Select a category",
+      "appName": "Application name",
+      "appNamePlaceholder": "E.g.: Google Drive, Slack, Notion...",
+      "appUrl": "URL",
+      "appUrlPlaceholder": "https://example.com",
+      "appIconNote": "If no icon is provided, we will try to get it automatically from the URL.",
+      "appIcon": "Icon URL (optional)",
+      "appIconPlaceholder": "https://example.com/icon.png",
+      "appDescription": "Description (optional)",
+      "appDescriptionPlaceholder": "Brief description of the application"
+    }
+  },
+  "common": {
+    "loading": "Loading data...",
+    "cancel": "Cancel",
+    "create": "Create",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search...",
+    "noResults": "No results found",
+    "error": "Error",
+    "success": "Success",
+    "updatedConfig": "Settings updated",
+    "configSaved": "The settings have been saved successfully",
+    "configError": "The settings could not be saved. Please try again later.",
+    "required": "* Required field"
+  },
+  "search": {
+    "placeholder": "Search applications...",
+    "placeholderShort": "Search..."
+  },
+  "settings": {
+    "title": "Settings",
+    "theme": "Theme",
+    "language": "Language",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode",
+    "systemMode": "System mode",
+    "languages": {
+      "en": "English",
+      "es": "Spanish"
+    }
+  }
+}

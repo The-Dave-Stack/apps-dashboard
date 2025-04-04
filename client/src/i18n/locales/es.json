@@ -1,0 +1,125 @@
+{
+  "app": {
+    "title": "AppHub",
+    "description": "Gestor de enlaces centralizado"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "categories": "Categorías",
+    "favorites": "Favoritos",
+    "recent": "Recientes",
+    "search": "Buscar",
+    "settings": "Configuración",
+    "admin": "Administración",
+    "login": "Iniciar sesión",
+    "register": "Registrarse",
+    "logout": "Cerrar sesión",
+    "viewAll": "Ver todos"
+  },
+  "auth": {
+    "welcome": "Bienvenido a AppHub",
+    "loginTab": "Iniciar sesión",
+    "registerTab": "Registrarse",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "loginButton": "Iniciar sesión",
+    "registerButton": "Registrarse",
+    "loginWithGoogle": "Iniciar sesión con Google",
+    "orDivider": "o",
+    "anonymousLogin": "Iniciar sesión anónimamente",
+    "alreadyAccount": "¿Ya tienes una cuenta?",
+    "noAccount": "¿No tienes una cuenta?",
+    "loginHere": "Inicia sesión aquí",
+    "registerHere": "Regístrate aquí"
+  },
+  "dashboard": {
+    "welcome": "Bienvenido",
+    "recentlyAccessed": "Accedidos recientemente",
+    "favorites": "Favoritos",
+    "popularApps": "Aplicaciones populares",
+    "allCategories": "Todas las categorías"
+  },
+  "admin": {
+    "title": "Panel de Administración",
+    "statusHeader": "Estado de Firebase",
+    "firebaseConnection": "Conexión a Firebase",
+    "connected": "Conectado",
+    "disconnected": "Desconectado",
+    "readPermissions": "Permisos de Lectura",
+    "writePermissions": "Permisos de Escritura",
+    "available": "Disponible",
+    "notAvailable": "No disponible",
+    "firebaseError": "Error en Firebase",
+    "securityRules": "Reglas de seguridad Firestore",
+    "securityRulesDescription": "Para permitir escrituras en Firebase Firestore, debes configurar las reglas de seguridad adecuadas en la consola de Firebase. Las reglas recomendadas para desarrollo (no para producción) son:",
+    "configHeader": "Configuración de la Aplicación",
+    "saveConfig": "Guardar Configuración",
+    "showRegisterTab": "Mostrar pestaña de registro",
+    "showRegisterTabDescription": "Habilita o deshabilita la pestaña de registro en la página de autenticación",
+    "categories": {
+      "noCategories": "No hay categorías",
+      "createCategoryPrompt": "Crea categorías para organizar tus aplicaciones",
+      "createCategory": "Crear categoría",
+      "editCategory": "Editar Categoría",
+      "deleteCategory": "Eliminar Categoría",
+      "deleteConfirmation": "¿Estás seguro de que deseas eliminar esta categoría y todas sus aplicaciones? Esta acción no podrá deshacerse.",
+      "categoryName": "Nombre de la categoría",
+      "categoryNamePlaceholder": "Ej: Productividad, Diseño, Desarrollo...",
+      "modify": "Modifica la información de la categoría."
+    },
+    "apps": {
+      "noApps": "No hay aplicaciones en esta categoría",
+      "addApp": "Agregar aplicación",
+      "addAppTo": "Agregar aplicación a {{category}}",
+      "newApp": "Nueva Aplicación",
+      "addAppDescription": "Agrega una nueva aplicación a tu colección.",
+      "editApp": "Editar Aplicación",
+      "editAppDescription": "Modifica la información de la aplicación.",
+      "deleteApp": "Eliminar Aplicación",
+      "deleteConfirmation": "¿Estás seguro de que deseas eliminar esta aplicación? Esta acción no podrá deshacerse.",
+      "selectCategory": "Selecciona una categoría",
+      "appName": "Nombre de la aplicación",
+      "appNamePlaceholder": "Ej: Google Drive, Slack, Notion...",
+      "appUrl": "URL",
+      "appUrlPlaceholder": "https://ejemplo.com",
+      "appIconNote": "Si no se proporciona un icono, intentaremos obtenerlo automáticamente desde la URL.",
+      "appIcon": "URL del icono (opcional)",
+      "appIconPlaceholder": "https://ejemplo.com/icono.png",
+      "appDescription": "Descripción (opcional)",
+      "appDescriptionPlaceholder": "Breve descripción de la aplicación"
+    }
+  },
+  "common": {
+    "loading": "Cargando datos...",
+    "cancel": "Cancelar",
+    "create": "Crear",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "search": "Buscar...",
+    "noResults": "No se encontraron resultados",
+    "error": "Error",
+    "success": "Éxito",
+    "updatedConfig": "Configuración actualizada",
+    "configSaved": "La configuración se ha guardado correctamente",
+    "configError": "No se pudo guardar la configuración. Inténtalo de nuevo más tarde.",
+    "required": "* Campo requerido"
+  },
+  "search": {
+    "placeholder": "Buscar aplicaciones...",
+    "placeholderShort": "Buscar..."
+  },
+  "settings": {
+    "title": "Configuración",
+    "theme": "Tema",
+    "language": "Idioma",
+    "darkMode": "Modo oscuro",
+    "lightMode": "Modo claro",
+    "systemMode": "Seguir sistema",
+    "languages": {
+      "en": "Inglés",
+      "es": "Español"
+    }
+  }
+}

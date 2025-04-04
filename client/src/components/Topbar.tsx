@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Menu, Search, Bell } from "lucide-react";
 import UserProfile from "@/components/UserProfile";
+import LanguageSelector from "@/components/LanguageSelector";
+import { useTranslation } from "react-i18next";
 
 interface TopbarProps {
   toggleMobileMenu: () => void;
@@ -14,6 +16,7 @@ export default function Topbar({ toggleMobileMenu, showSearch = true }: TopbarPr
   const [location] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [, setLocation] = useLocation();
+  const { t } = useTranslation();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +39,7 @@ export default function Topbar({ toggleMobileMenu, showSearch = true }: TopbarPr
             >
               <Menu className="h-5 w-5" />
             </Button>
-            <h1 className="text-xl font-bold text-primary md:hidden">AppHub</h1>
+            <h1 className="text-xl font-bold text-primary md:hidden">{t('app.title')}</h1>
           </div>
 
           {/* Center - Search bar */}
@@ -47,7 +50,7 @@ export default function Topbar({ toggleMobileMenu, showSearch = true }: TopbarPr
                   <Input
                     type="text"
                     className="w-full pl-9 h-9"
-                    placeholder="Buscar aplicaciones..."
+                    placeholder={t('search.placeholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -64,7 +67,7 @@ export default function Topbar({ toggleMobileMenu, showSearch = true }: TopbarPr
                 <Input
                   type="text"
                   className="w-32 pl-8 h-9"
-                  placeholder="Buscar..."
+                  placeholder={t('search.placeholderShort')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -76,6 +79,8 @@ export default function Topbar({ toggleMobileMenu, showSearch = true }: TopbarPr
               <Bell className="h-5 w-5" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </Button>
+            
+            <LanguageSelector />
             
             <UserProfile />
           </div>

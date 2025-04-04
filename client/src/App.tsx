@@ -6,6 +6,8 @@ import Layout from "@/components/Layout";
 import { ProtectedRoute } from "@/lib/protected-route";
 import { useEffect } from "react";
 import { initTheme } from "@/lib/theme-service";
+import { LanguageProvider } from "@/i18n/LanguageContext";
+import "@/i18n/index";
 
 // Importamos las páginas
 import Auth from "./pages/Auth";
@@ -122,8 +124,10 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AppRouter />
-      <Toaster />
+      <LanguageProvider>
+        <AppRouter />
+        <Toaster />
+      </LanguageProvider>
     </QueryClientProvider>
   );
 }
