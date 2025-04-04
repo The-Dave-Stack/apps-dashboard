@@ -11,10 +11,12 @@
     "search": "Buscar",
     "settings": "Configuración",
     "admin": "Administración",
+    "admin_short": "Admin",
     "login": "Iniciar sesión",
     "register": "Registrarse",
     "logout": "Cerrar sesión",
-    "viewAll": "Ver todos"
+    "viewAll": "Ver todos",
+    "home": "Inicio"
   },
   "auth": {
     "welcome": "Bienvenido a AppHub",
@@ -31,7 +33,9 @@
     "alreadyAccount": "¿Ya tienes una cuenta?",
     "noAccount": "¿No tienes una cuenta?",
     "loginHere": "Inicia sesión aquí",
-    "registerHere": "Regístrate aquí"
+    "registerHere": "Regístrate aquí",
+    "logoutSuccess": "Has cerrado sesión correctamente",
+    "logoutError": "Error al cerrar sesión"
   },
   "dashboard": {
     "welcome": "Bienvenido",
@@ -104,7 +108,8 @@
     "updatedConfig": "Configuración actualizada",
     "configSaved": "La configuración se ha guardado correctamente",
     "configError": "No se pudo guardar la configuración. Inténtalo de nuevo más tarde.",
-    "required": "* Campo requerido"
+    "required": "* Campo requerido",
+    "user": "Usuario"
   },
   "search": {
     "placeholder": "Buscar aplicaciones...",

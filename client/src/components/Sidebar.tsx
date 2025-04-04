@@ -12,23 +12,25 @@ import {
   Settings,
   LogOut
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function Sidebar() {
   const [location, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const handleLogout = async () => {
     try {
       await logout();
       toast({
-        title: "Sesión cerrada",
-        description: "Has cerrado sesión correctamente",
+        title: t("navigation.logout"),
+        description: t("auth.logoutSuccess"),
       });
       setLocation("/auth");
     } catch (error: any) {
       toast({
-        title: "Error al cerrar sesión",
+        title: t("auth.logoutError"),
         description: error.message,
         variant: "destructive",
       });
@@ -42,7 +44,7 @@ export default function Sidebar() {
   return (
     <div className="hidden md:flex md:flex-col md:w-64 bg-card border-r border-border">
       <div className="p-4 border-b border-border">
-        <h1 className="text-2xl font-bold text-primary">AppHub</h1>
+        <h1 className="text-2xl font-bold text-primary">{t("app.title")}</h1>
       </div>
       
       <nav className="flex-1 overflow-y-auto p-4">
@@ -54,7 +56,7 @@ export default function Sidebar() {
               onClick={() => setLocation("/")}
             >
               <Home className="mr-3 h-5 w-5" />
-              <span>Dashboard</span>
+              <span>{t("navigation.dashboard")}</span>
             </Button>
           </li>
           <li>
@@ -64,7 +66,7 @@ export default function Sidebar() {
               onClick={() => setLocation("/search")}
             >
               <Search className="mr-3 h-5 w-5" />
-              <span>Buscar</span>
+              <span>{t("navigation.search")}</span>
             </Button>
           </li>
           <li>
@@ -74,7 +76,7 @@ export default function Sidebar() {
               onClick={() => setLocation("/favorites")}
             >
               <Star className="mr-3 h-5 w-5" />
-              <span>Favoritos</span>
+              <span>{t("navigation.favorites")}</span>
             </Button>
           </li>
           <li>
@@ -84,7 +86,7 @@ export default function Sidebar() {
               onClick={() => setLocation("/recent")}
             >
               <Clock className="mr-3 h-5 w-5" />
-              <span>Recientes</span>
+              <span>{t("navigation.recent")}</span>
             </Button>
           </li>
           
@@ -95,7 +97,7 @@ export default function Sidebar() {
               onClick={navigateToAdmin}
             >
               <ShieldAlert className="mr-3 h-5 w-5" />
-              <span>Panel de Administración</span>
+              <span>{t("navigation.admin")}</span>
             </Button>
           </li>
           
@@ -106,7 +108,7 @@ export default function Sidebar() {
               onClick={() => setLocation("/settings")}
             >
               <Settings className="mr-3 h-5 w-5" />
-              <span>Configuración</span>
+              <span>{t("navigation.settings")}</span>
             </Button>
           </li>
         </ul>
@@ -125,7 +127,7 @@ export default function Sidebar() {
           </div>
           <div className="ml-3">
             <p className="text-sm font-medium text-card-foreground">
-              {user?.displayName || user?.email || "Usuario"}
+              {user?.displayName || user?.email || t("common.user")}
             </p>
             <Button 
               variant="link" 
@@ -134,7 +136,7 @@ export default function Sidebar() {
               onClick={handleLogout}
             >
               <LogOut className="h-3 w-3 mr-1" />
-              Cerrar sesión
+              {t("navigation.logout")}
             </Button>
           </div>
         </div>

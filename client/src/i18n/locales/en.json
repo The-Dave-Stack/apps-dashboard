@@ -11,10 +11,12 @@
     "search": "Search",
     "settings": "Settings",
     "admin": "Admin",
+    "admin_short": "Admin",
     "login": "Login",
     "register": "Register",
     "logout": "Logout",
-    "viewAll": "View all"
+    "viewAll": "View all",
+    "home": "Home"
   },
   "auth": {
     "welcome": "Welcome to AppHub",
@@ -31,7 +33,9 @@
     "alreadyAccount": "Already have an account?",
     "noAccount": "Don't have an account?",
     "loginHere": "Login here",
-    "registerHere": "Register here"
+    "registerHere": "Register here",
+    "logoutSuccess": "You have successfully logged out",
+    "logoutError": "Error logging out"
   },
   "dashboard": {
     "welcome": "Welcome",
@@ -104,7 +108,8 @@
     "updatedConfig": "Settings updated",
     "configSaved": "The settings have been saved successfully",
     "configError": "The settings could not be saved. Please try again later.",
-    "required": "* Required field"
+    "required": "* Required field",
+    "user": "User"
   },
   "search": {
     "placeholder": "Search applications...",

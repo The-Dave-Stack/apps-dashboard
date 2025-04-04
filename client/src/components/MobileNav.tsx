@@ -8,9 +8,11 @@ import {
   ShieldAlert,
   UserCircle
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function MobileNav() {
   const [location, setLocation] = useLocation();
+  const { t } = useTranslation();
   // Usamos un valor fijo de administrador para desarrollo
   const isAdmin = true;
 
@@ -24,7 +26,7 @@ export default function MobileNav() {
           onClick={() => setLocation("/")}
         >
           <Home className="h-5 w-5" />
-          <span className="text-xs mt-1">Inicio</span>
+          <span className="text-xs mt-1">{t("navigation.home")}</span>
         </button>
         
         <button 
@@ -34,7 +36,7 @@ export default function MobileNav() {
           onClick={() => setLocation("/search")}
         >
           <Search className="h-5 w-5" />
-          <span className="text-xs mt-1">Buscar</span>
+          <span className="text-xs mt-1">{t("navigation.search")}</span>
         </button>
         
         <button 
@@ -44,7 +46,7 @@ export default function MobileNav() {
           onClick={() => setLocation("/favorites")}
         >
           <Star className="h-5 w-5" />
-          <span className="text-xs mt-1">Favoritos</span>
+          <span className="text-xs mt-1">{t("navigation.favorites")}</span>
         </button>
         
         <button 
@@ -54,7 +56,7 @@ export default function MobileNav() {
           onClick={() => setLocation("/settings")}
         >
           <Settings className="h-5 w-5" />
-          <span className="text-xs mt-1">Ajustes</span>
+          <span className="text-xs mt-1">{t("navigation.settings")}</span>
         </button>
         
         {isAdmin && (
@@ -65,7 +67,7 @@ export default function MobileNav() {
             onClick={() => setLocation("/admin")}
           >
             <ShieldAlert className="h-5 w-5" />
-            <span className="text-xs mt-1">Admin</span>
+            <span className="text-xs mt-1">{t("navigation.admin_short")}</span>
           </button>
         )}
       </div>
