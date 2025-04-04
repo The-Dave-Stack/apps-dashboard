@@ -7,6 +7,7 @@ import { getFirebaseInstances } from "@/lib/firebase-init";
 import { collection, getDocs, query, orderBy, limit, doc, Timestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { fetchCategories } from "@/lib/firebase";
+import { useTranslation } from "react-i18next";
 
 // Tipo extendido para incluir información de acceso
 interface RecentApp extends AppData {
@@ -19,6 +20,7 @@ export default function Recent() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { db } = getFirebaseInstances();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const loadRecentApps = async () => {
@@ -70,8 +72,8 @@ export default function Recent() {
       } catch (error) {
         console.error("Error al cargar historial reciente:", error);
         toast({
-          title: "Error",
-          description: "No se pudo cargar tu historial de aplicaciones recientes",
+          title: t('common.error'),
+          description: t('recent.errorLoading'),
           variant: "destructive",
         });
       } finally {
@@ -113,8 +115,8 @@ export default function Recent() {
     <>
       {/* Page Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-primary-600">Recientes</h1>
-        <p className="text-neutral-500 mt-1">Aplicaciones que has visitado recientemente</p>
+        <h1 className="text-2xl font-bold text-primary-600">{t('recent.title')}</h1>
+        <p className="text-neutral-500 mt-1">{t('recent.subtitle')}</p>
       </div>
       
       {/* Recent Content */}
@@ -135,7 +137,7 @@ export default function Recent() {
         <>
           {recentApps.length > 0 ? (
             <>
-              <h2 className="text-lg font-medium text-neutral-800 mb-4">Último día</h2>
+              <h2 className="text-lg font-medium text-neutral-800 mb-4">{t('recent.lastDay')}</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {recentApps.map(app => (
                   <AppCard key={app.id} app={app} />
@@ -147,8 +149,8 @@ export default function Recent() {
               <div className="mx-auto w-16 h-16 mb-4 text-neutral-300">
                 <History className="w-full h-full" />
               </div>
-              <h3 className="text-lg font-medium text-neutral-700">No hay actividad reciente</h3>
-              <p className="text-neutral-500 mt-2">Las aplicaciones que uses aparecerán aquí</p>
+              <h3 className="text-lg font-medium text-neutral-700">{t('recent.noActivity')}</h3>
+              <p className="text-neutral-500 mt-2">{t('recent.appsWillAppear')}</p>
             </div>
           )}
         </>

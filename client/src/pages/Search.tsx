@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import AppCard from "@/components/AppCard";
 import { fetchCategories } from "@/lib/firebase";
 import { AppData } from "@/lib/types";
+import { useTranslation } from "react-i18next";
 
 export default function Search() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -12,6 +13,7 @@ export default function Search() {
   const [allApps, setAllApps] = useState<AppData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const search = useSearch();
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Extraer el parámetro de búsqueda de la URL si existe
@@ -76,8 +78,8 @@ export default function Search() {
     <>
       {/* Title */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-primary-600">Búsqueda</h1>
-        <p className="text-neutral-500 mt-1">Encuentra rápidamente las aplicaciones que necesitas</p>
+        <h1 className="text-2xl font-bold text-primary-600">{t('navigation.search')}</h1>
+        <p className="text-neutral-500 mt-1">{t('search.quickFind')}</p>
       </div>
       
       {/* Search Input */}
@@ -86,7 +88,7 @@ export default function Search() {
           <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 h-5 w-5" />
           <Input
             type="text"
-            placeholder="Buscar aplicaciones por nombre o descripción..."
+            placeholder={t('search.searchByNameDesc')}
             value={searchTerm}
             onChange={handleSearchChange}
             className="pl-10 py-6 text-lg"
@@ -122,8 +124,8 @@ export default function Search() {
               <div className="mx-auto w-16 h-16 mb-4 text-neutral-300">
                 <SearchIcon className="w-full h-full" />
               </div>
-              <h3 className="text-lg font-medium text-neutral-700">No se encontraron resultados</h3>
-              <p className="text-neutral-500 mt-2">Intenta buscar con otros términos</p>
+              <h3 className="text-lg font-medium text-neutral-700">{t('search.noResults')}</h3>
+              <p className="text-neutral-500 mt-2">{t('search.tryOtherTerms')}</p>
             </div>
           )}
         </>

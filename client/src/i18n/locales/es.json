@@ -52,6 +52,22 @@
     "viewAll": "Ver todos",
     "viewCategory": "Ver categoría"
   },
+  "favorites": {
+    "title": "Favoritos",
+    "subtitle": "Accede rápidamente a tus aplicaciones favoritas",
+    "noFavorites": "No tienes favoritos",
+    "addFavoritesMessage": "Agrega aplicaciones a tus favoritos para verlas aquí",
+    "addFavorites": "Agregar favoritos",
+    "errorLoading": "No se pudieron cargar tus aplicaciones favoritas"
+  },
+  "recent": {
+    "title": "Recientes",
+    "subtitle": "Aplicaciones que has visitado recientemente",
+    "noActivity": "No hay actividad reciente",
+    "appsWillAppear": "Las aplicaciones que uses aparecerán aquí", 
+    "lastDay": "Último día",
+    "errorLoading": "No se pudo cargar tu historial de aplicaciones recientes"
+  },
   "admin": {
     "title": "Panel de Administración",
     "statusHeader": "Estado de Firebase",
@@ -140,7 +156,11 @@
   },
   "search": {
     "placeholder": "Buscar aplicaciones...",
-    "placeholderShort": "Buscar..."
+    "placeholderShort": "Buscar...",
+    "quickFind": "Encuentra rápidamente las aplicaciones que necesitas",
+    "noResults": "No se encontraron resultados",
+    "tryOtherTerms": "Intenta buscar con otros términos",
+    "searchByNameDesc": "Buscar aplicaciones por nombre o descripción..."
   },
   "settings": {
     "title": "Configuración",

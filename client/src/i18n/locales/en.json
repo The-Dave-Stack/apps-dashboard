@@ -52,6 +52,22 @@
     "viewAll": "View all",
     "viewCategory": "View category"
   },
+  "favorites": {
+    "title": "Favorites",
+    "subtitle": "Quick access to your favorite applications",
+    "noFavorites": "No favorites",
+    "addFavoritesMessage": "Add applications to your favorites to see them here",
+    "addFavorites": "Add favorites",
+    "errorLoading": "Your favorite applications could not be loaded"
+  },
+  "recent": {
+    "title": "Recent",
+    "subtitle": "Applications you have recently visited",
+    "noActivity": "No recent activity",
+    "appsWillAppear": "The applications you use will appear here", 
+    "lastDay": "Last day",
+    "errorLoading": "Your recent applications history could not be loaded"
+  },
   "admin": {
     "title": "Admin Panel",
     "statusHeader": "Firebase Status",
@@ -140,7 +156,11 @@
   },
   "search": {
     "placeholder": "Search applications...",
-    "placeholderShort": "Search..."
+    "placeholderShort": "Search...",
+    "quickFind": "Quickly find the applications you need",
+    "noResults": "No results found",
+    "tryOtherTerms": "Try searching with other terms",
+    "searchByNameDesc": "Search applications by name or description..."
   },
   "settings": {
     "title": "Settings",

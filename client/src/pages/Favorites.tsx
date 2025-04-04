@@ -8,6 +8,7 @@ import { getFirebaseInstances } from "@/lib/firebase-init";
 import { collection, getDocs, query, where, doc, getDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { fetchCategories } from "@/lib/firebase";
+import { useTranslation } from "react-i18next";
 
 export default function Favorites() {
   const [favorites, setFavorites] = useState<AppData[]>([]);
@@ -15,6 +16,7 @@ export default function Favorites() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { db } = getFirebaseInstances();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const loadFavorites = async () => {
@@ -55,8 +57,8 @@ export default function Favorites() {
       } catch (error) {
         console.error("Error al cargar favoritos:", error);
         toast({
-          title: "Error",
-          description: "No se pudieron cargar tus aplicaciones favoritas",
+          title: t('common.error'),
+          description: t('favorites.errorLoading'),
           variant: "destructive",
         });
       } finally {
@@ -71,8 +73,8 @@ export default function Favorites() {
     <>
       {/* Page Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-primary-600">Favoritos</h1>
-        <p className="text-neutral-500 mt-1">Accede rápidamente a tus aplicaciones favoritas</p>
+        <h1 className="text-2xl font-bold text-primary-600">{t('favorites.title')}</h1>
+        <p className="text-neutral-500 mt-1">{t('favorites.subtitle')}</p>
       </div>
       
       {/* Favorites Content */}
@@ -102,11 +104,11 @@ export default function Favorites() {
               <div className="mx-auto w-16 h-16 mb-4 text-neutral-300">
                 <Star className="w-full h-full" />
               </div>
-              <h3 className="text-lg font-medium text-neutral-700">No tienes favoritos</h3>
-              <p className="text-neutral-500 mt-2">Agrega aplicaciones a tus favoritos para verlas aquí</p>
+              <h3 className="text-lg font-medium text-neutral-700">{t('favorites.noFavorites')}</h3>
+              <p className="text-neutral-500 mt-2">{t('favorites.addFavoritesMessage')}</p>
               <Button className="mt-6">
                 <Plus className="h-4 w-4 mr-2" />
-                Agregar favoritos
+                {t('favorites.addFavorites')}
               </Button>
             </div>
           )}
