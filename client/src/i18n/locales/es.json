@@ -70,6 +70,7 @@
   },
   "admin": {
     "title": "Panel de Administración",
+    "subtitle": "Gestiona categorías y aplicaciones",
     "statusHeader": "Estado de Firebase",
     "firebaseConnection": "Conexión a Firebase",
     "connected": "Conectado",
@@ -85,6 +86,24 @@
     "saveConfig": "Guardar Configuración",
     "showRegisterTab": "Mostrar pestaña de registro",
     "showRegisterTabDescription": "Habilita o deshabilita la pestaña de registro en la página de autenticación",
+    "connectionError": "Error de conexión",
+    "permissionError": "Error de permisos",
+    "successConnection": "Conexión exitosa",
+    "verifyFirebase": "Verificar conexión a Firebase",
+    "connectionSuccess": "La conexión a Firebase está funcionando correctamente.",
+    "categoriesHeader": "Categorías",
+    "appsHeader": "Aplicaciones",
+    "registerTabEnabled": "Se ha habilitado la pestaña de registro",
+    "registerTabDisabled": "Se ha deshabilitado la pestaña de registro",
+    "noFirebaseConnection": "No se pudo conectar a Firebase. Verifica tu conexión a internet.",
+    "noWritePermission": "No se pudo escribir en Firebase. Verifica las reglas de seguridad.",
+    "errorMessage": "Ocurrió un error al verificar la conexión a Firebase.",
+    "errorLoadingCategories": "No se pudieron cargar las categorías. Inténtalo de nuevo más tarde.",
+    "searchCategories": "Buscar categorías...",
+    "searchApps": "Buscar aplicaciones...",
+    "looking4Icon": "Buscando icono...",
+    "autoFetchIcon": "Intentando obtener el icono automáticamente, esto puede tardar unos segundos",
+    "invalidUrl": "La URL no es válida",
     "categories": {
       "noCategories": "No hay categorías",
       "createCategoryPrompt": "Crea categorías para organizar tus aplicaciones",
@@ -94,7 +113,17 @@
       "deleteConfirmation": "¿Estás seguro de que deseas eliminar esta categoría y todas sus aplicaciones? Esta acción no podrá deshacerse.",
       "categoryName": "Nombre de la categoría",
       "categoryNamePlaceholder": "Ej: Productividad, Diseño, Desarrollo...",
-      "modify": "Modifica la información de la categoría."
+      "modify": "Modifica la información de la categoría.",
+      "categoryCreated": "Categoría creada",
+      "categoryCreatedMessage": "Se ha creado la categoría {{name}}",
+      "categoryUpdated": "Categoría actualizada",
+      "categoryUpdatedMessage": "Se ha actualizado la categoría a {{name}}",
+      "categoryDeleted": "Categoría eliminada",
+      "categoryDeletedMessage": "La categoría ha sido eliminada correctamente",
+      "categoryError": "No se pudo crear la categoría. Inténtalo de nuevo más tarde.",
+      "categoryUpdateError": "No se pudo actualizar la categoría. Inténtalo de nuevo más tarde.",
+      "categoryDeleteError": "No se pudo eliminar la categoría. Inténtalo de nuevo más tarde.",
+      "emptyNameError": "El nombre de la categoría no puede estar vacío"
     },
     "apps": {
       "noApps": "No hay aplicaciones en esta categoría",
@@ -115,7 +144,18 @@
       "appIcon": "URL del icono (opcional)",
       "appIconPlaceholder": "https://ejemplo.com/icono.png",
       "appDescription": "Descripción (opcional)",
-      "appDescriptionPlaceholder": "Breve descripción de la aplicación"
+      "appDescriptionPlaceholder": "Breve descripción de la aplicación",
+      "selectCategory": "Debes seleccionar una categoría",
+      "requiredFields": "El nombre y la URL son campos obligatorios",
+      "appCreated": "Aplicación creada",
+      "appCreatedMessage": "Se ha creado la aplicación {{name}}",
+      "appUpdated": "Aplicación actualizada",
+      "appUpdatedMessage": "Se ha actualizado la aplicación {{name}}",
+      "appDeleted": "Aplicación eliminada",
+      "appDeletedMessage": "La aplicación ha sido eliminada correctamente",
+      "appError": "No se pudo crear la aplicación. Inténtalo de nuevo más tarde.",
+      "appUpdateError": "No se pudo actualizar la aplicación. Inténtalo de nuevo más tarde.",
+      "appDeleteError": "No se pudo eliminar la aplicación. Inténtalo de nuevo más tarde."
     }
   },
   "notFound": {
@@ -164,6 +204,7 @@
   },
   "settings": {
     "title": "Configuración",
+    "subtitle": "Gestiona tus preferencias y datos de usuario",
     "theme": "Tema",
     "language": "Idioma",
     "darkMode": "Modo oscuro",
@@ -172,7 +213,27 @@
     "languages": {
       "en": "Inglés",
       "es": "Español"
-    }
+    },
+    "preferences": "Preferencias",
+    "appearance": "Cambia la apariencia de la aplicación",
+    "notifications": "Notificaciones",
+    "notificationsDesc": "Recibe alertas sobre nuevas aplicaciones",
+    "languageSettings": "Selecciona el idioma de la aplicación",
+    "security": "Seguridad",
+    "changePassword": "Cambiar contraseña",
+    "logout": "Cerrar sesión",
+    "profile": "Editar perfil",
+    "sessionClosed": "Sesión cerrada",
+    "sessionClosedSuccess": "Has cerrado sesión correctamente",
+    "logoutError": "No se pudo cerrar la sesión. Intenta de nuevo.",
+    "darkModeEnabled": "Modo oscuro activado",
+    "lightModeEnabled": "Modo claro activado",
+    "settingsSaved": "La configuración se ha guardado correctamente",
+    "notificationsEnabled": "Notificaciones activadas",
+    "notificationsDisabled": "Notificaciones desactivadas",
+    "languageChanged": "Idioma cambiado",
+    "languageChangedTo": "El idioma se ha cambiado a {{language}}",
+    "copyright": "© 2025 AppHub. Todos los derechos reservados."
   },
   "errors": {
     "authFailed": "Error de autenticación",

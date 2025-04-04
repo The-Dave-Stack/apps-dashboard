@@ -70,6 +70,7 @@
   },
   "admin": {
     "title": "Admin Panel",
+    "subtitle": "Manage categories and applications",
     "statusHeader": "Firebase Status",
     "firebaseConnection": "Firebase Connection",
     "connected": "Connected",
@@ -85,6 +86,24 @@
     "saveConfig": "Save Settings",
     "showRegisterTab": "Show register tab",
     "showRegisterTabDescription": "Enable or disable the registration tab on the authentication page",
+    "connectionError": "Connection error",
+    "permissionError": "Permission error",
+    "successConnection": "Successful connection",
+    "verifyFirebase": "Check Firebase connection",
+    "connectionSuccess": "The connection to Firebase is working correctly.",
+    "categoriesHeader": "Categories",
+    "appsHeader": "Applications",
+    "registerTabEnabled": "Registration tab has been enabled",
+    "registerTabDisabled": "Registration tab has been disabled",
+    "noFirebaseConnection": "Unable to connect to Firebase. Check your internet connection.",
+    "noWritePermission": "Could not write to Firebase. Check the security rules.",
+    "errorMessage": "An error occurred while verifying the connection to Firebase.",
+    "errorLoadingCategories": "Categories could not be loaded. Try again later.",
+    "searchCategories": "Search categories...",
+    "searchApps": "Search applications...",
+    "looking4Icon": "Looking for icon...",
+    "autoFetchIcon": "Trying to get the icon automatically, this may take a few seconds",
+    "invalidUrl": "The URL is not valid",
     "categories": {
       "noCategories": "No categories",
       "createCategoryPrompt": "Create categories to organize your applications",
@@ -94,7 +113,17 @@
       "deleteConfirmation": "Are you sure you want to delete this category and all its applications? This action cannot be undone.",
       "categoryName": "Category name",
       "categoryNamePlaceholder": "E.g.: Productivity, Design, Development...",
-      "modify": "Modify the category information."
+      "modify": "Modify the category information.",
+      "categoryCreated": "Category created",
+      "categoryCreatedMessage": "The category {{name}} has been created",
+      "categoryUpdated": "Category updated",
+      "categoryUpdatedMessage": "The category has been updated to {{name}}",
+      "categoryDeleted": "Category deleted",
+      "categoryDeletedMessage": "The category has been successfully deleted",
+      "categoryError": "Could not create the category. Try again later.",
+      "categoryUpdateError": "Could not update the category. Try again later.",
+      "categoryDeleteError": "Could not delete the category. Try again later.",
+      "emptyNameError": "The category name cannot be empty"
     },
     "apps": {
       "noApps": "No applications in this category",
@@ -115,7 +144,18 @@
       "appIcon": "Icon URL (optional)",
       "appIconPlaceholder": "https://example.com/icon.png",
       "appDescription": "Description (optional)",
-      "appDescriptionPlaceholder": "Brief description of the application"
+      "appDescriptionPlaceholder": "Brief description of the application",
+      "selectCategory": "You must select a category",
+      "requiredFields": "Name and URL are required fields",
+      "appCreated": "Application created",
+      "appCreatedMessage": "The application {{name}} has been created",
+      "appUpdated": "Application updated",
+      "appUpdatedMessage": "The application {{name}} has been updated",
+      "appDeleted": "Application deleted",
+      "appDeletedMessage": "The application has been successfully deleted",
+      "appError": "Could not create the application. Try again later.",
+      "appUpdateError": "Could not update the application. Try again later.",
+      "appDeleteError": "Could not delete the application. Try again later."
     }
   },
   "notFound": {
@@ -164,6 +204,7 @@
   },
   "settings": {
     "title": "Settings",
+    "subtitle": "Manage your preferences and user data",
     "theme": "Theme",
     "language": "Language",
     "darkMode": "Dark mode",
@@ -172,7 +213,27 @@
     "languages": {
       "en": "English",
       "es": "Spanish"
-    }
+    },
+    "preferences": "Preferences",
+    "appearance": "Change the appearance of the application",
+    "notifications": "Notifications",
+    "notificationsDesc": "Receive alerts about new applications",
+    "languageSettings": "Select the language of the application",
+    "security": "Security",
+    "changePassword": "Change password",
+    "logout": "Log out",
+    "profile": "Edit profile",
+    "sessionClosed": "Session closed",
+    "sessionClosedSuccess": "You have successfully logged out",
+    "logoutError": "Could not log out. Try again.",
+    "darkModeEnabled": "Dark mode enabled",
+    "lightModeEnabled": "Light mode enabled",
+    "settingsSaved": "Settings have been saved successfully",
+    "notificationsEnabled": "Notifications enabled",
+    "notificationsDisabled": "Notifications disabled",
+    "languageChanged": "Language changed",
+    "languageChangedTo": "Language has been changed to {{language}}",
+    "copyright": "© 2025 AppHub. All rights reserved."
   },
   "errors": {
     "authFailed": "Authentication error",

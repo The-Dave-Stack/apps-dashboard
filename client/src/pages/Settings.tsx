@@ -8,11 +8,13 @@ import { useToast } from "@/hooks/use-toast";
 import { logout } from "@/lib/auth";
 import { useLocation } from "wouter";
 import { getTheme, setTheme, toggleTheme, type Theme } from "@/lib/theme-service";
+import { useTranslation } from "react-i18next";
 
 export default function Settings() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
+  const { t, i18n } = useTranslation();
   
   // Estados para las configuraciones
   const [darkMode, setDarkMode] = useState<boolean>(false);
@@ -41,15 +43,15 @@ export default function Settings() {
     try {
       await logout();
       toast({
-        title: "Sesión cerrada",
-        description: "Has cerrado sesión correctamente",
+        title: t('settings.sessionClosed'),
+        description: t('settings.sessionClosedSuccess'),
       });
       setLocation("/");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
       toast({
-        title: "Error",
-        description: "No se pudo cerrar la sesión. Intenta de nuevo.",
+        title: t('common.error'),
+        description: t('settings.logoutError'),
         variant: "destructive",
       });
     }
@@ -61,33 +63,39 @@ export default function Settings() {
     setDarkMode(newDarkMode);
     setTheme(newDarkMode ? 'dark' : 'light');
     toast({
-      title: newDarkMode ? "Modo oscuro activado" : "Modo claro activado",
-      description: "La configuración se ha guardado correctamente"
+      title: newDarkMode ? t('settings.darkModeEnabled') : t('settings.lightModeEnabled'),
+      description: t('settings.settingsSaved')
     });
   };
   
   const handleNotificationsChange = () => {
     setNotifications(!notifications);
     toast({
-      title: !notifications ? "Notificaciones activadas" : "Notificaciones desactivadas",
-      description: "La configuración se ha guardado correctamente"
+      title: !notifications ? t('settings.notificationsEnabled') : t('settings.notificationsDisabled'),
+      description: t('settings.settingsSaved')
     });
   };
   
   const handleLanguageChange = (lang: string) => {
     setLanguage(lang);
+    i18n.changeLanguage(lang);
     toast({
-      title: "Idioma cambiado",
-      description: `El idioma se ha cambiado a ${lang === 'es' ? 'Español' : 'English'}`
+      title: t('settings.languageChanged'),
+      description: t('settings.languageChangedTo', { language: lang === 'es' ? t('settings.languages.es') : t('settings.languages.en') })
     });
   };
+
+  // Inicializar el idioma correcto una vez
+  useEffect(() => {
+    setLanguage(i18n.language);
+  }, [i18n.language]);
 
   return (
     <>
       {/* Title */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-primary">Configuración</h1>
-        <p className="text-muted-foreground mt-1">Gestiona tus preferencias y datos de usuario</p>
+        <h1 className="text-2xl font-bold text-primary">{t('settings.title')}</h1>
+        <p className="text-muted-foreground mt-1">{t('settings.subtitle')}</p>
       </div>
       
       {/* Settings Content */}
@@ -98,7 +106,7 @@ export default function Settings() {
               {effectiveUser?.photoURL ? (
                 <img 
                   src={effectiveUser.photoURL} 
-                  alt="Foto de perfil" 
+                  alt={t('common.user')} 
                   className="w-full h-full object-cover" 
                 />
               ) : (
@@ -111,13 +119,13 @@ export default function Settings() {
             </div>
             <div className="text-center sm:text-left">
               <h2 className="text-xl font-semibold text-card-foreground">
-                {effectiveUser.displayName || "Usuario"}
+                {effectiveUser.displayName || t('common.user')}
               </h2>
               <p className="text-muted-foreground">{effectiveUser.email}</p>
               <div className="mt-3">
                 <Button variant="outline" size="sm" className="mr-2">
                   <User className="h-4 w-4 mr-1" />
-                  Editar perfil
+                  {t('settings.profile')}
                 </Button>
               </div>
             </div>
@@ -126,15 +134,15 @@ export default function Settings() {
         
         <div className="bg-card rounded-lg border border-border overflow-hidden">
           <div className="p-4 sm:p-6">
-            <h3 className="text-lg font-medium mb-4 text-card-foreground">Preferencias</h3>
+            <h3 className="text-lg font-medium mb-4 text-card-foreground">{t('settings.preferences')}</h3>
             
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   {darkMode ? <Moon className="h-5 w-5 text-primary" /> : <Sun className="h-5 w-5 text-primary" />}
                   <div>
-                    <p className="font-medium text-card-foreground">Modo oscuro</p>
-                    <p className="text-sm text-muted-foreground">Cambia la apariencia de la aplicación</p>
+                    <p className="font-medium text-card-foreground">{t('settings.theme')}</p>
+                    <p className="text-sm text-muted-foreground">{t('settings.appearance')}</p>
                   </div>
                 </div>
                 <Switch checked={darkMode} onCheckedChange={handleDarkModeChange} />
@@ -146,8 +154,8 @@ export default function Settings() {
                 <div className="flex items-center space-x-3">
                   <Bell className="h-5 w-5 text-primary" />
                   <div>
-                    <p className="font-medium text-card-foreground">Notificaciones</p>
-                    <p className="text-sm text-muted-foreground">Recibe alertas sobre nuevas aplicaciones</p>
+                    <p className="font-medium text-card-foreground">{t('settings.notifications')}</p>
+                    <p className="text-sm text-muted-foreground">{t('settings.notificationsDesc')}</p>
                   </div>
                 </div>
                 <Switch checked={notifications} onCheckedChange={handleNotificationsChange} />
@@ -159,8 +167,8 @@ export default function Settings() {
                 <div className="flex items-center space-x-3 mb-3">
                   <Globe className="h-5 w-5 text-primary" />
                   <div>
-                    <p className="font-medium text-card-foreground">Idioma</p>
-                    <p className="text-sm text-muted-foreground">Selecciona el idioma de la aplicación</p>
+                    <p className="font-medium text-card-foreground">{t('settings.language')}</p>
+                    <p className="text-sm text-muted-foreground">{t('settings.languageSettings')}</p>
                   </div>
                 </div>
                 <div className="flex gap-2 ml-8">
@@ -169,14 +177,14 @@ export default function Settings() {
                     size="sm"
                     onClick={() => handleLanguageChange("es")}
                   >
-                    Español
+                    {t('settings.languages.es')}
                   </Button>
                   <Button 
                     variant={language === "en" ? "default" : "outline"} 
                     size="sm"
                     onClick={() => handleLanguageChange("en")}
                   >
-                    English
+                    {t('settings.languages.en')}
                   </Button>
                 </div>
               </div>
@@ -186,12 +194,12 @@ export default function Settings() {
         
         <div className="bg-card rounded-lg border border-border overflow-hidden mt-6">
           <div className="p-4 sm:p-6">
-            <h3 className="text-lg font-medium mb-4 text-card-foreground">Seguridad</h3>
+            <h3 className="text-lg font-medium mb-4 text-card-foreground">{t('settings.security')}</h3>
             
             <div className="space-y-6">
               <Button variant="outline" className="w-full justify-start">
                 <Shield className="h-5 w-5 mr-2" />
-                Cambiar contraseña
+                {t('settings.changePassword')}
               </Button>
               
               <Button 
@@ -200,7 +208,7 @@ export default function Settings() {
                 onClick={handleLogout}
               >
                 <LogOut className="h-5 w-5 mr-2" />
-                Cerrar sesión
+                {t('settings.logout')}
               </Button>
             </div>
           </div>
@@ -208,7 +216,7 @@ export default function Settings() {
         
         <div className="mt-8 text-center text-sm text-muted-foreground">
           <p>AppHub v1.0.0</p>
-          <p className="mt-1">© 2025 AppHub. Todos los derechos reservados.</p>
+          <p className="mt-1">{t('settings.copyright')}</p>
         </div>
       </div>
     </>
