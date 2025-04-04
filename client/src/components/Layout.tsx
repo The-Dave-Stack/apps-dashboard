@@ -24,7 +24,7 @@ export default function Layout({ children, showSearch = true }: LayoutProps) {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-neutral-50">
+    <div className="flex h-screen overflow-hidden bg-background">
       {/* Sidebar para pantallas medianas y grandes */}
       <Sidebar />
       

@@ -4,6 +4,8 @@ import { Switch, Route } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import Layout from "@/components/Layout";
 import { ProtectedRoute } from "@/lib/protected-route";
+import { useEffect } from "react";
+import { initTheme } from "@/lib/theme-service";
 
 // Importamos las páginas
 import Auth from "./pages/Auth";
@@ -112,6 +114,12 @@ function AppRouter() {
 
 // Main App component
 function App() {
+  // Inicializar el tema cuando carga la aplicación
+  useEffect(() => {
+    initTheme();
+    console.log("Theme initialized");
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AppRouter />
