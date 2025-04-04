@@ -754,44 +754,44 @@ export default function AdminPanel() {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className={`p-4 rounded-lg border ${firebaseStatus.connection ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+          <div className={`p-4 rounded-lg border ${firebaseStatus.connection ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-950/30' : 'border-red-400 dark:border-red-700 bg-red-50 dark:bg-red-950/30'}`}>
             <div className="flex items-center">
               {firebaseStatus.connection ? (
-                <Shield className="h-5 w-5 text-green-500 mr-2" />
+                <Shield className="h-5 w-5 text-green-500 dark:text-green-400 mr-2" />
               ) : (
-                <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+                <AlertCircle className="h-5 w-5 text-red-500 dark:text-red-400 mr-2" />
               )}
-              <h3 className="font-medium">Conexión a Firebase</h3>
+              <h3 className="font-medium text-foreground">Conexión a Firebase</h3>
             </div>
-            <p className={`text-sm mt-1 ${firebaseStatus.connection ? 'text-green-700' : 'text-red-700'}`}>
+            <p className={`text-sm mt-1 ${firebaseStatus.connection ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
               {firebaseStatus.connection ? 'Conectado' : 'Desconectado'}
             </p>
           </div>
           
-          <div className={`p-4 rounded-lg border ${firebaseStatus.read ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+          <div className={`p-4 rounded-lg border ${firebaseStatus.read ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-950/30' : 'border-red-400 dark:border-red-700 bg-red-50 dark:bg-red-950/30'}`}>
             <div className="flex items-center">
               {firebaseStatus.read ? (
-                <Shield className="h-5 w-5 text-green-500 mr-2" />
+                <Shield className="h-5 w-5 text-green-500 dark:text-green-400 mr-2" />
               ) : (
-                <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+                <AlertCircle className="h-5 w-5 text-red-500 dark:text-red-400 mr-2" />
               )}
-              <h3 className="font-medium">Permisos de Lectura</h3>
+              <h3 className="font-medium text-foreground">Permisos de Lectura</h3>
             </div>
-            <p className={`text-sm mt-1 ${firebaseStatus.read ? 'text-green-700' : 'text-red-700'}`}>
+            <p className={`text-sm mt-1 ${firebaseStatus.read ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
               {firebaseStatus.read ? 'Disponible' : 'No disponible'}
             </p>
           </div>
           
-          <div className={`p-4 rounded-lg border ${firebaseStatus.write ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+          <div className={`p-4 rounded-lg border ${firebaseStatus.write ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-950/30' : 'border-red-400 dark:border-red-700 bg-red-50 dark:bg-red-950/30'}`}>
             <div className="flex items-center">
               {firebaseStatus.write ? (
-                <Shield className="h-5 w-5 text-green-500 mr-2" />
+                <Shield className="h-5 w-5 text-green-500 dark:text-green-400 mr-2" />
               ) : (
-                <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+                <AlertCircle className="h-5 w-5 text-red-500 dark:text-red-400 mr-2" />
               )}
-              <h3 className="font-medium">Permisos de Escritura</h3>
+              <h3 className="font-medium text-foreground">Permisos de Escritura</h3>
             </div>
-            <p className={`text-sm mt-1 ${firebaseStatus.write ? 'text-green-700' : 'text-red-700'}`}>
+            <p className={`text-sm mt-1 ${firebaseStatus.write ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
               {firebaseStatus.write ? 'Disponible' : 'No disponible'}
             </p>
           </div>
@@ -808,13 +808,13 @@ export default function AdminPanel() {
         )}
         
         {!firebaseStatus.write && (
-          <Alert className="mb-4 bg-amber-50 border-amber-200 text-amber-800">
-            <AlertTriangle className="h-4 w-4 text-amber-800" />
+          <Alert className="mb-4 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-700 text-amber-800 dark:text-amber-400">
+            <AlertTriangle className="h-4 w-4 text-amber-800 dark:text-amber-400" />
             <AlertTitle>Reglas de seguridad Firestore</AlertTitle>
-            <AlertDescription>
+            <AlertDescription className="dark:text-amber-300">
               Para permitir escrituras en Firebase Firestore, debes configurar las reglas de seguridad adecuadas en la consola de Firebase. 
               Las reglas recomendadas para desarrollo (no para producción) son:
-              <pre className="mt-2 p-2 bg-amber-100 rounded text-xs overflow-x-auto">
+              <pre className="mt-2 p-2 bg-amber-100 dark:bg-amber-900/50 rounded text-xs overflow-x-auto dark:text-amber-200">
                 {`rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -890,7 +890,7 @@ service cloud.firestore {
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="text-neutral-600"
+                      className="text-foreground"
                       onClick={() => handleEditCategory(category)}
                     >
                       <Pencil className="h-4 w-4" />
@@ -898,7 +898,7 @@ service cloud.firestore {
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="text-red-600"
+                      className="text-red-600 dark:text-red-400"
                       onClick={() => handleDeleteCategory(category)}
                     >
                       <Trash className="h-4 w-4" />
@@ -925,7 +925,7 @@ service cloud.firestore {
                                 <Button 
                                   variant="ghost" 
                                   size="sm" 
-                                  className="h-6 w-6 p-0"
+                                  className="h-6 w-6 p-0 text-foreground"
                                   onClick={() => handleEditApp(app, category.id)}
                                 >
                                   <Pencil className="h-3 w-3" />
@@ -933,7 +933,7 @@ service cloud.firestore {
                                 <Button 
                                   variant="ghost" 
                                   size="sm" 
-                                  className="h-6 w-6 p-0 text-red-600"
+                                  className="h-6 w-6 p-0 text-red-600 dark:text-red-400"
                                   onClick={() => app.id && handleDeleteApp(app.id, category.id)}
                                 >
                                   <Trash className="h-3 w-3" />
