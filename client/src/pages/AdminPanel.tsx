@@ -35,9 +35,11 @@ import {
 } from "@/lib/firebase";
 import { checkFirebaseConnection } from "@/lib/firebase-check";
 import { AppConfig, getAppConfig, updateAppConfig } from "@/lib/appConfig";
+import { useTranslation } from "react-i18next";
 
 export default function AdminPanel() {
   const { toast } = useToast();
+  const { t } = useTranslation();
   
   // Estados para la gestión de categorías y aplicaciones
   const [categories, setCategories] = useState<CategoryData[]>([]);
@@ -714,17 +716,17 @@ export default function AdminPanel() {
       {/* Admin Panel Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-primary">Panel de Administración</h1>
-          <p className="text-muted-foreground mt-1">Gestiona las categorías y aplicaciones del sistema</p>
+          <h1 className="text-2xl font-bold text-primary">{t('admin.title')}</h1>
+          <p className="text-muted-foreground mt-1">{t('admin.subtitle')}</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={handleAddApp}>
             <AppWindow className="mr-2 h-4 w-4" />
-            Nueva Aplicación
+            {t('admin.apps.newApp')}
           </Button>
           <Button onClick={() => setShowNewCategoryDialog(true)} variant="outline">
             <FolderPlus className="mr-2 h-4 w-4" />
-            Nueva Categoría
+            {t('admin.categories.createCategory')}
           </Button>
         </div>
       </div>
@@ -732,7 +734,7 @@ export default function AdminPanel() {
       {/* Estado de Firebase */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold mb-4">Estado de Firebase</h2>
+          <h2 className="text-xl font-semibold mb-4">{t('admin.statusHeader')}</h2>
           <Button 
             onClick={checkFirebaseStatus} 
             disabled={firebaseStatus.checking}
@@ -742,12 +744,12 @@ export default function AdminPanel() {
             {firebaseStatus.checking ? (
               <>
                 <Loader className="mr-2 h-4 w-4 animate-spin" />
-                Verificando...
+                {t('common.loading')}
               </>
             ) : (
               <>
                 <RefreshCw className="mr-2 h-4 w-4" />
-                Verificar Conexión
+                {t('admin.verifyFirebase')}
               </>
             )}
           </Button>
@@ -761,10 +763,10 @@ export default function AdminPanel() {
               ) : (
                 <AlertCircle className="h-5 w-5 text-red-500 dark:text-red-400 mr-2" />
               )}
-              <h3 className="font-medium text-foreground">Conexión a Firebase</h3>
+              <h3 className="font-medium text-foreground">{t('admin.firebaseConnection')}</h3>
             </div>
             <p className={`text-sm mt-1 ${firebaseStatus.connection ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
-              {firebaseStatus.connection ? 'Conectado' : 'Desconectado'}
+              {firebaseStatus.connection ? t('admin.connected') : t('admin.disconnected')}
             </p>
           </div>
           
