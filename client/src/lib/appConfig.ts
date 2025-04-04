@@ -23,7 +23,7 @@ export interface AppConfig {
  * @const {AppConfig} DEFAULT_CONFIG
  */
 const DEFAULT_CONFIG: AppConfig = {
-  showRegisterTab: true
+  showRegisterTab: false
 };
 
 // Obtenemos la instancia de Firestore mediante el patrón Singleton
