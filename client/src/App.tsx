@@ -7,7 +7,6 @@ import { ProtectedRoute } from "@/lib/protected-route";
 import { useEffect } from "react";
 import { initTheme } from "@/lib/theme-service";
 import { LanguageProvider } from "@/i18n/LanguageContext";
-import "@/i18n/index";
 
 // Importamos las páginas
 import Auth from "./pages/Auth";

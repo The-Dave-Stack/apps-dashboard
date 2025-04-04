@@ -13,11 +13,7 @@ import { LanguageProvider } from "./i18n/LanguageContext";
 console.log("Initializing React application");
 
 createRoot(document.getElementById("root")!).render(
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <LanguageProvider>
-        <App />
-      </LanguageProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+  <AuthProvider>
+    <App />
+  </AuthProvider>
 );
