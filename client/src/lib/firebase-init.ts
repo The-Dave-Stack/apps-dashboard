@@ -62,6 +62,15 @@ interface FirebaseInstances {
 export function getFirebaseInstances(): FirebaseInstances {
   if (!initialized) {
     try {
+      // Verificar que las variables de entorno necesarias estén definidas
+      if (!import.meta.env.VITE_FIREBASE_API_KEY || 
+          !import.meta.env.VITE_FIREBASE_PROJECT_ID || 
+          !import.meta.env.VITE_FIREBASE_APP_ID) {
+        console.error("Error: Faltan variables de entorno para Firebase.");
+        console.error("Por favor, crea un archivo .env con las variables mencionadas en .env.example");
+        throw new Error("Configuración de Firebase incompleta. Verifica el archivo .env");
+      }
+      
       console.log("Inicializando Firebase por primera vez:", import.meta.env.VITE_FIREBASE_PROJECT_ID);
       firebaseApp = initializeApp(firebaseConfig);
       firebaseAuth = getAuth(firebaseApp);

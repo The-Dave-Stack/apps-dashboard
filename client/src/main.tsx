@@ -8,6 +8,11 @@ import { AuthProvider } from "./lib/auth";
 // Importar configuración de i18n
 import "./i18n";
 import { LanguageProvider } from "./i18n/LanguageContext";
+// Importar verificación de variables de entorno
+import { logFirebaseEnvStatus } from "./lib/env-check";
+
+// Verificar variables de entorno de Firebase
+logFirebaseEnvStatus();
 
 // Inicialización de Firebase en la raíz de la aplicación
 console.log("Initializing React application");
