@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Bell } from "lucide-react";
+import { Search } from "lucide-react";
 import UserProfile from "@/components/UserProfile";
 import LanguageSelector from "@/components/LanguageSelector";
 import { useTranslation } from "react-i18next";
@@ -65,11 +65,6 @@ export default function Topbar({ showSearch = true }: TopbarProps) {
                 <Search className="h-4 w-4 text-muted-foreground absolute left-2 top-1/2 transform -translate-y-1/2" />
               </div>
             )}
-            
-            <Button variant="ghost" size="icon" className="h-9 w-9 relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </Button>
             
             <LanguageSelector />
             
