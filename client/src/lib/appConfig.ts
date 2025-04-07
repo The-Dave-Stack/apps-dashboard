@@ -1,5 +1,5 @@
 /**
- * @fileoverview Gestión de configuración global de la aplicación AppHub
+ * @fileoverview Gestión de configuración global de la aplicación Bookmark Manager Sync
  * Este módulo proporciona funciones para obtener y actualizar la configuración
  * global de la aplicación, almacenada en Firestore.
  * @module lib/appConfig

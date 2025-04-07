@@ -1,5 +1,5 @@
 /**
- * @fileoverview Definición de tipos para AppHub
+ * @fileoverview Definición de tipos para Bookmark Manager Sync
  * Este archivo contiene las definiciones de interfaces y tipos utilizados en toda la aplicación.
  * @module lib/types
  */

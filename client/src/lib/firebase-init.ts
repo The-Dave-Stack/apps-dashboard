@@ -1,5 +1,5 @@
 /**
- * @fileoverview Módulo de inicialización de Firebase para AppHub
+ * @fileoverview Módulo de inicialización de Firebase para Bookmark Manager Sync
  * Este módulo maneja la inicialización de los servicios de Firebase y proporciona
  * un singleton para acceder a las instancias de Firebase en toda la aplicación.
  * @module firebase-init

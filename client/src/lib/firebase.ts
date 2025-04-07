@@ -1,5 +1,5 @@
 /**
- * @fileoverview Operaciones con Firebase Firestore para AppHub
+ * @fileoverview Operaciones con Firebase Firestore para Bookmark Manager Sync
  * Este módulo proporciona funciones para interactuar con Firestore,
  * permitiendo operaciones CRUD para categorías y aplicaciones.
  * Soporta arquitectura multiusuario donde cada usuario tiene sus propios datos.
@@ -16,6 +16,7 @@ import {
   deleteDoc, 
   query, 
   where,
+  limit as limitQuery,
   Firestore,
   CollectionReference,
   DocumentData
@@ -692,10 +693,10 @@ export async function recordAppAccess(app: AppData): Promise<void> {
  * Los resultados vienen ordenados del más reciente al más antiguo.
  * 
  * @async
- * @param {number} limit - Número máximo de registros a obtener (por defecto 10)
+ * @param {number} limitCount - Número máximo de registros a obtener (por defecto 10)
  * @returns {Promise<{appId: string, name: string, icon: string, url: string, accessedAt: string}[]>} Lista de accesos recientes
  */
-export async function getRecentAppAccess(limit = 10): Promise<{appId: string, name: string, icon: string, url: string, accessedAt: string}[]> {
+export async function getRecentAppAccess(limitCount = 10): Promise<{appId: string, name: string, icon: string, url: string, accessedAt: string}[]> {
   try {
     const currentUser = auth.currentUser;
     if (!currentUser) {
@@ -709,7 +710,9 @@ export async function getRecentAppAccess(limit = 10): Promise<{appId: string, na
     }
     
     // Ordenar por fecha de acceso descendente y limitar a la cantidad especificada
-    const q = query(historyRef, /* orderBy('accessedAt', 'desc'), */ limit > 0 ? limit : 10);
+    const maxItems = limitCount > 0 ? limitCount : 10;
+    // Usamos limitQuery (alias para la función limit de firebase/firestore)
+    const q = query(historyRef, /* orderBy('accessedAt', 'desc'), */ limitQuery(maxItems));
     const snapshot = await getDocs(q);
     
     return snapshot.docs.map(doc => {

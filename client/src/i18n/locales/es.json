@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "AppHub",
+    "title": "Bookmark Manager Sync",
     "description": "Gestor de enlaces centralizado"
   },
   "navigation": {
@@ -19,7 +19,7 @@
     "home": "Inicio"
   },
   "auth": {
-    "welcome": "Bienvenido a AppHub",
+    "welcome": "Bienvenido a Bookmark Manager Sync",
     "loginTab": "Iniciar sesión",
     "registerTab": "Registrarse",
     "email": "Correo electrónico",
@@ -244,7 +244,7 @@
     "notificationsDisabled": "Notificaciones desactivadas",
     "languageChanged": "Idioma cambiado",
     "languageChangedTo": "El idioma se ha cambiado a {{language}}",
-    "copyright": "© 2025 AppHub. Todos los derechos reservados."
+    "copyright": "© 2025 Bookmark Manager Sync. Todos los derechos reservados."
   },
   "errors": {
     "authFailed": "Error de autenticación",

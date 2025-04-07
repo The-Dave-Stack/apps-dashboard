@@ -175,7 +175,7 @@ export default function Auth() {
           <CardContent className="p-0">
             <div className="px-6 py-8">
               <div className="text-center mb-6">
-                <h1 className="text-3xl font-bold text-primary-600">AppHub</h1>
+                <h1 className="text-3xl font-bold text-primary-600">Bookmark Manager Sync</h1>
                 <p className="text-neutral-500 mt-2">Accede a todas tus aplicaciones favoritas en un solo lugar</p>
               </div>
               
