@@ -2,17 +2,16 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Menu, Search, Bell } from "lucide-react";
+import { Search, Bell } from "lucide-react";
 import UserProfile from "@/components/UserProfile";
 import LanguageSelector from "@/components/LanguageSelector";
 import { useTranslation } from "react-i18next";
 
 interface TopbarProps {
-  toggleMobileMenu: () => void;
   showSearch?: boolean;
 }
 
-export default function Topbar({ toggleMobileMenu, showSearch = true }: TopbarProps) {
+export default function Topbar({ showSearch = true }: TopbarProps) {
   const [location] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [, setLocation] = useLocation();
@@ -29,16 +28,8 @@ export default function Topbar({ toggleMobileMenu, showSearch = true }: TopbarPr
     <header className="bg-card border-b border-border sticky top-0 z-10">
       <div className="container mx-auto py-3 px-4">
         <div className="flex items-center justify-between">
-          {/* Left side - Mobile menu toggle and logo */}
+          {/* Left side - Logo en móviles */}
           <div className="flex items-center">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden mr-2"
-              onClick={toggleMobileMenu}
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
             <h1 className="text-xl font-bold text-primary md:hidden">{t('app.title')}</h1>
           </div>
 

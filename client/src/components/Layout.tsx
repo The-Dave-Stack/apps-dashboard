@@ -1,9 +1,7 @@
-import { useState } from "react";
 import { useLocation } from "wouter";
 import Sidebar from "@/components/Sidebar";
 import MobileNav from "@/components/MobileNav";
 import Topbar from "@/components/Topbar";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -12,11 +10,6 @@ interface LayoutProps {
 
 export default function Layout({ children, showSearch = true }: LayoutProps) {
   const [location] = useLocation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
 
   // No renderizar el layout en la página de autenticación
   if (location === "/auth") {
@@ -25,27 +18,22 @@ export default function Layout({ children, showSearch = true }: LayoutProps) {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      {/* Sidebar para pantallas medianas y grandes */}
-      <Sidebar />
-      
-      {/* Menú móvil en Sheet */}
-      <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-        <SheetContent side="left" className="p-0 w-64">
-          <Sidebar />
-        </SheetContent>
-      </Sheet>
+      {/* Sidebar para pantallas medianas y grandes, oculto en móviles */}
+      <div className="hidden md:block">
+        <Sidebar />
+      </div>
       
       {/* Contenido principal */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Barra superior */}
-        <Topbar toggleMobileMenu={toggleMobileMenu} showSearch={showSearch} />
+        {/* Barra superior - Ya no necesitamos toggleMobileMenu en móviles */}
+        <Topbar showSearch={showSearch} />
         
         {/* Contenido de la página */}
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
           {children}
         </main>
         
-        {/* Navegación móvil */}
+        {/* Navegación móvil - Solo visible en móviles */}
         <MobileNav />
       </div>
     </div>
