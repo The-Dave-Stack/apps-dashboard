@@ -17,6 +17,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useLocation } from "wouter";
+import { Link } from "wouter";
 
 export default function UserManagement() {
   const { users, isLoading, error, updateUserRole, isUpdating } = useUserManagement();
@@ -30,6 +31,11 @@ export default function UserManagement() {
     updateUserRole({ userId, role });
   };
   
+  // Función para navegar de vuelta al panel de administración
+  const handleBack = () => {
+    setLocation('/admin');
+  };
+  
   // Mostrar la interfaz de carga mientras se obtienen los usuarios
   if (isLoading) {
     return (
@@ -39,7 +45,7 @@ export default function UserManagement() {
             <h1 className="text-2xl font-bold text-primary">{t('users.management')}</h1>
             <p className="text-muted-foreground mt-1">{t('users.managementDesc')}</p>
           </div>
-          <Button variant="outline" onClick={() => navigate('/admin')}>
+          <Button variant="outline" onClick={handleBack}>
             <ChevronLeft className="h-4 w-4 mr-2" />
             {t('common.back')}
           </Button>
@@ -59,7 +65,7 @@ export default function UserManagement() {
             <h1 className="text-2xl font-bold text-primary">{t('users.management')}</h1>
             <p className="text-muted-foreground mt-1">{t('users.managementDesc')}</p>
           </div>
-          <Button variant="outline" onClick={() => navigate('/admin')}>
+          <Button variant="outline" onClick={handleBack}>
             <ChevronLeft className="h-4 w-4 mr-2" />
             {t('common.back')}
           </Button>
@@ -83,7 +89,7 @@ export default function UserManagement() {
           <h1 className="text-2xl font-bold text-primary">{t('users.management')}</h1>
           <p className="text-muted-foreground mt-1">{t('users.managementDesc')}</p>
         </div>
-        <Button variant="outline" onClick={() => navigate('/admin')}>
+        <Button variant="outline" onClick={handleBack}>
           <ChevronLeft className="h-4 w-4 mr-2" />
           {t('common.back')}
         </Button>
