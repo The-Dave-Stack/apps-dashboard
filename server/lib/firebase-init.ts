@@ -7,6 +7,7 @@
 
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 
 // Función que devuelve las instancias de Firebase necesarias para el servidor
 export function getFirebaseInstances() {
@@ -14,7 +15,7 @@ export function getFirebaseInstances() {
   if (getApps().length === 0) {
     // Si no hay service account configurado, intentar usar credenciales de entorno
     const firebaseConfig = {
-      projectId: process.env.FIREBASE_PROJECT_ID,
+      projectId: process.env.FIREBASE_PROJECT_ID || 'appsdashboard-ef2e1',
     };
 
     // Si hay credenciales definidas como variable de entorno, usarlas
@@ -37,8 +38,10 @@ export function getFirebaseInstances() {
 
   // Obtener y devolver las instancias necesarias
   const db = getFirestore();
+  const auth = getAuth();
 
   return {
-    db
+    db,
+    auth
   };
 }
