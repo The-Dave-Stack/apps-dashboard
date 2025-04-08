@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { FirebaseUser, UserRole, updateUserRoleSchema } from "@shared/schema";
+import { FirebaseUser, UserRole, updateUserRoleSchema, toggleUserStatusSchema, deleteUserSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API routes for server-side functionality
@@ -81,6 +81,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error al actualizar rol de usuario:', error);
       res.status(500).json({ error: 'Error al actualizar rol de usuario' });
+    }
+  });
+
+  // Deshabilitar o habilitar un usuario
+  app.patch('/api/users/:userId/status', async (req: Request, res: Response) => {
+    try {
+      const userId = req.params.userId;
+      const { disabled } = req.body;
+      
+      // Validar datos usando Zod
+      const validationResult = toggleUserStatusSchema.safeParse({
+        userId,
+        disabled
+      });
+      
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          error: 'Datos inválidos',
+          details: validationResult.error.format()
+        });
+      }
+      
+      // Verificar que el usuario existe
+      const user = await storage.getUserById(userId);
+      if (!user) {
+        return res.status(404).json({ error: 'Usuario no encontrado' });
+      }
+      
+      // Actualizar el estado del usuario
+      const updatedUser = await storage.toggleUserStatus(userId, disabled);
+      
+      res.json(updatedUser);
+    } catch (error) {
+      console.error('Error al actualizar estado de usuario:', error);
+      res.status(500).json({ error: 'Error al actualizar estado de usuario' });
+    }
+  });
+
+  // Eliminar un usuario
+  app.delete('/api/users/:userId', async (req: Request, res: Response) => {
+    try {
+      const userId = req.params.userId;
+      
+      // Validar datos usando Zod
+      const validationResult = deleteUserSchema.safeParse({
+        userId
+      });
+      
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          error: 'Datos inválidos',
+          details: validationResult.error.format()
+        });
+      }
+      
+      // Verificar que el usuario existe
+      const user = await storage.getUserById(userId);
+      if (!user) {
+        return res.status(404).json({ error: 'Usuario no encontrado' });
+      }
+      
+      // Eliminar el usuario
+      await storage.deleteUser(userId);
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error al eliminar usuario:', error);
+      res.status(500).json({ error: 'Error al eliminar usuario' });
     }
   });
 

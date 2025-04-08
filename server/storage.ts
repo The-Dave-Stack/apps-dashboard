@@ -12,6 +12,8 @@ export interface IStorage {
   getUsers(): Promise<FirebaseUser[]>;
   getUserById(userId: string): Promise<FirebaseUser | null>;
   updateUserRole(userId: string, role: UserRole): Promise<FirebaseUser>;
+  toggleUserStatus(userId: string, disabled: boolean): Promise<FirebaseUser>;
+  deleteUser(userId: string): Promise<void>;
   hasUsers(): Promise<boolean>;
 }
 
@@ -95,6 +97,29 @@ export class MemStorage implements IStorage {
     
     this.firebaseUsers.set(userId, updatedUser);
     return updatedUser;
+  }
+  
+  async toggleUserStatus(userId: string, disabled: boolean): Promise<FirebaseUser> {
+    const user = this.firebaseUsers.get(userId);
+    if (!user) {
+      throw new Error(`Usuario ${userId} no encontrado`);
+    }
+    
+    const updatedUser: FirebaseUser = {
+      ...user,
+      disabled
+    };
+    
+    this.firebaseUsers.set(userId, updatedUser);
+    return updatedUser;
+  }
+  
+  async deleteUser(userId: string): Promise<void> {
+    if (!this.firebaseUsers.has(userId)) {
+      throw new Error(`Usuario ${userId} no encontrado`);
+    }
+    
+    this.firebaseUsers.delete(userId);
   }
   
   async hasUsers(): Promise<boolean> {

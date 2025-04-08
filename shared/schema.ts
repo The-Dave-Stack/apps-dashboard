@@ -93,6 +93,7 @@ export type FirebaseUser = {
   email: string;
   role: UserRole;
   createdAt?: Date | string;
+  disabled?: boolean;
 };
 
 export const updateUserRoleSchema = z.object({
@@ -100,4 +101,15 @@ export const updateUserRoleSchema = z.object({
   role: z.nativeEnum(UserRole)
 });
 
+export const toggleUserStatusSchema = z.object({
+  userId: z.string(),
+  disabled: z.boolean()
+});
+
+export const deleteUserSchema = z.object({
+  userId: z.string()
+});
+
 export type UpdateUserRole = z.infer<typeof updateUserRoleSchema>;
+export type ToggleUserStatus = z.infer<typeof toggleUserStatusSchema>;
+export type DeleteUser = z.infer<typeof deleteUserSchema>;
