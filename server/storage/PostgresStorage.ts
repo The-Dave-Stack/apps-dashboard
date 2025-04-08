@@ -866,6 +866,49 @@ export class PostgresStorage implements IStorage {
   }
   
   /**
+   * Activa o desactiva un usuario
+   * @param userId - ID del usuario
+   * @param disabled - Indica si el usuario debe ser desactivado
+   * @returns Promise con el usuario actualizado
+   */
+  async toggleUserStatus(userId: string, disabled: boolean): Promise<FirebaseUser> {
+    try {
+      await db.execute(sql`
+        UPDATE bms_users
+        SET disabled = ${disabled}
+        WHERE id = ${userId};
+      `);
+      
+      const updatedUser = await this.getUserById(userId);
+      if (!updatedUser) {
+        throw new Error(`Usuario ${userId} no encontrado después de actualizar`);
+      }
+      
+      return updatedUser;
+    } catch (error) {
+      console.error(`[Postgres] Error al ${disabled ? 'desactivar' : 'activar'} usuario ${userId}:`, error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Elimina un usuario
+   * @param userId - ID del usuario
+   * @returns Promise que se resuelve cuando el usuario es eliminado
+   */
+  async deleteUser(userId: string): Promise<void> {
+    try {
+      await db.execute(sql`
+        DELETE FROM bms_users
+        WHERE id = ${userId};
+      `);
+    } catch (error) {
+      console.error(`[Postgres] Error al eliminar usuario ${userId}:`, error);
+      throw error;
+    }
+  }
+  
+  /**
    * Verifica si hay usuarios en el sistema
    * @returns Promise con un booleano indicando si hay usuarios
    */

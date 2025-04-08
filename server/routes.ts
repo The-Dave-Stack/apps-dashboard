@@ -1,8 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
-// Para producción, descomentar y usar:
-// import { storage } from "./storage/index";
+// Importamos el almacenamiento desde el StorageFactory en lugar del storage.ts
+import { storage, StorageFactory } from "./storage/index";
 import { FirebaseUser, UserRole, updateUserRoleSchema, toggleUserStatusSchema, deleteUserSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {

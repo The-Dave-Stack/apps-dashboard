@@ -556,6 +556,7 @@ export class FirebaseStorage implements IStorage {
           email: data.email || '',
           role: data.role || UserRole.USER,
           createdAt: data.createdAt || new Date(),
+          disabled: data.disabled || false,
         });
       });
 
@@ -587,6 +588,7 @@ export class FirebaseStorage implements IStorage {
         email: data.email || '',
         role: data.role || UserRole.USER,
         createdAt: data.createdAt || new Date(),
+        disabled: data.disabled || false,
       };
     } catch (error) {
       console.error(`[Firebase] Error al obtener usuario ${userId}:`, error);
@@ -617,6 +619,48 @@ export class FirebaseStorage implements IStorage {
       return updatedUser;
     } catch (error) {
       console.error(`[Firebase] Error al actualizar rol de usuario ${userId}:`, error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Activa o desactiva un usuario
+   * @param userId - ID del usuario
+   * @param disabled - Indica si el usuario debe ser desactivado
+   * @returns Promise con el usuario actualizado
+   */
+  async toggleUserStatus(userId: string, disabled: boolean): Promise<FirebaseUser> {
+    try {
+      const userRef = this.db.doc(`users/${userId}`);
+      
+      await userRef.update({
+        disabled: disabled
+      });
+      
+      // Obtener el usuario actualizado
+      const updatedUser = await this.getUserById(userId);
+      if (!updatedUser) {
+        throw new Error(`Usuario ${userId} no encontrado después de actualizar`);
+      }
+      
+      return updatedUser;
+    } catch (error) {
+      console.error(`[Firebase] Error al ${disabled ? 'desactivar' : 'activar'} usuario ${userId}:`, error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Elimina un usuario
+   * @param userId - ID del usuario
+   * @returns Promise que se resuelve cuando el usuario es eliminado
+   */
+  async deleteUser(userId: string): Promise<void> {
+    try {
+      const userRef = this.db.doc(`users/${userId}`);
+      await userRef.delete();
+    } catch (error) {
+      console.error(`[Firebase] Error al eliminar usuario ${userId}:`, error);
       throw error;
     }
   }

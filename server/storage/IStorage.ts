@@ -182,6 +182,21 @@ export interface IStorage {
   updateUserRole(userId: string, role: UserRole): Promise<FirebaseUser>;
   
   /**
+   * Activa o desactiva un usuario
+   * @param userId - ID del usuario
+   * @param disabled - Indica si el usuario debe ser desactivado
+   * @returns Promise con el usuario actualizado
+   */
+  toggleUserStatus(userId: string, disabled: boolean): Promise<FirebaseUser>;
+  
+  /**
+   * Elimina un usuario
+   * @param userId - ID del usuario
+   * @returns Promise que se resuelve cuando el usuario es eliminado
+   */
+  deleteUser(userId: string): Promise<void>;
+  
+  /**
    * Verifica si hay usuarios en el sistema
    * @returns Promise con un booleano indicando si hay usuarios
    */
