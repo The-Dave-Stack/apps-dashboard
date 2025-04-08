@@ -5,7 +5,7 @@
  * @module storage/IStorage
  */
 
-import { FirebaseCategory, FirebaseApp } from '@shared/schema';
+import { FirebaseCategory, FirebaseApp, FirebaseUser, UserRole } from '@shared/schema';
 
 /**
  * Interfaz común para todos los proveedores de almacenamiento
@@ -159,4 +159,31 @@ export interface IStorage {
    * @returns Promise con la configuración actualizada
    */
   updateAppConfig(config: Record<string, any>): Promise<Record<string, any>>;
+  
+  /**
+   * Obtiene todos los usuarios registrados en el sistema
+   * @returns Promise con array de usuarios
+   */
+  getUsers(): Promise<FirebaseUser[]>;
+  
+  /**
+   * Obtiene un usuario específico por su ID
+   * @param userId - ID del usuario
+   * @returns Promise con el usuario o null si no existe
+   */
+  getUserById(userId: string): Promise<FirebaseUser | null>;
+  
+  /**
+   * Actualiza el rol de un usuario
+   * @param userId - ID del usuario
+   * @param role - Nuevo rol para el usuario
+   * @returns Promise con el usuario actualizado
+   */
+  updateUserRole(userId: string, role: UserRole): Promise<FirebaseUser>;
+  
+  /**
+   * Verifica si hay usuarios en el sistema
+   * @returns Promise con un booleano indicando si hay usuarios
+   */
+  hasUsers(): Promise<boolean>;
 }

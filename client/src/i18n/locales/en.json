@@ -86,6 +86,7 @@
     "saveConfig": "Save Settings",
     "showRegisterTab": "Show register tab",
     "showRegisterTabDesc": "Enable or disable the registration tab on the authentication page",
+    "manageUsers": "Manage Users",
     "connectionError": "Connection error",
     "permissionError": "Permission error",
     "successConnection": "Successful connection",
@@ -245,6 +246,23 @@
     "languageChanged": "Language changed",
     "languageChangedTo": "Language has been changed to {{language}}",
     "copyright": "© 2025 Bookmark Manager Sync. All rights reserved."
+  },
+  "users": {
+    "management": "User Management",
+    "managementDesc": "Manage user roles and permissions",
+    "username": "Username",
+    "email": "Email",
+    "role": "Role",
+    "actions": "Actions",
+    "selectRole": "Select a role",
+    "admin": "Administrator",
+    "user": "User",
+    "roleUpdated": "Role updated",
+    "roleUpdatedDesc": "User role has been updated successfully",
+    "roleUpdateError": "Error updating role",
+    "noUsers": "No users found",
+    "noUsersDesc": "There are no registered users in the system",
+    "fetchError": "Error fetching users"
   },
   "errors": {
     "authFailed": "Authentication error",

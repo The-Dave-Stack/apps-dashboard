@@ -18,6 +18,7 @@ import Recent from "./pages/Recent";
 import Settings from "./pages/Settings";
 import AdminPanel from "./pages/AdminPanel";
 import CategoryDetail from "./pages/CategoryDetail";
+import UserManagement from "./pages/UserManagement";
 
 // Componentes para las páginas
 const DashboardPage = () => (
@@ -59,6 +60,12 @@ const AdminPage = () => (
 const CategoryDetailPage = () => (
   <Layout>
     <CategoryDetail />
+  </Layout>
+);
+
+const UserManagementPage = () => (
+  <Layout showSearch={false}>
+    <UserManagement />
   </Layout>
 );
 
@@ -106,6 +113,11 @@ function AppRouter() {
       <Route path="/category/:id">
         <ProtectedRoute>
           <CategoryDetailPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/admin/users">
+        <ProtectedRoute>
+          <UserManagementPage />
         </ProtectedRoute>
       </Route>
       <Route component={NotFoundPage} />

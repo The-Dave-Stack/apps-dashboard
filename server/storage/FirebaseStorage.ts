@@ -7,7 +7,7 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { getFirebaseInstances } from '../lib/firebase-init';
 import { IStorage } from './IStorage';
-import { FirebaseCategory, FirebaseApp } from '@shared/schema';
+import { FirebaseCategory, FirebaseApp, FirebaseUser, UserRole } from '@shared/schema';
 import crypto from 'crypto';
 
 /**
@@ -533,6 +533,106 @@ export class FirebaseStorage implements IStorage {
       return newConfig;
     } catch (error) {
       console.error('[Firebase] Error al actualizar configuración de la aplicación:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtiene todos los usuarios registrados en el sistema
+   * @returns Promise con array de usuarios
+   */
+  async getUsers(): Promise<FirebaseUser[]> {
+    try {
+      console.log('[Firebase] Obteniendo lista de usuarios');
+      const usersRef = this.db.collection('users');
+      const snapshot = await usersRef.get();
+      const users: FirebaseUser[] = [];
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        users.push({
+          id: doc.id,
+          username: data.username || '',
+          email: data.email || '',
+          role: data.role || UserRole.USER,
+          createdAt: data.createdAt || new Date(),
+        });
+      });
+
+      return users;
+    } catch (error) {
+      console.error('[Firebase] Error al obtener usuarios:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Obtiene un usuario específico por su ID
+   * @param userId - ID del usuario
+   * @returns Promise con el usuario o null si no existe
+   */
+  async getUserById(userId: string): Promise<FirebaseUser | null> {
+    try {
+      const userRef = this.db.doc(`users/${userId}`);
+      const userDoc = await userRef.get();
+      
+      if (!userDoc.exists) {
+        return null;
+      }
+      
+      const data = userDoc.data() || {};
+      return {
+        id: userDoc.id,
+        username: data.username || '',
+        email: data.email || '',
+        role: data.role || UserRole.USER,
+        createdAt: data.createdAt || new Date(),
+      };
+    } catch (error) {
+      console.error(`[Firebase] Error al obtener usuario ${userId}:`, error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Actualiza el rol de un usuario
+   * @param userId - ID del usuario
+   * @param role - Nuevo rol para el usuario
+   * @returns Promise con el usuario actualizado
+   */
+  async updateUserRole(userId: string, role: UserRole): Promise<FirebaseUser> {
+    try {
+      const userRef = this.db.doc(`users/${userId}`);
+      
+      await userRef.update({
+        role: role
+      });
+      
+      // Obtener el usuario actualizado
+      const updatedUser = await this.getUserById(userId);
+      if (!updatedUser) {
+        throw new Error(`Usuario ${userId} no encontrado después de actualizar`);
+      }
+      
+      return updatedUser;
+    } catch (error) {
+      console.error(`[Firebase] Error al actualizar rol de usuario ${userId}:`, error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Verifica si hay usuarios en el sistema
+   * @returns Promise con un booleano indicando si hay usuarios
+   */
+  async hasUsers(): Promise<boolean> {
+    try {
+      const usersRef = this.db.collection('users');
+      const snapshot = await usersRef.limit(1).get();
+      
+      return !snapshot.empty;
+    } catch (error) {
+      console.error('[Firebase] Error al verificar existencia de usuarios:', error);
       throw error;
     }
   }

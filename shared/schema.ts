@@ -2,13 +2,20 @@ import { pgTable, text, serial, integer, boolean, jsonb } from "drizzle-orm/pg-c
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Definir los roles de usuario
+export enum UserRole {
+  ADMIN = 'admin',
+  USER = 'user',
+}
+
 // User schema
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   email: text("email").notNull().unique(),
-  isAdmin: boolean("is_admin").default(false).notNull(),
+  role: text("role").notNull().default(UserRole.USER),
+  isAdmin: boolean("is_admin").default(false).notNull(), // Mantenemos por compatibilidad
 });
 
 // App schema
@@ -38,6 +45,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
   email: true,
+  role: true,
   isAdmin: true,
 });
 
@@ -77,3 +85,19 @@ export type FirebaseCategory = {
   name: string;
   apps: FirebaseApp[];
 };
+
+// Tipos para la gestión de usuarios
+export type FirebaseUser = {
+  id: string;
+  username: string;
+  email: string;
+  role: UserRole;
+  createdAt?: Date | string;
+};
+
+export const updateUserRoleSchema = z.object({
+  userId: z.string(),
+  role: z.nativeEnum(UserRole)
+});
+
+export type UpdateUserRole = z.infer<typeof updateUserRoleSchema>;

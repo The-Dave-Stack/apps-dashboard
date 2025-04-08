@@ -5,9 +5,10 @@
  */
 
 import { IStorage } from './IStorage';
-import { FirebaseCategory, FirebaseApp } from '@shared/schema';
+import { FirebaseCategory, FirebaseApp, FirebaseUser, UserRole } from '@shared/schema';
 import { db } from '../db';
 import { sql } from 'drizzle-orm';
+import crypto from 'crypto';
 
 /**
  * Implementación de almacenamiento utilizando PostgreSQL
@@ -38,6 +39,17 @@ export class PostgresStorage implements IStorage {
       
       if (!tableExists) {
         console.log('[Postgres] Creando esquema de base de datos...');
+        
+        // Crear tabla de usuarios
+        await db.execute(sql`
+          CREATE TABLE bms_users (
+            id TEXT PRIMARY KEY,
+            username TEXT NOT NULL UNIQUE,
+            email TEXT NOT NULL UNIQUE,
+            role TEXT NOT NULL DEFAULT 'user',
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+          );
+        `);
         
         // Crear tabla de categorías
         await db.execute(sql`
@@ -760,6 +772,114 @@ export class PostgresStorage implements IStorage {
       return newConfig;
     } catch (error) {
       console.error('[Postgres] Error al actualizar configuración de la aplicación:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtiene todos los usuarios registrados en el sistema
+   * @returns Promise con array de usuarios
+   */
+  async getUsers(): Promise<FirebaseUser[]> {
+    try {
+      console.log('[Postgres] Obteniendo lista de usuarios');
+      const usersResult = await db.execute(sql`
+        SELECT id, username, email, role, created_at
+        FROM bms_users
+        ORDER BY username;
+      `);
+      
+      const users: FirebaseUser[] = usersResult.rows.map(row => {
+        const createdAt = row.created_at ? new Date(String(row.created_at)) : undefined;
+        return {
+          id: String(row.id),
+          username: String(row.username),
+          email: String(row.email),
+          role: row.role as UserRole,
+          createdAt,
+        };
+      });
+      
+      return users;
+    } catch (error) {
+      console.error('[Postgres] Error al obtener usuarios:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Obtiene un usuario específico por su ID
+   * @param userId - ID del usuario
+   * @returns Promise con el usuario o null si no existe
+   */
+  async getUserById(userId: string): Promise<FirebaseUser | null> {
+    try {
+      const userResult = await db.execute(sql`
+        SELECT id, username, email, role, created_at
+        FROM bms_users
+        WHERE id = ${userId};
+      `);
+      
+      if (userResult.rows.length === 0) {
+        return null;
+      }
+      
+      const row = userResult.rows[0];
+      const createdAt = row.created_at ? new Date(String(row.created_at)) : undefined;
+      return {
+        id: String(row.id),
+        username: String(row.username),
+        email: String(row.email),
+        role: row.role as UserRole,
+        createdAt,
+      };
+    } catch (error) {
+      console.error(`[Postgres] Error al obtener usuario ${userId}:`, error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Actualiza el rol de un usuario
+   * @param userId - ID del usuario
+   * @param role - Nuevo rol para el usuario
+   * @returns Promise con el usuario actualizado
+   */
+  async updateUserRole(userId: string, role: UserRole): Promise<FirebaseUser> {
+    try {
+      await db.execute(sql`
+        UPDATE bms_users
+        SET role = ${role}
+        WHERE id = ${userId};
+      `);
+      
+      const updatedUser = await this.getUserById(userId);
+      if (!updatedUser) {
+        throw new Error(`Usuario ${userId} no encontrado después de actualizar`);
+      }
+      
+      return updatedUser;
+    } catch (error) {
+      console.error(`[Postgres] Error al actualizar rol de usuario ${userId}:`, error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Verifica si hay usuarios en el sistema
+   * @returns Promise con un booleano indicando si hay usuarios
+   */
+  async hasUsers(): Promise<boolean> {
+    try {
+      const result = await db.execute(sql`
+        SELECT EXISTS (
+          SELECT 1 FROM bms_users LIMIT 1
+        );
+      `);
+      
+      return Boolean(result.rows[0].exists);
+    } catch (error) {
+      console.error('[Postgres] Error al verificar existencia de usuarios:', error);
       throw error;
     }
   }

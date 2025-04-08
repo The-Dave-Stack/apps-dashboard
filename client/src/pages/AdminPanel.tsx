@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { 
-  Pencil, 
-  Trash, 
-  Plus, 
-  PlusCircle, 
-  X, 
-  Save, 
+  Pencil,
+  Trash,
+  Plus,
+  PlusCircle,
+  Save,
   FolderPlus,
   AppWindow,
   Loader,
@@ -13,7 +12,8 @@ import {
   Shield,
   AlertCircle,
   RefreshCw,
-  Settings
+  Settings,
+  Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -528,11 +528,14 @@ export default function AdminPanel() {
       
       // Crear nueva app en Firebase
       const newApp: AppData = {
-        ...newAppData,
-        icon: appIcon
+        id: "", // Firebase asignará el ID
+        name: newAppData.name,
+        icon: appIcon,
+        url: newAppData.url,
+        description: newAppData.description
       };
       
-      const savedApp = await saveApp(newApp, selectedCategoryId);
+      const savedApp = await saveApp(selectedCategoryId, newApp);
       
       // Actualizar el estado local
       const updatedCategories = categories.map(cat => {
@@ -553,13 +556,13 @@ export default function AdminPanel() {
       });
       
       // Cerramos el diálogo y limpiamos campos
-      setShowNewAppDialog(false);
       setNewAppData({
         name: "",
         icon: "",
         url: "",
         description: ""
       });
+      setShowNewAppDialog(false);
     } catch (error) {
       console.error("Error al crear aplicación:", error);
       toast({
@@ -599,9 +602,9 @@ export default function AdminPanel() {
     setLoading(true);
     
     try {
-      // Si el icono cambió a vacío, intentar obtenerlo automáticamente
+      // Si el icono ha cambiado o está vacío, intentar obtenerlo automáticamente
       let appIcon = newAppData.icon;
-      if (!appIcon || appIcon.trim() === "") {
+      if (appIcon !== editingApp.app.icon && (!appIcon || appIcon.trim() === "")) {
         toast({
           title: "Buscando icono...",
           description: "Intentando obtener el icono automáticamente, esto puede tardar unos segundos",
@@ -614,12 +617,14 @@ export default function AdminPanel() {
       
       // Actualizar app en Firebase
       const updatedApp: AppData = { 
-        ...newAppData,
-        id: editingApp.app.id,
-        icon: appIcon
+        ...editingApp.app,
+        name: newAppData.name,
+        icon: appIcon,
+        url: newAppData.url,
+        description: newAppData.description
       };
       
-      await saveApp(updatedApp, editingApp.categoryId);
+      await saveApp(editingApp.categoryId, updatedApp);
       
       // Actualizar el estado local
       const updatedCategories = categories.map(cat => {
@@ -640,16 +645,6 @@ export default function AdminPanel() {
         title: "Aplicación actualizada",
         description: `Se ha actualizado la aplicación ${updatedApp.name}`,
       });
-      
-      // Cerramos el diálogo y limpiamos campos
-      setShowEditAppDialog(false);
-      setEditingApp(null);
-      setNewAppData({
-        name: "",
-        icon: "",
-        url: "",
-        description: ""
-      });
     } catch (error) {
       console.error("Error al actualizar aplicación:", error);
       toast({
@@ -659,6 +654,14 @@ export default function AdminPanel() {
       });
     } finally {
       setLoading(false);
+      setShowEditAppDialog(false);
+      setEditingApp(null);
+      setNewAppData({
+        name: "",
+        icon: "",
+        url: "",
+        description: ""
+      });
     }
   };
   
@@ -678,11 +681,11 @@ export default function AdminPanel() {
     
     try {
       // Eliminar app de Firebase
-      await deleteApp(itemToDelete.id);
+      await deleteApp(itemToDelete.categoryId, itemToDelete.id);
       
       // Actualizar el estado local
       const updatedCategories = categories.map(cat => {
-        if (cat.id === itemToDelete?.categoryId) {
+        if (cat.id === itemToDelete.categoryId) {
           return {
             ...cat,
             apps: cat.apps.filter(app => app.id !== itemToDelete.id)
@@ -712,7 +715,7 @@ export default function AdminPanel() {
   };
   
   return (
-    <>
+    <div className="space-y-6">
       {/* Admin Panel Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
@@ -834,17 +837,22 @@ service cloud.firestore {
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold mb-4">{t('admin.configHeader')}</h2>
-          <Button 
-            onClick={async () => {
-              try {
-                const updatedConfig = await updateAppConfig(appConfig);
-                setAppConfig(updatedConfig);
-                toast({
-                  title: "Configuración actualizada",
-                  description: "La configuración se ha guardado correctamente",
-                  variant: "default"
-                });
-              } catch (error) {
+          <div className="flex space-x-2">
+            <Button variant="outline" onClick={() => window.open("/admin/users", "_self")}>
+              <Users className="mr-2 h-4 w-4" />
+              {t('admin.manageUsers')}
+            </Button>
+            <Button 
+              onClick={async () => {
+                try {
+                  const updatedConfig = await updateAppConfig(appConfig);
+                  setAppConfig(updatedConfig);
+                  toast({
+                    title: "Configuración actualizada",
+                    description: "La configuración se ha guardado correctamente",
+                    variant: "default"
+                  });
+                } catch (error) {
                 console.error("Error al guardar la configuración:", error);
                 toast({
                   title: "Error",
@@ -859,6 +867,7 @@ service cloud.firestore {
             <Save className="mr-2 h-4 w-4" />
             {t('admin.saveConfig')}
           </Button>
+          </div>
         </div>
         
         <div className="bg-card rounded-lg border p-4 space-y-4">
@@ -1209,25 +1218,25 @@ service cloud.firestore {
                 value={newAppData.url}
                 onChange={(e) => setNewAppData({...newAppData, url: e.target.value})}
               />
+              <p className="text-xs text-muted-foreground">{t('admin.apps.autoIconInfo')}</p>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-app-icon">{t('admin.apps.iconUrl')}</Label>
+              <Label htmlFor="edit-app-icon">{t('admin.apps.iconUrl')} ({t('common.optional')})</Label>
               <Input 
                 id="edit-app-icon" 
                 placeholder={t('admin.apps.iconUrlPlaceholder')} 
                 value={newAppData.icon}
                 onChange={(e) => setNewAppData({...newAppData, icon: e.target.value})}
               />
-              <p className="text-xs text-muted-foreground">{t('admin.apps.autoIconInfo')}</p>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-app-description">{t('admin.apps.description')}</Label>
+              <Label htmlFor="edit-app-description">{t('admin.apps.description')} ({t('common.optional')})</Label>
               <Textarea 
                 id="edit-app-description" 
                 placeholder={t('admin.apps.descriptionPlaceholder')} 
-                value={newAppData.description}
+                value={newAppData.description || ""}
                 onChange={(e) => setNewAppData({...newAppData, description: e.target.value})}
               />
             </div>
@@ -1281,6 +1290,6 @@ service cloud.firestore {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }

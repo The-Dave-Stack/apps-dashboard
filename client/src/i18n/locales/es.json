@@ -86,6 +86,7 @@
     "saveConfig": "Guardar Configuración",
     "showRegisterTab": "Mostrar pestaña de registro",
     "showRegisterTabDesc": "Habilita o deshabilita la pestaña de registro en la página de autenticación",
+    "manageUsers": "Gestionar Usuarios",
     "connectionError": "Error de conexión",
     "permissionError": "Error de permisos",
     "successConnection": "Conexión exitosa",
@@ -245,6 +246,23 @@
     "languageChanged": "Idioma cambiado",
     "languageChangedTo": "El idioma se ha cambiado a {{language}}",
     "copyright": "© 2025 Bookmark Manager Sync. Todos los derechos reservados."
+  },
+  "users": {
+    "management": "Gestión de Usuarios",
+    "managementDesc": "Administra roles y permisos de usuarios",
+    "username": "Nombre de usuario",
+    "email": "Correo electrónico",
+    "role": "Rol",
+    "actions": "Acciones",
+    "selectRole": "Selecciona un rol",
+    "admin": "Administrador",
+    "user": "Usuario",
+    "roleUpdated": "Rol actualizado",
+    "roleUpdatedDesc": "El rol del usuario ha sido actualizado correctamente",
+    "roleUpdateError": "Error al actualizar el rol",
+    "noUsers": "No se encontraron usuarios",
+    "noUsersDesc": "No hay usuarios registrados en el sistema",
+    "fetchError": "Error al obtener usuarios"
   },
   "errors": {
     "authFailed": "Error de autenticación",
