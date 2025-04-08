@@ -284,12 +284,12 @@ function UserTable({
                       <AlertDialogContent>
                         <AlertDialogHeader>
                           <AlertDialogTitle>
-                            {user.disabled 
+                            {user.disabled === true 
                               ? t('users.enableUserTitle') 
                               : t('users.disableUserTitle')}
                           </AlertDialogTitle>
                           <AlertDialogDescription>
-                            {user.disabled 
+                            {user.disabled === true 
                               ? t('users.enableUserDesc', { username: user.username }) 
                               : t('users.disableUserDesc', { username: user.username })}
                           </AlertDialogDescription>
@@ -297,9 +297,9 @@ function UserTable({
                         <AlertDialogFooter>
                           <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                           <AlertDialogAction
-                            onClick={() => onToggleStatus(user.id, user.username, !user.disabled)}
+                            onClick={() => onToggleStatus(user.id, user.username, !(user.disabled === true))}
                           >
-                            {user.disabled 
+                            {user.disabled === true 
                               ? t('users.enableUser') 
                               : t('users.disableUser')}
                           </AlertDialogAction>

@@ -33,7 +33,8 @@ export class MemStorage implements IStorage {
       username: "Usuario Admin",
       email: "admin@ejemplo.com",
       role: UserRole.ADMIN,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      disabled: false
     });
     
     // Segundo usuario con rol normal
@@ -42,7 +43,8 @@ export class MemStorage implements IStorage {
       username: "Usuario Regular",
       email: "usuario@ejemplo.com",
       role: UserRole.USER,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      disabled: false
     });
   }
 
@@ -105,9 +107,11 @@ export class MemStorage implements IStorage {
       throw new Error(`Usuario ${userId} no encontrado`);
     }
     
+    console.log(`[Storage] Toggle status for ${userId}: setting disabled=${disabled}`);
+    
     const updatedUser: FirebaseUser = {
       ...user,
-      disabled
+      disabled: Boolean(disabled) // Asegurarnos de que siempre es un booleano
     };
     
     this.firebaseUsers.set(userId, updatedUser);
@@ -127,4 +131,8 @@ export class MemStorage implements IStorage {
   }
 }
 
+// Para desarrollo usando almacenamiento en memoria
 export const storage = new MemStorage();
+
+// Para producción, se debe usar:
+// import { storage, StorageFactory } from './storage';
