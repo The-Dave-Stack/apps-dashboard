@@ -121,6 +121,9 @@ export default function UserManagement() {
     );
   }
   
+  // Depuración
+  console.log("[UserManagement] Users:", users);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between mb-6">
@@ -264,13 +267,13 @@ function UserTable({
                         <Button 
                           variant="outline" 
                           size="icon"
-                          className={`h-7 w-7 ${user.disabled ? 'bg-muted-foreground/10' : ''}`}
+                          className={`h-7 w-7 ${user.disabled === true ? 'bg-muted-foreground/10' : ''}`}
                           disabled={isUpdatingStatus && selectedUserId === user.id}
                         >
                           {isUpdatingStatus && selectedUserId === user.id ? (
                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
                           ) : (
-                            user.disabled ? (
+                            user.disabled === true ? (
                               <UserX className="h-3.5 w-3.5 text-muted-foreground" />
                             ) : (
                               <Ban className="h-3.5 w-3.5" />
