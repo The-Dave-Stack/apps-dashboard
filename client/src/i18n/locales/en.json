@@ -176,6 +176,7 @@
     "backToHome": "Back to Home"
   },
   "common": {
+    "back": "Back",
     "loading": "Loading data...",
     "cancel": "Cancel",
     "create": "Create",

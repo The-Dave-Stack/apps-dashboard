@@ -24,6 +24,24 @@ export class MemStorage implements IStorage {
     this.users = new Map();
     this.firebaseUsers = new Map();
     this.currentId = 1;
+    
+    // Añadir usuarios de prueba para desarrollo
+    this.firebaseUsers.set("u20InPS27iMb50V9kzjKScKSx4j1", {
+      id: "u20InPS27iMb50V9kzjKScKSx4j1",
+      username: "Usuario Admin",
+      email: "admin@ejemplo.com",
+      role: UserRole.ADMIN,
+      createdAt: new Date().toISOString()
+    });
+    
+    // Segundo usuario con rol normal
+    this.firebaseUsers.set("user123456", {
+      id: "user123456",
+      username: "Usuario Regular",
+      email: "usuario@ejemplo.com",
+      role: UserRole.USER,
+      createdAt: new Date().toISOString()
+    });
   }
 
   async getUser(id: number): Promise<User | undefined> {
