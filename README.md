@@ -42,7 +42,7 @@ Una aplicación web moderna para la gestión centralizada de enlaces, ofreciendo
   - Diseño responsive para dispositivos móviles y escritorio
   - Soporte para tema claro/oscuro con persistencia
   - Multilingüe (Español e Inglés) con detección automática
-  - Almacenamiento seguro en Firebase o PostgreSQL
+  - Almacenamiento seguro en Firebase, PostgreSQL o Supabase
   - Arquitectura de backend flexible con múltiples implementaciones de almacenamiento
 
 - **Seguridad**:
@@ -69,6 +69,7 @@ La aplicación utiliza una arquitectura moderna basada en:
   - Implementaciones múltiples:
     - FirebaseStorage: Utiliza Firebase/Firestore
     - PostgresStorage: Utiliza PostgreSQL con Drizzle ORM
+    - SupabaseStorage: Utiliza Supabase para datos y autenticación
     - MemStorage: Implementación en memoria para desarrollo rápido
   - Autenticación mediante Firebase Authentication
   - Comunicación segura con bases de datos
@@ -76,7 +77,7 @@ La aplicación utiliza una arquitectura moderna basada en:
 - **Almacenamiento de Datos**:
   - Estructura de datos jerárquica (Usuario > Categorías > Aplicaciones)
   - Colecciones basadas en documentos en Firestore
-  - Tablas relacionales en PostgreSQL
+  - Tablas relacionales en PostgreSQL o Supabase
   - Transacciones atómicas para operaciones críticas
   - Abstracciones de consultas mediante APIs dedicadas
 
@@ -85,7 +86,7 @@ La aplicación utiliza una arquitectura moderna basada en:
 BMS está diseñado para adaptarse a diferentes escenarios:
 
 - Configuración mediante variables de entorno
-- Selección de base de datos mediante `BMS_DATABASE` (firebase/postgres/memory)
+- Selección de base de datos mediante `BMS_DATABASE` (firebase/postgres/supabase/memory)
 - Despliegue mediante Docker para entornos aislados y consistentes
 - Arquitectura de múltiples capas para fácil extensibilidad
 - Posibilidad de añadir nuevos proveedores de almacenamiento

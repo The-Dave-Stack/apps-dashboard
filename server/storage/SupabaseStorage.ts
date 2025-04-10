@@ -502,7 +502,7 @@ export class SupabaseStorage implements IStorage {
         
       if (error) throw error;
       
-      return data.map(fav => ({
+      return data.map((fav: any) => ({
         id: fav.bms_apps.id,
         name: fav.bms_apps.name,
         url: fav.bms_apps.url,
@@ -756,9 +756,12 @@ export class SupabaseStorage implements IStorage {
    */
   async getUserById(userId: string): Promise<FirebaseUser | null> {
     try {
-      const { data: user, error } = await this.client.auth.admin.getUserById(userId);
+      const { data, error } = await this.client.auth.admin.getUserById(userId);
       
-      if (error || !user) return null;
+      if (error || !data) return null;
+      
+      // Extraer el usuario del objeto data
+      const user = data.user;
       
       // Obtener rol personalizado
       const { data: userRole } = await this.client
@@ -773,7 +776,7 @@ export class SupabaseStorage implements IStorage {
         email: user.email || '',
         role: userRole?.role || UserRole.USER,
         createdAt: user.created_at,
-        disabled: !user.confirmed_at
+        disabled: !user.email_confirmed_at
       };
     } catch (error) {
       console.error(`[Supabase] Error al obtener usuario ${userId}:`, error);
@@ -840,12 +843,23 @@ export class SupabaseStorage implements IStorage {
         throw new Error(`Usuario ${userId} no encontrado`);
       }
       
+      // Nota: Supabase no tiene una propiedad 'banned' directamente,
+      // pero podemos usar el método para actualizar el usuario.
+      // Dependiendo de la versión de Supabase, podríamos usar diferentes propiedades:
+      // - 'banned'
+      // - 'is_disabled'
+      // - custom user_metadata
+      
       if (disabled) {
         // Deshabilitar usuario
-        await this.client.auth.admin.updateUserById(userId, { banned: true });
+        await this.client.auth.admin.updateUserById(userId, {
+          user_metadata: { disabled: true }
+        });
       } else {
         // Habilitar usuario
-        await this.client.auth.admin.updateUserById(userId, { banned: false });
+        await this.client.auth.admin.updateUserById(userId, {
+          user_metadata: { disabled: false }
+        });
       }
       
       // Devolver usuario actualizado
@@ -921,7 +935,7 @@ export class SupabaseStorage implements IStorage {
    */
   async hasUsers(): Promise<boolean> {
     try {
-      const { data, error, count } = await this.client.auth.admin.listUsers({
+      const { data, error } = await this.client.auth.admin.listUsers({
         perPage: 1,
         page: 1
       });
