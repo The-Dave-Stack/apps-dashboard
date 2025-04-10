@@ -8,11 +8,12 @@
 import { IStorage } from './IStorage';
 import { FirebaseStorage } from './FirebaseStorage';
 import { PostgresStorage } from './PostgresStorage';
+import { SupabaseStorage } from './SupabaseStorage';
 
 /**
  * Tipos de almacenamiento soportados
  */
-export type StorageType = 'firebase' | 'postgres';
+export type StorageType = 'firebase' | 'postgres' | 'supabase';
 
 /**
  * Clase fábrica que proporciona una instancia de almacenamiento
@@ -27,7 +28,11 @@ export class StorageFactory {
    */
   static getConfiguredStorageType(): StorageType {
     const databaseType = process.env.BMS_DATABASE?.toLowerCase() || 'firebase';
-    return databaseType === 'postgres' ? 'postgres' : 'firebase';
+    
+    if (databaseType === 'postgres') return 'postgres';
+    if (databaseType === 'supabase') return 'supabase';
+    
+    return 'firebase'; // Por defecto, usar Firebase
   }
 
   /**
@@ -40,10 +45,16 @@ export class StorageFactory {
 
       console.log(`[StorageFactory] Usando almacenamiento: ${storageType}`);
 
-      if (storageType === 'postgres') {
-        this.instance = new PostgresStorage();
-      } else {
-        this.instance = new FirebaseStorage();
+      switch (storageType) {
+        case 'postgres':
+          this.instance = new PostgresStorage();
+          break;
+        case 'supabase':
+          this.instance = new SupabaseStorage();
+          break;
+        default:
+          this.instance = new FirebaseStorage();
+          break;
       }
     }
 
