@@ -1,0 +1,20 @@
+### 🎨 Guía de Estilos – The Dave Stack
+
+| Rol / Uso              | Nombre del Color            | HEX       | RGB             | Descripción                                                      |
+|------------------------|-----------------------------|-----------|------------------|------------------------------------------------------------------|
+| **Primario**           | Teal Profundo               | `#199A9A` | (25, 154, 154)   | Color base de marca, botones principales, enlaces clave         |
+| **Secundario**         | Verde Menta                 | `#1EDAB4` | (30, 218, 180)   | Color de apoyo y hover, acentos secundarios                     |
+| **Texto principal**    | Azul Petróleo Profundo      | `#093142` | (9, 49, 66)      | Color de texto para fondos claros (modo claro)                  |
+| **Texto invertido**    | Blanco                      | `#FFFFFF` | (255, 255, 255)  | Color de texto sobre fondo oscuro (modo dark)                   |
+| **Texto oscuro (dark)**| Gris Claro Niebla           | `#F4F7F8` | (244, 247, 248)  | Texto base en modo oscuro                                       |
+| **Fondo claro**        | Gris Claro Niebla           | `#F4F7F8` | (244, 247, 248)  | Fondo general del sitio en modo claro                          |
+| **Fondo oscuro**       | Azul Nocturno               | `#091E42` | (9, 30, 66)      | Fondo general del sitio en modo oscuro                         |
+| **Fondo alternativo**  | Azul Petróleo Profundo      | `#093142` | (9, 49, 66)      | Cards o secciones oscuras en dark mode                         |
+| **Bordes claros**      | Gris Suave                  | `#DCE3E5` | (220, 227, 229)  | Bordes, líneas divisorias en modo claro                        |
+| **Bordes oscuros**     | Gris Azul Oscuro            | `#1D2B38` | (29, 43, 56)     | Bordes sutiles en modo oscuro                                  |
+| **Link**               | Teal Profundo               | `#199A9A` | (25, 154, 154)   | Color de enlace por defecto                                    |
+| **Link hover**         | Verde Menta                 | `#1EDAB4` | (30, 218, 180)   | Color al pasar el ratón o enfocar un enlace                    |
+| **Botones (texto)**    | Blanco                      | `#FFFFFF` | (255, 255, 255)  | Para texto dentro de botones principales                       |
+| **Botones (hover)**    | Verde Menta                 | `#1EDAB4` | (30, 218, 180)   | Color de fondo o borde al pasar sobre el botón                 |
+| **Danger**             | Rojo Alerta                 | `#C31717` | (195, 23, 23)    | Color de error, advertencias o elementos críticos               |
+| **Success**            | Verde Menta                 | `#1EDAB4` | (30, 218, 180)   | Confirmación o notificaciones positivas                         |

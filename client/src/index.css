@@ -4,67 +4,75 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 47.4% 11.2%;
+    /* Colores de The Dave Stack - Modo Claro */
+    --background: 195 5% 96%; /* Gris Claro Niebla #F4F7F8 */
+    --foreground: 200 76% 15%; /* Azul Petróleo Profundo #093142 */
     
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 195 5% 96%; /* Gris Claro Niebla #F4F7F8 */
+    --muted-foreground: 200 76% 25%; /* Variante más clara de Azul Petróleo */
     
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 47.4% 11.2%;
+    --popover: 0 0% 100%; /* Blanco #FFFFFF */
+    --popover-foreground: 200 76% 15%; /* Azul Petróleo Profundo #093142 */
     
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
+    --border: 195 10% 88%; /* Gris Suave #DCE3E5 */
+    --input: 195 10% 88%; /* Gris Suave #DCE3E5 */
     
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 47.4% 11.2%;
+    --card: 0 0% 100%; /* Blanco #FFFFFF */
+    --card-foreground: 200 76% 15%; /* Azul Petróleo Profundo #093142 */
     
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 180 72% 35%; /* Teal Profundo #199A9A */
+    --primary-foreground: 0 0% 100%; /* Blanco #FFFFFF */
     
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 165 76% 49%; /* Verde Menta #1EDAB4 */
+    --secondary-foreground: 200 76% 15%; /* Azul Petróleo Profundo #093142 */
     
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 165 76% 49%; /* Verde Menta #1EDAB4 */
+    --accent-foreground: 200 76% 15%; /* Azul Petróleo Profundo #093142 */
     
-    --destructive: 0 92% 38%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 80% 43%; /* Rojo Alerta #C31717 */
+    --destructive-foreground: 0 0% 100%; /* Blanco #FFFFFF */
     
-    --ring: 215 20.2% 65.1%;
+    --ring: 180 72% 35%; /* Teal Profundo #199A9A */
+    
+    --success: 165 76% 49%; /* Verde Menta #1EDAB4 */
+    --success-foreground: 200 76% 15%; /* Azul Petróleo Profundo #093142 */
     
     --radius: 0.5rem;
   }
   
   .dark {
-    --background: 224 71% 4%;
-    --foreground: 213 31% 91%;
+    /* Colores de The Dave Stack - Modo Oscuro */
+    --background: 217 76% 15%; /* Azul Nocturno #091E42 */
+    --foreground: 195 5% 96%; /* Gris Claro Niebla #F4F7F8 */
     
-    --muted: 223 47% 11%;
-    --muted-foreground: 215.4 16.3% 56.9%;
+    --muted: 200 34% 17%; /* Gris Azul Oscuro #1D2B38 */
+    --muted-foreground: 195 5% 75%; /* Variante más clara de Gris Claro Niebla */
     
-    --accent: 216 34% 17%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 180 72% 35%; /* Teal Profundo #199A9A */
+    --accent-foreground: 0 0% 100%; /* Blanco #FFFFFF */
     
-    --popover: 224 71% 4%;
-    --popover-foreground: 215 20.2% 65.1%;
+    --popover: 217 76% 15%; /* Azul Nocturno #091E42 */
+    --popover-foreground: 195 5% 96%; /* Gris Claro Niebla #F4F7F8 */
     
-    --border: 216 34% 17%;
-    --input: 216 34% 17%;
+    --border: 200 34% 17%; /* Gris Azul Oscuro #1D2B38 */
+    --input: 200 34% 17%; /* Gris Azul Oscuro #1D2B38 */
     
-    --card: 224 71% 4%;
-    --card-foreground: 213 31% 91%;
+    --card: 200 76% 15%; /* Azul Petróleo Profundo #093142 */
+    --card-foreground: 195 5% 96%; /* Gris Claro Niebla #F4F7F8 */
     
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 1.2%;
+    --primary: 180 72% 35%; /* Teal Profundo #199A9A */
+    --primary-foreground: 0 0% 100%; /* Blanco #FFFFFF */
     
-    --secondary: 222.2 47.4% 11.2%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 165 76% 49%; /* Verde Menta #1EDAB4 */
+    --secondary-foreground: 0 0% 100%; /* Blanco #FFFFFF */
     
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 80% 43%; /* Rojo Alerta #C31717 */
+    --destructive-foreground: 0 0% 100%; /* Blanco #FFFFFF */
     
-    --ring: 216 34% 17%;
+    --ring: 180 72% 35%; /* Teal Profundo #199A9A */
+    
+    --success: 165 76% 49%; /* Verde Menta #1EDAB4 */
+    --success-foreground: 0 0% 100%; /* Blanco #FFFFFF */
   }
 
   * {
