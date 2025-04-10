@@ -107,8 +107,10 @@ BMS está diseñado para adaptarse a diferentes escenarios:
    VITE_FIREBASE_APP_ID=tu_app_id
    
    # Base de datos (opcional)
-   BMS_DATABASE=firebase    # O "postgres" o "memory"
+   BMS_DATABASE=firebase    # O "postgres", "supabase" o "memory"
    DATABASE_URL=postgres://usuario:contraseña@localhost:5432/bms    # Solo para PostgreSQL
+   SUPABASE_URL=https://tu-proyecto.supabase.co    # Solo para Supabase
+   SUPABASE_KEY=tu_api_key_supabase    # Solo para Supabase
    
    # Configuración de servidor (opcional)
    PORT=5000
@@ -202,6 +204,44 @@ Para utilizar la aplicación con Firebase:
    }
    ```
 
+## Configuración de Supabase
+
+Para utilizar la aplicación con Supabase:
+
+1. Ir a la [Consola de Supabase](https://supabase.com/dashboard)
+2. Crear un nuevo proyecto
+3. Obtener la URL y la API Key de Supabase desde Configuration > API
+4. Habilitar Autenticación en Authentication > Providers:
+   - Email/Password para registro local
+   - Google para inicio de sesión social (opcional)
+5. Crear las siguientes tablas en Database > Tables:
+   - `bms_user_roles` - Roles de usuarios (se crea automáticamente)
+   - `bms_categories` - Categorías de aplicaciones
+   - `bms_apps` - Aplicaciones individuales
+   - `bms_favorites` - Marcadores de favoritos
+   - `bms_accesses` - Registro de accesos a aplicaciones
+   - `bms_config` - Configuración global de la aplicación
+
+6. Configurar políticas de seguridad RLS (Row Level Security) para cada tabla:
+   ```sql
+   -- Ejemplo para bms_categories
+   CREATE POLICY "Usuarios pueden ver sus propias categorías" 
+   ON bms_categories FOR SELECT 
+   USING (auth.uid() = user_id);
+   
+   CREATE POLICY "Usuarios pueden crear sus propias categorías" 
+   ON bms_categories FOR INSERT 
+   WITH CHECK (auth.uid() = user_id);
+   
+   CREATE POLICY "Usuarios pueden actualizar sus propias categorías" 
+   ON bms_categories FOR UPDATE 
+   USING (auth.uid() = user_id);
+   
+   CREATE POLICY "Usuarios pueden eliminar sus propias categorías" 
+   ON bms_categories FOR DELETE 
+   USING (auth.uid() = user_id);
+   ```
+
 ## Estructura del Proyecto
 
 ```
@@ -221,6 +261,7 @@ bookmark-manager-sync/
 │   │   ├── StorageFactory.ts  # Fábrica para seleccionar implementación
 │   │   ├── FirebaseStorage.ts # Implementación con Firebase
 │   │   ├── PostgresStorage.ts # Implementación con PostgreSQL
+│   │   ├── SupabaseStorage.ts # Implementación con Supabase
 │   │   └── MemStorage.ts   # Implementación en memoria
 │   ├── index.ts            # Punto de entrada del servidor
 │   └── routes.ts           # Definición de rutas API
