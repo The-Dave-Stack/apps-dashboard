@@ -272,7 +272,8 @@ export default function Auth() {
                   
                   <Button 
                     type="submit" 
-                    className="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow-sm transition-colors" 
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium shadow-sm transition-colors" 
+                    size="lg"
                     disabled={isLoading}
                   >
                     {isLoading ? t('auth.loggingIn', 'Logging in...') : t('auth.loginButton', 'Login')}
