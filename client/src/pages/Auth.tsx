@@ -131,8 +131,8 @@ export default function Auth() {
         // Verificación de registro
         if (password !== confirmPassword) {
           toast({
-            title: "Error",
-            description: "Las contraseñas no coinciden",
+            title: t('errors.passwordMismatch', 'Error'),
+            description: t('errors.confirmPasswordMatch', 'Passwords do not match'),
             variant: "destructive",
           });
           setIsLoading(false);
@@ -145,8 +145,8 @@ export default function Auth() {
           await registerWithEmail(email, password);
           
           toast({
-            title: "Registro exitoso",
-            description: "Tu cuenta ha sido creada",
+            title: t('auth.registerSuccess', 'Registration successful'),
+            description: t('auth.accountCreated', 'Your account has been created'),
           });
           
           // Redirigir al dashboard
@@ -154,8 +154,8 @@ export default function Auth() {
         } catch (registerError: any) {
           console.error("Registration error:", registerError);
           toast({
-            title: "Error de registro",
-            description: registerError.message || "No se pudo completar el registro.",
+            title: t('errors.registrationFailed', 'Registration failed'),
+            description: registerError.message || t('errors.registrationError', 'Registration could not be completed.'),
             variant: "destructive",
           });
           setIsLoading(false);
@@ -164,8 +164,8 @@ export default function Auth() {
     } catch (error: any) {
       console.error("Authentication error:", error);
       toast({
-        title: "Error de autenticación",
-        description: error.message || "Fallo al autenticar",
+        title: t('errors.authFailed', 'Authentication error'),
+        description: error.message || t('errors.genericAuth', 'Authentication failed'),
         variant: "destructive",
       });
       setIsLoading(false);

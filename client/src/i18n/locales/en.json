@@ -35,7 +35,18 @@
     "loginHere": "Login here",
     "registerHere": "Register here",
     "logoutSuccess": "You have successfully logged out",
-    "logoutError": "Error logging out"
+    "logoutError": "Error logging out",
+    "emailPlaceholder": "your@email.com",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password?",
+    "loggingIn": "Logging in...",
+    "creatingAccount": "Creating account...",
+    "fullName": "Full Name",
+    "namePlaceholder": "John Doe",
+    "loginSuccess": "Login successful",
+    "welcomeBack": "Welcome back!",
+    "registerSuccess": "Registration successful",
+    "accountCreated": "Your account has been created"
   },
   "dashboard": {
     "welcome": "Welcome",

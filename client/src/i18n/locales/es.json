@@ -35,7 +35,18 @@
     "loginHere": "Inicia sesión aquí",
     "registerHere": "Regístrate aquí",
     "logoutSuccess": "Has cerrado sesión correctamente",
-    "logoutError": "Error al cerrar sesión"
+    "logoutError": "Error al cerrar sesión",
+    "emailPlaceholder": "tu@correo.com",
+    "rememberMe": "Recordarme",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "loggingIn": "Iniciando sesión...",
+    "creatingAccount": "Creando cuenta...",
+    "fullName": "Nombre completo",
+    "namePlaceholder": "Juan Pérez",
+    "loginSuccess": "Inicio de sesión exitoso",
+    "welcomeBack": "¡Bienvenido de nuevo!",
+    "registerSuccess": "Registro exitoso",
+    "accountCreated": "Tu cuenta ha sido creada"
   },
   "dashboard": {
     "welcome": "Bienvenido",
