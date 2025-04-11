@@ -1,7 +1,7 @@
 /**
- * @fileoverview Utilidades de diagnóstico para comprobar la conexión con Firebase
- * Este módulo proporciona funciones para verificar la disponibilidad y el estado
- * de los servicios de Firebase, incluyendo Firestore y Authentication.
+ * @fileoverview Diagnostic utilities to check Firebase connection
+ * This module provides functions to verify the availability and status
+ * of Firebase services, including Firestore and Authentication.
  * @module lib/firebase-check
  */
 
@@ -10,13 +10,13 @@ import { collection, getDocs, doc, setDoc, getDoc } from 'firebase/firestore';
 import { getCurrentUser } from "./auth";
 
 /**
- * Interfaz que define el resultado de la comprobación de Firebase
+ * Interface that defines the result of Firebase check
  * @interface FirebaseCheckResult
- * @property {boolean} connection - Indica si se pudo establecer conexión con Firebase
- * @property {boolean} read - Indica si se pudieron leer datos de Firestore
- * @property {boolean} write - Indica si se pudieron escribir datos en Firestore
- * @property {boolean} auth - Indica si hay un usuario autenticado
- * @property {string} [error] - Mensaje de error, si ocurrió alguno
+ * @property {boolean} connection - Indicates if a connection could be established with Firebase
+ * @property {boolean} read - Indicates if data could be read from Firestore
+ * @property {boolean} write - Indicates if data could be written to Firestore
+ * @property {boolean} auth - Indicates if there is an authenticated user
+ * @property {string} [error] - Error message, if any occurred
  */
 interface FirebaseCheckResult {
   connection: boolean;
@@ -27,17 +27,17 @@ interface FirebaseCheckResult {
 }
 
 /**
- * Realiza una verificación completa de la conexión y permisos con Firebase.
- * Comprueba autenticación, conexión a Firestore, y permisos de lectura y escritura.
+ * Performs a complete check of the connection and permissions with Firebase.
+ * Verifies authentication, connection to Firestore, and read/write permissions.
  * 
  * @async
- * @returns {Promise<FirebaseCheckResult>} Resultado detallado de la comprobación
+ * @returns {Promise<FirebaseCheckResult>} Detailed check result
  * @example
  * const checkResult = await checkFirebaseConnection();
  * if (checkResult.connection && checkResult.read && checkResult.write) {
- *   console.log("Firebase funciona correctamente");
+ *   console.log("Firebase is working correctly");
  * } else {
- *   console.error("Problema con Firebase:", checkResult.error);
+ *   console.error("Problem with Firebase:", checkResult.error);
  * }
  */
 export async function checkFirebaseConnection(): Promise<FirebaseCheckResult> {

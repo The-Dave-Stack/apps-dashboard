@@ -1,7 +1,7 @@
 /**
- * @fileoverview Inicialización del SDK de Firebase para el servidor
- * Este módulo proporciona una función para obtener instancias de Firebase
- * configuradas para su uso en el servidor.
+ * @fileoverview Firebase SDK initialization for server
+ * This module provides a function to get Firebase instances
+ * configured for server-side use.
  * @module lib/firebase-init
  */
 
@@ -9,16 +9,16 @@ import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
 
-// Función que devuelve las instancias de Firebase necesarias para el servidor
+// Function that returns the Firebase instances needed for the server
 export function getFirebaseInstances() {
-  // Verifica si ya hay una app inicializada
+  // Verify if there's already an initialized app
   if (getApps().length === 0) {
-    // Si no hay service account configurado, intentar usar credenciales de entorno
+    // If no service account is configured, try using environment credentials
     const firebaseConfig = {
       projectId: process.env.FIREBASE_PROJECT_ID || 'appsdashboard-ef2e1',
     };
 
-    // Si hay credenciales definidas como variable de entorno, usarlas
+    // If credentials are defined as an environment variable, use them
     if (process.env.FIREBASE_SERVICE_ACCOUNT) {
       try {
         const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
@@ -26,17 +26,17 @@ export function getFirebaseInstances() {
           credential: cert(serviceAccount),
         });
       } catch (error) {
-        console.error('Error al inicializar Firebase con service account:', error);
-        // Fallar silenciosamente a la inicialización básica
+        console.error('Error initializing Firebase with service account:', error);
+        // Silently fail to basic initialization
         initializeApp(firebaseConfig);
       }
     } else {
-      // Inicialización básica para entornos de desarrollo o cuando no hay service account
+      // Basic initialization for development environments or when there's no service account
       initializeApp(firebaseConfig);
     }
   }
 
-  // Obtener y devolver las instancias necesarias
+  // Get and return the necessary instances
   const db = getFirestore();
   const auth = getAuth();
 

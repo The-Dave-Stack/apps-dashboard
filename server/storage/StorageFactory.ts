@@ -23,8 +23,8 @@ export class StorageFactory {
   private static instance: IStorage | null = null;
 
   /**
-   * Obtiene el tipo de almacenamiento configurado en las variables de entorno
-   * @returns El tipo de almacenamiento configurado
+   * Gets the storage type configured in environment variables
+   * @returns The configured storage type
    */
   static getConfiguredStorageType(): StorageType {
     const databaseType = process.env.BMS_DATABASE?.toLowerCase() || 'firebase';
@@ -32,18 +32,18 @@ export class StorageFactory {
     if (databaseType === 'postgres') return 'postgres';
     if (databaseType === 'supabase') return 'supabase';
     
-    return 'firebase'; // Por defecto, usar Firebase
+    return 'firebase'; // Default, use Firebase
   }
 
   /**
-   * Crea y devuelve una instancia de almacenamiento según la configuración
-   * @returns Una instancia de almacenamiento que implementa IStorage
+   * Creates and returns a storage instance based on configuration
+   * @returns A storage instance implementing IStorage
    */
   static getStorage(): IStorage {
     if (!this.instance) {
       const storageType = this.getConfiguredStorageType();
 
-      console.log(`[StorageFactory] Usando almacenamiento: ${storageType}`);
+      console.log(`[StorageFactory] Using storage: ${storageType}`);
 
       switch (storageType) {
         case 'postgres':
@@ -62,8 +62,8 @@ export class StorageFactory {
   }
 
   /**
-   * Reinicia la instancia de almacenamiento
-   * Útil para pruebas o cuando cambia la configuración
+   * Resets the storage instance
+   * Useful for testing or when configuration changes
    */
   static resetStorage(): void {
     this.instance = null;
