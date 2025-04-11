@@ -8,6 +8,8 @@
     "categories": "Categorías",
     "favorites": "Favoritos",
     "recent": "Recientes",
+    "statistics": "Estadísticas",
+    "stats": "Estadís",
     "search": "Buscar",
     "settings": "Configuración",
     "admin": "Administración",
@@ -78,6 +80,36 @@
     "appsWillAppear": "Las aplicaciones que uses aparecerán aquí", 
     "lastDay": "Último día",
     "errorLoading": "No se pudo cargar tu historial de aplicaciones recientes"
+  },
+  "statistics": {
+    "title": "Estadísticas",
+    "subtitle": "Visualiza analíticas sobre el uso de tus aplicaciones",
+    "periods": {
+      "week": "Últimos 7 días",
+      "month": "Últimos 30 días",
+      "allTime": "Todo el tiempo"
+    },
+    "totalAccesses": "Accesos Totales",
+    "mostActiveHour": "Hora Más Activa",
+    "mostActiveDay": "Día Más Activo",
+    "hourlyActivity": "Actividad por Hora",
+    "hourlyActivityDesc": "Número de accesos por hora del día",
+    "dailyActivity": "Actividad por Día",
+    "dailyActivityDesc": "Número de accesos por día de la semana",
+    "topApps": "Apps Más Usadas",
+    "topAppsDesc": "Tus aplicaciones más frecuentemente accedidas",
+    "noData": "Sin datos de uso aún",
+    "useMoreApps": "Comienza a usar aplicaciones para ver tus estadísticas de uso",
+    "days": {
+      "monday": "Lunes",
+      "tuesday": "Martes",
+      "wednesday": "Miércoles",
+      "thursday": "Jueves",
+      "friday": "Viernes",
+      "saturday": "Sábado",
+      "sunday": "Domingo"
+    },
+    "accesses": "accesos"
   },
   "admin": {
     "title": "Panel de Administración",

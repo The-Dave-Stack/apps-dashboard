@@ -1,370 +1,367 @@
-import { useState, useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/lib/hooks";
-import { getFirebaseInstances } from "@/lib/firebase-init";
-import { collection, doc, query, getDocs, orderBy, limit, Timestamp, where } from "firebase/firestore";
-import { AppData } from "@/lib/types";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AlertTriangle, TrendingUp, Clock, Calendar, Award, BarChartIcon, PieChartIcon } from "lucide-react";
+import { 
+  BarChart as BarChartIcon, 
+  Clock, 
+  Calendar
+} from "lucide-react";
+import {
+  BarChart as BarChartComponent,
+  LineChart,
+  Line,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from "recharts";
+import { collection, doc, getDoc, getDocs, query, where, DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
+import { useAuth } from "@/lib/hooks";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import AppCard from "@/components/AppCard";
+import { getFirebaseInstances } from "@/lib/firebase-init";
 
-// Colores para gráficos
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d', '#ffc658'];
+// Interfaces para los datos
+interface UsageStats {
+  totalAccesses: number;
+  mostActiveHour: number;
+  mostActiveDay: string;
+  hourlyActivity: { hour: number; count: number }[];
+  dailyActivity: { day: string; count: number }[];
+  topApps: { id: string; name: string; icon: string; url: string; count: number }[];
+}
 
-// Interfaz para los datos de acceso
 interface AccessData {
   appId: string;
   appName: string;
-  timestamp: Timestamp;
-  accessDate: string;
-  hourOfDay: number;
-  dayOfWeek: number;
-}
-
-// Interfaz para datos de app con número de accesos
-interface AppAccessCount {
-  id: string;
-  name: string;
-  icon: string;
-  url: string;
-  count: number;
+  appIcon: string;
+  appUrl: string;
+  hour: number;
+  day: number;
+  timestamp: Date;
 }
 
 export default function Statistics() {
-  const { toast } = useToast();
-  const { user } = useAuth();
-  const { db } = getFirebaseInstances();
   const { t } = useTranslation();
-  
-  const [isLoading, setIsLoading] = useState(true);
-  const [accessData, setAccessData] = useState<AccessData[]>([]);
-  const [topApps, setTopApps] = useState<AppAccessCount[]>([]);
-  const [hourlyData, setHourlyData] = useState<{hour: number, count: number}[]>([]);
-  const [weekdayData, setWeekdayData] = useState<{day: string, count: number}[]>([]);
-  const [totalAccesses, setTotalAccesses] = useState(0);
-  const [timeframe, setTimeframe] = useState("7days"); // 7days, 30days, alltime
-  
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState<'week' | 'month' | 'allTime'>('week');
+  const [stats, setStats] = useState<UsageStats | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // Función auxiliar para obtener el nombre del día
+  const getDayName = (dayIndex: number): string => {
+    const days = [
+      t("statistics.days.sunday"),
+      t("statistics.days.monday"),
+      t("statistics.days.tuesday"),
+      t("statistics.days.wednesday"),
+      t("statistics.days.thursday"),
+      t("statistics.days.friday"),
+      t("statistics.days.saturday")
+    ];
+    return days[dayIndex];
+  };
+
+  // Obtener estadísticas de uso
   useEffect(() => {
-    loadStatistics();
-  }, [user, timeframe]);
-  
-  const loadStatistics = async () => {
-    if (!user) {
-      setIsLoading(false);
-      return;
-    }
-    
-    try {
-      setIsLoading(true);
-      
-      // Referencia a la colección de historial
-      const userHistoryRef = collection(doc(db, "users", user.uid), "history");
-      
-      // Filtrar por período si es necesario
-      let historyQuery;
-      if (timeframe !== "alltime") {
-        const daysAgo = timeframe === "7days" ? 7 : 30;
-        const startDate = new Date();
-        startDate.setDate(startDate.getDate() - daysAgo);
+    if (!user) return;
+
+    const fetchStatistics = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        // Obtener Firestore
+        const { db } = getFirebaseInstances();
         
-        historyQuery = query(
-          userHistoryRef, 
-          where("timestamp", ">=", startDate),
-          orderBy("timestamp", "desc")
-        );
-      } else {
-        historyQuery = query(userHistoryRef, orderBy("timestamp", "desc"));
-      }
-      
-      const historySnapshot = await getDocs(historyQuery);
-      
-      if (historySnapshot.empty) {
-        setAccessData([]);
-        setTopApps([]);
-        setHourlyData([]);
-        setWeekdayData([]);
-        setTotalAccesses(0);
-        setIsLoading(false);
-        return;
-      }
-      
-      // Procesar los datos de acceso
-      const accesses: AccessData[] = [];
-      const appAccessCount: Record<string, AppAccessCount> = {};
-      const hourCount: Record<number, number> = {};
-      const dayCount: Record<number, number> = {};
-      
-      // Inicializar contadores para cada hora y día
-      for (let i = 0; i < 24; i++) {
-        hourCount[i] = 0;
-      }
-      
-      for (let i = 0; i < 7; i++) {
-        dayCount[i] = 0;
-      }
-      
-      historySnapshot.forEach(doc => {
-        const data = doc.data();
-        const timestamp = data.timestamp as Timestamp;
-        const date = timestamp.toDate();
+        // Calcular la fecha límite según el período seleccionado
+        const now = new Date();
+        let limitDate = new Date();
+        if (period === 'week') {
+          limitDate.setDate(now.getDate() - 7);
+        } else if (period === 'month') {
+          limitDate.setDate(now.getDate() - 30);
+        } else {
+          // For 'allTime', set a very old date
+          limitDate = new Date(2020, 0, 1);
+        }
+
+        // Obtener historial de accesos
+        const accessesRef = collection(db, 'users', user.uid, 'accessHistory');
         
-        // Extraer hora y día de la semana
-        const hour = date.getHours();
-        const day = date.getDay(); // 0 = Domingo, 6 = Sábado
-        
-        // Incrementar contadores
-        hourCount[hour]++;
-        dayCount[day]++;
-        
-        // Preparar datos de acceso
-        const access: AccessData = {
-          appId: data.appId,
-          appName: data.name,
-          timestamp,
-          accessDate: date.toLocaleDateString(),
-          hourOfDay: hour,
-          dayOfWeek: day
-        };
-        
-        accesses.push(access);
-        
-        // Contar accesos por aplicación
-        if (!appAccessCount[data.appId]) {
-          appAccessCount[data.appId] = {
-            id: data.appId,
-            name: data.name,
-            icon: data.icon,
-            url: data.url,
-            count: 0
-          };
+        let accessQuery;
+        if (period !== 'allTime') {
+          accessQuery = query(accessesRef, where('timestamp', '>=', limitDate));
+        } else {
+          accessQuery = query(accessesRef);
         }
         
-        appAccessCount[data.appId].count++;
-      });
-      
-      // Convertir datos para gráficos
-      const hourlyDataArray = Object.entries(hourCount).map(([hour, count]) => ({
-        hour: parseInt(hour),
-        count
-      }));
-      
-      const weekdays = [
-        t('statistics.days.sunday'),
-        t('statistics.days.monday'),
-        t('statistics.days.tuesday'),
-        t('statistics.days.wednesday'),
-        t('statistics.days.thursday'),
-        t('statistics.days.friday'),
-        t('statistics.days.saturday')
-      ];
-      
-      const weekdayDataArray = Object.entries(dayCount).map(([day, count]) => ({
-        day: weekdays[parseInt(day)],
-        count
-      }));
-      
-      // Ordenar aplicaciones por número de accesos
-      const topAppsArray = Object.values(appAccessCount)
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 5);
-      
-      setAccessData(accesses);
-      setTopApps(topAppsArray);
-      setHourlyData(hourlyDataArray);
-      setWeekdayData(weekdayDataArray);
-      setTotalAccesses(accesses.length);
-      
-    } catch (error) {
-      console.error("Error al cargar estadísticas:", error);
-      toast({
-        title: t('errors.title'),
-        description: t('errors.loadingData'),
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const formatHour = (hour: number) => {
-    return `${hour}:00`;
-  };
-  
+        const accessesSnapshot = await getDocs(accessQuery);
+        
+        // Si no hay datos, establecer valores predeterminados
+        if (accessesSnapshot.empty) {
+          setStats({
+            totalAccesses: 0,
+            mostActiveHour: 0,
+            mostActiveDay: getDayName(new Date().getDay()),
+            hourlyActivity: Array.from({ length: 24 }, (_, i) => ({ hour: i, count: 0 })),
+            dailyActivity: Array.from({ length: 7 }, (_, i) => ({ day: getDayName(i), count: 0 })),
+            topApps: []
+          });
+          setLoading(false);
+          return;
+        }
+
+        // Procesar los datos para las estadísticas
+        const accesses: AccessData[] = accessesSnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
+          const data = doc.data();
+          const timestamp = data.timestamp?.toDate() || new Date();
+          return {
+            appId: data.appId,
+            appName: data.appName || "Unknown",
+            appIcon: data.appIcon || "",
+            appUrl: data.appUrl || "#",
+            hour: timestamp.getHours(),
+            day: timestamp.getDay(),
+            timestamp
+          };
+        });
+
+        // Calcular estadísticas
+        const totalAccesses = accesses.length;
+        
+        // Contar por hora
+        const hourCounts = Array(24).fill(0);
+        accesses.forEach((access: AccessData) => hourCounts[access.hour]++);
+        const mostActiveHour = hourCounts.indexOf(Math.max(...hourCounts));
+        
+        // Contar por día
+        const dayCounts = Array(7).fill(0);
+        accesses.forEach((access: AccessData) => dayCounts[access.day]++);
+        const mostActiveDay = getDayName(dayCounts.indexOf(Math.max(...dayCounts)));
+        
+        // Estadística de actividad por hora
+        const hourlyActivity = hourCounts.map((count, hour) => ({
+          hour,
+          count
+        }));
+        
+        // Estadística de actividad por día
+        const dailyActivity = dayCounts.map((count, dayIndex) => ({
+          day: getDayName(dayIndex),
+          count
+        }));
+        
+        // Top apps por uso
+        const appCounts: Record<string, { count: number; name: string; icon: string; url: string }> = {};
+        accesses.forEach((access: AccessData) => {
+          if (!appCounts[access.appId]) {
+            appCounts[access.appId] = { 
+              count: 0, 
+              name: access.appName, 
+              icon: access.appIcon,
+              url: access.appUrl
+            };
+          }
+          appCounts[access.appId].count++;
+        });
+        
+        const topApps = Object.entries(appCounts)
+          .map(([id, { count, name, icon, url }]) => ({ id, name, icon, url, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 5);
+        
+        setStats({
+          totalAccesses,
+          mostActiveHour,
+          mostActiveDay,
+          hourlyActivity,
+          dailyActivity,
+          topApps
+        });
+      } catch (err) {
+        console.error("Error fetching statistics:", err);
+        setError(t("errors.dataLoadError"));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStatistics();
+  }, [user, period, t]);
+
   return (
-    <>
-      {/* Título de la página */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-primary-600">{t('statistics.title')}</h1>
-        <p className="text-neutral-500 mt-1">{t('statistics.subtitle')}</p>
-      </div>
-      
-      {/* Selector de período */}
-      <div className="mb-6">
-        <Tabs value={timeframe} onValueChange={setTimeframe} className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
-            <TabsTrigger value="7days">{t('statistics.periods.week')}</TabsTrigger>
-            <TabsTrigger value="30days">{t('statistics.periods.month')}</TabsTrigger>
-            <TabsTrigger value="alltime">{t('statistics.periods.allTime')}</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-      
-      {/* Contenido de estadísticas */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="bg-white rounded-lg shadow-sm border border-neutral-200 p-6 h-64">
-              <div className="h-6 bg-neutral-200 rounded w-1/2 mb-4"></div>
-              <div className="h-4 bg-neutral-200 rounded w-3/4 mb-8"></div>
-              <div className="h-32 bg-neutral-100 rounded w-full"></div>
-            </div>
-          ))}
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{t("statistics.title")}</h1>
+          <p className="text-muted-foreground mt-1">{t("statistics.subtitle")}</p>
         </div>
-      ) : (
-        <>
-          {totalAccesses > 0 ? (
-            <div className="space-y-6">
-              {/* Tarjetas de resumen */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      </div>
+
+      <Tabs defaultValue="week" value={period} onValueChange={(value) => setPeriod(value as any)}>
+        <TabsList>
+          <TabsTrigger value="week">{t("statistics.periods.week")}</TabsTrigger>
+          <TabsTrigger value="month">{t("statistics.periods.month")}</TabsTrigger>
+          <TabsTrigger value="allTime">{t("statistics.periods.allTime")}</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value={period} className="space-y-6 mt-6">
+          {loading ? (
+            // Esqueleto para carga
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Card key={i}>
+                  <CardHeader className="pb-2">
+                    <Skeleton className="h-4 w-1/2 mb-2" />
+                    <Skeleton className="h-8 w-1/3" />
+                  </CardHeader>
+                  <CardContent>
+                    <Skeleton className="h-4 w-3/4" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : error ? (
+            // Mensaje de error
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <p className="text-destructive">{error}</p>
+              </CardContent>
+            </Card>
+          ) : stats && stats.totalAccesses > 0 ? (
+            // Contenido principal
+            <>
+              {/* Indicadores principales */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg flex items-center">
-                      <TrendingUp className="h-5 w-5 mr-2 text-primary-500" />
-                      {t('statistics.totalAccesses')}
+                    <CardTitle className="text-lg font-medium flex items-center">
+                      <BarChartIcon className="mr-2 h-5 w-5 text-primary" />
+                      {t("statistics.totalAccesses")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-3xl font-bold">{totalAccesses}</p>
+                    <p className="text-3xl font-bold">{stats.totalAccesses}</p>
                   </CardContent>
                 </Card>
                 
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg flex items-center">
-                      <Clock className="h-5 w-5 mr-2 text-primary-500" />
-                      {t('statistics.mostActiveHour')}
+                    <CardTitle className="text-lg font-medium flex items-center">
+                      <Clock className="mr-2 h-5 w-5 text-primary" />
+                      {t("statistics.mostActiveHour")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-3xl font-bold">
-                      {hourlyData.reduce((prev, current) => (prev.count > current.count) ? prev : current).hour}:00
-                    </p>
+                    <p className="text-3xl font-bold">{stats.mostActiveHour}:00</p>
                   </CardContent>
                 </Card>
                 
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg flex items-center">
-                      <Calendar className="h-5 w-5 mr-2 text-primary-500" />
-                      {t('statistics.mostActiveDay')}
+                    <CardTitle className="text-lg font-medium flex items-center">
+                      <Calendar className="mr-2 h-5 w-5 text-primary" />
+                      {t("statistics.mostActiveDay")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-3xl font-bold">
-                      {weekdayData.reduce((prev, current) => (prev.count > current.count) ? prev : current).day}
-                    </p>
+                    <p className="text-3xl font-bold">{stats.mostActiveDay}</p>
                   </CardContent>
                 </Card>
               </div>
-              
-              {/* Gráficos */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <BarChartIcon className="h-5 w-5 mr-2 text-primary-500" />
-                      {t('statistics.hourlyActivity')}
-                    </CardTitle>
-                    <CardDescription>
-                      {t('statistics.hourlyActivityDesc')}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="h-72">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={hourlyData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                        <XAxis 
-                          dataKey="hour" 
-                          tickFormatter={formatHour}
-                          tick={{ fontSize: 12 }}
-                        />
-                        <YAxis tick={{ fontSize: 12 }} />
-                        <Tooltip 
-                          formatter={(value) => [value, t('statistics.accesses')]}
-                          labelFormatter={(label) => `${label}:00 - ${(label + 1) % 24}:00`}
-                        />
-                        <Bar dataKey="count" fill="#8884d8" name={t('statistics.accesses')} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <BarChartIcon className="h-5 w-5 mr-2 text-primary-500" />
-                      {t('statistics.dailyActivity')}
-                    </CardTitle>
-                    <CardDescription>
-                      {t('statistics.dailyActivityDesc')}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="h-72">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={weekdayData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                        <XAxis dataKey="day" tick={{ fontSize: 12 }} />
-                        <YAxis tick={{ fontSize: 12 }} />
-                        <Tooltip 
-                          formatter={(value) => [value, t('statistics.accesses')]}
-                        />
-                        <Bar dataKey="count" fill="#82ca9d" name={t('statistics.accesses')} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              {/* Top aplicaciones */}
+
+              {/* Gráfica de actividad por hora */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Award className="h-5 w-5 mr-2 text-primary-500" />
-                    {t('statistics.topApps')}
-                  </CardTitle>
-                  <CardDescription>
-                    {t('statistics.topAppsDesc')}
-                  </CardDescription>
+                  <CardTitle>{t("statistics.hourlyActivity")}</CardTitle>
+                  <CardDescription>{t("statistics.hourlyActivityDesc")}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                    {topApps.map((app, index) => (
-                      <AppCard 
-                        key={app.id} 
-                        app={app} 
-                        badge={`${index + 1}. ${app.count} ${t('statistics.accesses')}`} 
-                      />
-                    ))}
-                  </div>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChartComponent
+                      data={stats.hourlyActivity}
+                      margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="hour" />
+                      <YAxis />
+                      <Tooltip formatter={(value) => [`${value} ${t("statistics.accesses")}`, '']} />
+                      <Bar dataKey="count" fill="#8884d8" />
+                    </BarChartComponent>
+                  </ResponsiveContainer>
                 </CardContent>
               </Card>
-            </div>
+
+              {/* Gráfica de actividad por día */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t("statistics.dailyActivity")}</CardTitle>
+                  <CardDescription>{t("statistics.dailyActivityDesc")}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart
+                      data={stats.dailyActivity}
+                      margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="day" />
+                      <YAxis />
+                      <Tooltip formatter={(value) => [`${value} ${t("statistics.accesses")}`, '']} />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="count"
+                        stroke="#8884d8"
+                        activeDot={{ r: 8 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              {/* Top Apps */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t("statistics.topApps")}</CardTitle>
+                  <CardDescription>{t("statistics.topAppsDesc")}</CardDescription>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {stats.topApps.map((app) => (
+                    <AppCard
+                      key={app.id}
+                      app={{
+                        id: app.id,
+                        name: app.name,
+                        icon: app.icon,
+                        url: app.url,
+                        description: ""
+                      }}
+                      badge={<Badge variant="secondary">{app.count} {t("statistics.accesses")}</Badge>}
+                      compact
+                    />
+                  ))}
+                </CardContent>
+              </Card>
+            </>
           ) : (
-            <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-neutral-200">
-              <div className="mx-auto w-16 h-16 mb-4 text-neutral-300">
-                <BarChartIcon className="w-full h-full" />
-              </div>
-              <h3 className="text-lg font-medium text-neutral-700">{t('statistics.noData')}</h3>
-              <p className="text-neutral-500 mt-2">{t('statistics.useMoreApps')}</p>
-            </div>
+            // Sin datos
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <h3 className="text-xl font-semibold mb-2">{t("statistics.noData")}</h3>
+                <p className="text-muted-foreground">{t("statistics.useMoreApps")}</p>
+              </CardContent>
+            </Card>
           )}
-        </>
-      )}
-    </>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }
