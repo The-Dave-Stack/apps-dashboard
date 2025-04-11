@@ -1,6 +1,6 @@
 /**
- * @fileoverview Implementación de almacenamiento con Supabase para Bookmark Manager Sync
- * Este módulo implementa la interfaz IStorage utilizando Supabase como backend.
+ * @fileoverview Supabase storage implementation for Bookmark Manager Sync
+ * This module implements the IStorage interface using Supabase as backend.
  * @module storage/SupabaseStorage
  */
 
@@ -10,7 +10,7 @@ import { createClient, SupabaseClient, User, AdminUserAttributes } from '@supaba
 import crypto from 'crypto';
 
 /**
- * Implementación de almacenamiento utilizando Supabase
+ * Storage implementation using Supabase
  * @class SupabaseStorage
  * @implements {IStorage}
  */
