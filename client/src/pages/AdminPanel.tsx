@@ -624,7 +624,7 @@ export default function AdminPanel() {
         description: newAppData.description
       };
       
-      await saveApp(editingApp.categoryId, updatedApp);
+      await saveApp(updatedApp, editingApp.categoryId);
       
       // Actualizar el estado local
       const updatedCategories = categories.map(cat => {
@@ -681,7 +681,7 @@ export default function AdminPanel() {
     
     try {
       // Eliminar app de Firebase
-      await deleteApp(itemToDelete.categoryId, itemToDelete.id);
+      await deleteApp(itemToDelete.id);
       
       // Actualizar el estado local
       const updatedCategories = categories.map(cat => {
