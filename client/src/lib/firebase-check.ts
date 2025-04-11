@@ -49,84 +49,84 @@ export async function checkFirebaseConnection(): Promise<FirebaseCheckResult> {
   };
 
   try {
-    console.log("[Firebase-Check] Iniciando comprobación de Firebase...");
+    console.log("[Firebase-Check] Starting Firebase check...");
     
-    // Verificamos si hay un usuario autenticado
+    // Check if there is an authenticated user
     const user = getCurrentUser();
     result.auth = !!user;
-    console.log("[Firebase-Check] Estado de autenticación:", result.auth ? "Autenticado" : "No autenticado");
+    console.log("[Firebase-Check] Authentication status:", result.auth ? "Authenticated" : "Not authenticated");
     
-    // 1. Obtenemos las instancias de Firebase
+    // 1. Get Firebase instances
     const { db } = getFirebaseInstances();
     if (!db) {
-      result.error = "No se pudo inicializar Firestore";
+      result.error = "Could not initialize Firestore";
       return result;
     }
     
     result.connection = true;
-    console.log("[Firebase-Check] Conexión a Firebase establecida correctamente");
+    console.log("[Firebase-Check] Connection to Firebase established successfully");
     
-    // 2. Intentamos leer de una colección real primero
+    // 2. Try to read from a real collection first
     try {
-      console.log("[Firebase-Check] Intentando leer colección 'categories'...");
+      console.log("[Firebase-Check] Attempting to read 'categories' collection...");
       const categoriesCollection = collection(db, "categories");
       await getDocs(categoriesCollection);
       result.read = true;
-      console.log("[Firebase-Check] Lectura de categorías exitosa");
+      console.log("[Firebase-Check] Categories read successful");
     } catch (categoriesError) {
-      console.error("[Firebase-Check] Error al leer categorías:", categoriesError);
+      console.error("[Firebase-Check] Error reading categories:", categoriesError);
       
-      // Si hay error en categorías, intentamos con otra colección
+      // If there's an error with categories, try another collection
       try {
-        console.log("[Firebase-Check] Intentando leer colección 'config'...");
+        console.log("[Firebase-Check] Attempting to read 'config' collection...");
         const configDoc = await getDoc(doc(db, "config", "app_config"));
         if (configDoc.exists()) {
-          console.log("[Firebase-Check] Configuración leída correctamente:", configDoc.data());
+          console.log("[Firebase-Check] Configuration read successfully:", configDoc.data());
           result.read = true;
         } else {
-          console.log("[Firebase-Check] No existe documento de configuración");
+          console.log("[Firebase-Check] Configuration document does not exist");
         }
       } catch (configError) {
-        console.error("[Firebase-Check] Error al leer configuración:", configError);
+        console.error("[Firebase-Check] Error reading configuration:", configError);
         if (configError instanceof Error) {
-          result.error = `Error de lectura: ${configError.message}`;
+          result.error = `Read error: ${configError.message}`;
         }
       }
     }
     
-    // 3. Intentamos escribir solo si estamos autenticados
+    // 3. Try to write only if we are authenticated
     if (user) {
       try {
-        console.log("[Firebase-Check] Intentando escribir datos de prueba...");
-        // Usamos una colección específica para el usuario para evitar problemas de permisos
+        console.log("[Firebase-Check] Attempting to write test data...");
+        // Use a user-specific collection to avoid permission issues
         const testCollection = `user_tests_${user.uid}`;
         const testDoc = doc(collection(db, testCollection));
         await setDoc(testDoc, {
           test: true,
           timestamp: new Date().toISOString(),
           userId: user.uid,
-          message: "Prueba de escritura"
+          message: "Write test"
         });
         result.write = true;
-        console.log("[Firebase-Check] Escritura exitosa");
+        console.log("[Firebase-Check] Write successful");
       } catch (writeError) {
-        console.error("[Firebase-Check] Error al escribir datos:", writeError);
+        console.error("[Firebase-Check] Error writing data:", writeError);
         if (writeError instanceof Error) {
-          result.error = `Error de escritura: ${writeError.message}`;
+          result.error = `Write error: ${writeError.message}`;
         }
       }
     } else {
-      console.log("[Firebase-Check] No se intentó escribir porque no hay usuario autenticado");
-      result.error = "Debes iniciar sesión para poder escribir datos en Firestore";
+      console.log("[Firebase-Check] Write not attempted because there is no authenticated user");
+      result.error = "You must be logged in to write data to Firestore";
     }
     
     return result;
   } catch (error) {
-    console.error("[Firebase-Check] Error general en la comprobación:", error);
+    console.error("[Firebase-Check] General error in the check:", error);
     if (error instanceof Error) {
       result.error = error.message;
     } else {
-      result.error = "Error desconocido";
+      result.error = "Unknown error";
     }
     return result;
   }

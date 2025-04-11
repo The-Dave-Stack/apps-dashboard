@@ -1,8 +1,8 @@
 /**
- * @fileoverview Operaciones con Firebase Firestore para Bookmark Manager Sync
- * Este módulo proporciona funciones para interactuar con Firestore,
- * permitiendo operaciones CRUD para categorías y aplicaciones.
- * Soporta arquitectura multiusuario donde cada usuario tiene sus propios datos.
+ * @fileoverview Firebase Firestore operations for Bookmark Manager Sync
+ * This module provides functions to interact with Firestore,
+ * allowing CRUD operations for categories and applications.
+ * Supports multi-user architecture where each user has their own data.
  * @module lib/firebase
  */
 
@@ -25,8 +25,8 @@ import type { CategoryData, AppData } from "@/lib/types";
 import { getFirebaseInstances } from "./firebase-init";
 
 /**
- * Instancias de Firebase obtenidas mediante inicialización controlada
- * Usa el patrón Singleton para evitar múltiples inicializaciones
+ * Firebase instances obtained through controlled initialization
+ * Uses the Singleton pattern to avoid multiple initializations
  */
 const { app, auth, db } = getFirebaseInstances();
 
@@ -39,7 +39,7 @@ const { app, auth, db } = getFirebaseInstances();
 export function getUserCategoriesRef(): CollectionReference<DocumentData> | null {
   const currentUser = auth.currentUser;
   if (!currentUser) {
-    console.warn("[Firebase] No hay usuario autenticado para obtener referencias");
+    console.warn("[Firebase] No authenticated user to get references");
     return null;
   }
   
@@ -55,7 +55,7 @@ export function getUserCategoriesRef(): CollectionReference<DocumentData> | null
 export function getUserAppsRef(): CollectionReference<DocumentData> | null {
   const currentUser = auth.currentUser;
   if (!currentUser) {
-    console.warn("[Firebase] No hay usuario autenticado para obtener referencias");
+    console.warn("[Firebase] No authenticated user to get references");
     return null;
   }
   
