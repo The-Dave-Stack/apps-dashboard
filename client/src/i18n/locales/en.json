@@ -8,6 +8,8 @@
     "categories": "Categories",
     "favorites": "Favorites",
     "recent": "Recent",
+    "statistics": "Statistics",
+    "stats": "Stats",
     "search": "Search",
     "settings": "Settings",
     "admin": "Admin",
@@ -78,6 +80,36 @@
     "appsWillAppear": "The applications you use will appear here", 
     "lastDay": "Last day",
     "errorLoading": "Your recent applications history could not be loaded"
+  },
+  "statistics": {
+    "title": "Statistics",
+    "subtitle": "View analytics about your application usage",
+    "periods": {
+      "week": "Last 7 days",
+      "month": "Last 30 days",
+      "allTime": "All time"
+    },
+    "totalAccesses": "Total Accesses",
+    "mostActiveHour": "Most Active Hour",
+    "mostActiveDay": "Most Active Day",
+    "hourlyActivity": "Hourly Activity",
+    "hourlyActivityDesc": "Number of accesses by hour of day",
+    "dailyActivity": "Daily Activity",
+    "dailyActivityDesc": "Number of accesses by day of week",
+    "topApps": "Most Used Apps",
+    "topAppsDesc": "Your most frequently accessed applications",
+    "noData": "No usage data yet",
+    "useMoreApps": "Start using applications to see your usage statistics",
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    },
+    "accesses": "accesses"
   },
   "admin": {
     "title": "Admin Panel",

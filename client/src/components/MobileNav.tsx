@@ -4,6 +4,7 @@ import {
   Search, 
   Star,
   Clock,
+  BarChart,
   Settings, 
   ShieldAlert,
   UserCircle
@@ -47,6 +48,16 @@ export default function MobileNav() {
         >
           <Star className="h-5 w-5" />
           <span className="text-xs mt-1">{t("navigation.favorites")}</span>
+        </button>
+        
+        <button 
+          className={`flex flex-col items-center justify-center p-2 ${
+            location === "/statistics" ? "text-primary" : "text-muted-foreground"
+          }`}
+          onClick={() => setLocation("/statistics")}
+        >
+          <BarChart className="h-5 w-5" />
+          <span className="text-xs mt-1">{t("navigation.stats")}</span>
         </button>
         
         <button 

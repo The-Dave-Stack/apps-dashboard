@@ -8,6 +8,7 @@ import {
   Search, 
   Star, 
   Clock, 
+  BarChart,
   ShieldAlert, 
   Settings,
   LogOut
@@ -87,6 +88,16 @@ export default function Sidebar() {
             >
               <Clock className="mr-3 h-5 w-5" />
               <span>{t("navigation.recent")}</span>
+            </Button>
+          </li>
+          <li>
+            <Button 
+              variant={location === "/statistics" ? "secondary" : "ghost"} 
+              className="w-full justify-start"
+              onClick={() => setLocation("/statistics")}
+            >
+              <BarChart className="mr-3 h-5 w-5" />
+              <span>{t("navigation.statistics")}</span>
             </Button>
           </li>
           
