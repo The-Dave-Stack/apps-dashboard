@@ -36,7 +36,7 @@ interface AppCardProps {
  * @param {AppCardProps} props - Propiedades del componente
  * @returns {JSX.Element} Componente AppCard renderizado
  */
-export default function AppCard({ app }: AppCardProps) {
+export default function AppCard({ app, badge }: AppCardProps) {
   const { user } = useAuth();
   const { db } = getFirebaseInstances();
   const { toast } = useToast();
@@ -171,6 +171,11 @@ export default function AppCard({ app }: AppCardProps) {
             onError={(e) => (e.currentTarget.src = DEFAULT_ICON)}
           />
           <h3 className="font-medium text-card-foreground">{app.name}</h3>
+          {badge && (
+            <span className="mt-1 px-2 py-0.5 text-xs font-medium bg-primary/10 text-primary rounded-full">
+              {badge}
+            </span>
+          )}
           <p className="text-xs text-muted-foreground mt-1 flex-grow">{app.description || ""}</p>
         </div>
       </a>

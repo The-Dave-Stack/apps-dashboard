@@ -15,6 +15,7 @@ import NotFound from "./pages/not-found";
 import Search from "./pages/Search";
 import Favorites from "./pages/Favorites";
 import Recent from "./pages/Recent";
+import Statistics from "./pages/Statistics";
 import Settings from "./pages/Settings";
 import AdminPanel from "./pages/AdminPanel";
 import CategoryDetail from "./pages/CategoryDetail";
@@ -42,6 +43,12 @@ const FavoritesPage = () => (
 const RecentPage = () => (
   <Layout>
     <Recent />
+  </Layout>
+);
+
+const StatisticsPage = () => (
+  <Layout>
+    <Statistics />
   </Layout>
 );
 
@@ -98,6 +105,11 @@ function AppRouter() {
       <Route path="/recent">
         <ProtectedRoute>
           <RecentPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/statistics">
+        <ProtectedRoute>
+          <StatisticsPage />
         </ProtectedRoute>
       </Route>
       <Route path="/settings">

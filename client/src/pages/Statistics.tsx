@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/lib/auth-context";
-import { getFirebaseInstances } from "@/lib/firebase-instances";
+import { useAuth } from "@/lib/hooks";
+import { getFirebaseInstances } from "@/lib/firebase-init";
 import { collection, doc, query, getDocs, orderBy, limit, Timestamp, where } from "firebase/firestore";
 import { AppData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
