@@ -21,11 +21,13 @@ import { useTranslation } from "react-i18next";
  * Props para el componente AppCard
  * @interface AppCardProps
  * @property {AppData} app - Datos de la aplicación a mostrar
- * @property {string} [badge] - Texto opcional para mostrar como insignia en la tarjeta
+ * @property {React.ReactNode} [badge] - Elemento opcional para mostrar como insignia en la tarjeta
+ * @property {boolean} [compact] - Indica si la tarjeta debe mostrarse en modo compacto
  */
 interface AppCardProps {
   app: AppData;
-  badge?: string;
+  badge?: React.ReactNode;
+  compact?: boolean;
 }
 
 /**
@@ -36,7 +38,7 @@ interface AppCardProps {
  * @param {AppCardProps} props - Propiedades del componente
  * @returns {JSX.Element} Componente AppCard renderizado
  */
-export default function AppCard({ app, badge }: AppCardProps) {
+export default function AppCard({ app, badge, compact }: AppCardProps) {
   const { user } = useAuth();
   const { db } = getFirebaseInstances();
   const { toast } = useToast();
@@ -143,40 +145,46 @@ export default function AppCard({ app, badge }: AppCardProps) {
 
   return (
     <Card className="bg-card rounded-lg shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow h-full relative">
-      <button 
-        className={`absolute top-2 right-2 z-10 p-1.5 rounded-full transition-colors ${
-          isFavorite 
-            ? 'bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30' 
-            : 'bg-muted text-muted-foreground hover:bg-muted/80'
-        } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-        onClick={toggleFavorite}
-        disabled={loading}
-        aria-label={isFavorite ? t('common.favorites.removeFromFavorites') : t('common.favorites.addToFavorites')}
-      >
-        <Star className={`h-4 w-4 ${isFavorite ? 'fill-yellow-500' : ''}`} />
-      </button>
+      {!compact && (
+        <button 
+          className={`absolute top-2 right-2 z-10 p-1.5 rounded-full transition-colors ${
+            isFavorite 
+              ? 'bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30' 
+              : 'bg-muted text-muted-foreground hover:bg-muted/80'
+          } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          onClick={toggleFavorite}
+          disabled={loading}
+          aria-label={isFavorite ? t('common.favorites.removeFromFavorites') : t('common.favorites.addToFavorites')}
+        >
+          <Star className={`h-4 w-4 ${isFavorite ? 'fill-yellow-500' : ''}`} />
+        </button>
+      )}
       
       <a 
         href={app.url} 
         target="_blank" 
         rel="noopener noreferrer" 
-        className="block p-4 h-full"
+        className={`block ${compact ? 'p-3' : 'p-4'} h-full`}
         onClick={handleAppClick}
       >
-        <div className="flex flex-col items-center text-center h-full">
+        <div className={`flex ${compact ? 'flex-row items-center gap-3 text-left' : 'flex-col items-center text-center'} h-full`}>
           <img 
             src={app.icon || DEFAULT_ICON} 
             alt={app.name} 
-            className="w-16 h-16 mb-3 object-contain"
+            className={`${compact ? 'w-10 h-10' : 'w-16 h-16 mb-3'} object-contain`}
             onError={(e) => (e.currentTarget.src = DEFAULT_ICON)}
           />
-          <h3 className="font-medium text-card-foreground">{app.name}</h3>
-          {badge && (
-            <span className="mt-1 px-2 py-0.5 text-xs font-medium bg-primary/10 text-primary rounded-full">
-              {badge}
-            </span>
-          )}
-          <p className="text-xs text-muted-foreground mt-1 flex-grow">{app.description || ""}</p>
+          <div className={compact ? 'flex-1' : ''}>
+            <h3 className="font-medium text-card-foreground">{app.name}</h3>
+            {badge && (
+              <div className={`${compact ? 'mt-1' : 'mt-2'}`}>
+                {badge}
+              </div>
+            )}
+            {(!compact || app.description) && (
+              <p className="text-xs text-muted-foreground mt-1 flex-grow">{app.description || ""}</p>
+            )}
+          </div>
         </div>
       </a>
     </Card>
