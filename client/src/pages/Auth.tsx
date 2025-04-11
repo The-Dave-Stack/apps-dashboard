@@ -112,8 +112,8 @@ export default function Auth() {
           }
           
           toast({
-            title: "Inicio de sesión exitoso",
-            description: "¡Bienvenido de nuevo!",
+            title: t('auth.loginSuccess', 'Login successful'),
+            description: t('auth.welcomeBack', 'Welcome back!'),
           });
           
           // Redirigir al dashboard
@@ -121,8 +121,8 @@ export default function Auth() {
         } catch (loginError: any) {
           console.error("Login error:", loginError);
           toast({
-            title: "Error de inicio de sesión",
-            description: loginError.message || "No se pudo iniciar sesión. Verifica tus credenciales.",
+            title: t('errors.loginFailed', 'Login failed'),
+            description: loginError.message || t('errors.loginCredentials', 'Could not log in. Check your credentials.'),
             variant: "destructive",
           });
           setIsLoading(false);
@@ -200,7 +200,7 @@ export default function Auth() {
                   </Select>
                 </div>
                 <h1 className="text-3xl font-bold text-primary-600">Bookmark Manager Sync</h1>
-                <p className="text-neutral-500 mt-2">{t('auth.subtitle', 'Access all your favorite applications in one place')}</p>
+                <p className="text-neutral-500 mt-2">{t('auth.welcome', 'Welcome to Bookmark Manager Sync')}</p>
               </div>
               
               {configError && (
@@ -218,14 +218,14 @@ export default function Auth() {
                   onClick={() => setIsLogin(true)}
                   className={`flex-1 py-3 font-medium text-center ${isLogin ? 'border-b-2 border-primary-500 text-primary-600' : 'text-neutral-500 hover:text-neutral-700'}`}
                 >
-                  {t('auth.login', 'Login')}
+                  {t('auth.loginTab', 'Login')}
                 </button>
                 {showRegisterTab && (
                   <button 
                     onClick={() => setIsLogin(false)}
                     className={`flex-1 py-3 font-medium text-center ${!isLogin ? 'border-b-2 border-primary-500 text-primary-600' : 'text-neutral-500 hover:text-neutral-700'}`}
                   >
-                    {t('auth.register', 'Register')}
+                    {t('auth.registerTab', 'Register')}
                   </button>
                 )}
               </div>
@@ -275,7 +275,7 @@ export default function Auth() {
                     className="w-full bg-primary-600 hover:bg-primary-700" 
                     disabled={isLoading}
                   >
-                    {isLoading ? t('auth.loggingIn', 'Logging in...') : t('auth.login', 'Login')}
+                    {isLoading ? t('auth.loggingIn', 'Logging in...') : t('auth.loginButton', 'Login')}
                   </Button>
                 </form>
               ) : (
@@ -334,7 +334,7 @@ export default function Auth() {
                     className="w-full bg-primary-600 hover:bg-primary-700" 
                     disabled={isLoading}
                   >
-                    {isLoading ? t('auth.creatingAccount', 'Creating account...') : t('auth.createAccount', 'Create Account')}
+                    {isLoading ? t('auth.creatingAccount', 'Creating account...') : t('auth.registerButton', 'Register')}
                   </Button>
                 </form>
               )}
