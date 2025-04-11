@@ -535,7 +535,7 @@ export default function AdminPanel() {
         description: newAppData.description
       };
       
-      const savedApp = await saveApp(selectedCategoryId, newApp);
+      const savedApp = await saveApp(newApp, selectedCategoryId);
       
       // Actualizar el estado local
       const updatedCategories = categories.map(cat => {
