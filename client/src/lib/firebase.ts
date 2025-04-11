@@ -31,10 +31,10 @@ import { getFirebaseInstances } from "./firebase-init";
 const { app, auth, db } = getFirebaseInstances();
 
 /**
- * Obtiene la referencia a la colección de categorías para el usuario actual.
- * Si no hay usuario autenticado, devuelve null.
+ * Gets the reference to the categories collection for the current user.
+ * If there is no authenticated user, returns null.
  * 
- * @returns {CollectionReference<DocumentData> | null} Referencia a la colección de categorías del usuario o null
+ * @returns {CollectionReference<DocumentData> | null} Reference to the user's categories collection or null
  */
 export function getUserCategoriesRef(): CollectionReference<DocumentData> | null {
   const currentUser = auth.currentUser;
@@ -47,10 +47,10 @@ export function getUserCategoriesRef(): CollectionReference<DocumentData> | null
 }
 
 /**
- * Obtiene la referencia a la colección de aplicaciones para el usuario actual.
- * Si no hay usuario autenticado, devuelve null.
+ * Gets the reference to the apps collection for the current user.
+ * If there is no authenticated user, returns null.
  * 
- * @returns {CollectionReference<DocumentData> | null} Referencia a la colección de aplicaciones del usuario o null
+ * @returns {CollectionReference<DocumentData> | null} Reference to the user's apps collection or null
  */
 export function getUserAppsRef(): CollectionReference<DocumentData> | null {
   const currentUser = auth.currentUser;
@@ -63,23 +63,23 @@ export function getUserAppsRef(): CollectionReference<DocumentData> | null {
 }
 
 /**
- * Obtiene todas las categorías almacenadas en Firestore para el usuario actual, 
- * incluyendo sus aplicaciones asociadas.
- * Realiza dos consultas: una para las categorías y otra para las aplicaciones de cada categoría.
+ * Gets all categories stored in Firestore for the current user,
+ * including their associated applications.
+ * Performs two queries: one for categories and another for applications of each category.
  * 
  * @async
- * @returns {Promise<CategoryData[]>} Una promesa que resuelve a un array de categorías con sus aplicaciones
- * @throws {Error} Si ocurre un error durante la consulta a Firestore o si no hay usuario autenticado
+ * @returns {Promise<CategoryData[]>} A promise that resolves to an array of categories with their applications
+ * @throws {Error} If an error occurs during the Firestore query or if there is no authenticated user
  * @example
- * // Obtener todas las categorías con sus aplicaciones
+ * // Get all categories with their applications
  * const categories = await fetchCategories();
- * console.log(`Se encontraron ${categories.length} categorías`);
+ * console.log(`Found ${categories.length} categories`);
  */
 export async function fetchCategories(): Promise<CategoryData[]> {
   try {
     const currentUser = auth.currentUser;
     if (!currentUser) {
-      console.warn("[Firebase] No hay usuario autenticado para obtener categorías");
+      console.warn("[Firebase] No authenticated user to get categories");
       return [];
     }
     
@@ -87,18 +87,18 @@ export async function fetchCategories(): Promise<CategoryData[]> {
     const userAppsRef = getUserAppsRef();
     
     if (!userCategoriesRef || !userAppsRef) {
-      console.error("[Firebase] No se pudieron obtener las referencias a las colecciones");
+      console.error("[Firebase] Could not get references to collections");
       return [];
     }
     
-    console.log(`[Firebase] Obteniendo categorías para el usuario: ${currentUser.uid}`);
+    console.log(`[Firebase] Getting categories for user: ${currentUser.uid}`);
     const categoriesSnapshot = await getDocs(userCategoriesRef);
     const categories: CategoryData[] = [];
     
     for (const categoryDoc of categoriesSnapshot.docs) {
       const categoryData = categoryDoc.data() as Record<string, any>;
       
-      // Obtener las aplicaciones de esta categoría
+      // Get the applications for this category
       const appQuery = query(userAppsRef, where("categoryId", "==", categoryDoc.id));
       const appSnapshot = await getDocs(appQuery);
       
@@ -120,217 +120,217 @@ export async function fetchCategories(): Promise<CategoryData[]> {
       });
     }
     
-    console.log(`[Firebase] Se encontraron ${categories.length} categorías para el usuario ${currentUser.uid}`);
+    console.log(`[Firebase] Found ${categories.length} categories for user ${currentUser.uid}`);
     return categories;
   } catch (error) {
-    console.error("[Firebase] Error obteniendo categorías:", error);
+    console.error("[Firebase] Error getting categories:", error);
     return [];
   }
 }
 
 /**
- * Guarda una categoría en Firestore para el usuario actual, 
- * ya sea creando una nueva o actualizando una existente.
- * Incluye manejo de errores robusto y reintentos automáticos para mayor tolerancia a fallos.
+ * Saves a category to Firestore for the current user,
+ * either creating a new one or updating an existing one.
+ * Includes robust error handling and automatic retries for greater fault tolerance.
  * 
  * @async
- * @param {CategoryData} category - Datos de la categoría a guardar
- * @returns {Promise<CategoryData>} La categoría guardada con su ID asignado
- * @throws {Error} Si no se puede guardar la categoría en Firebase o no hay usuario autenticado
+ * @param {CategoryData} category - Category data to save
+ * @returns {Promise<CategoryData>} The saved category with its assigned ID
+ * @throws {Error} If the category cannot be saved to Firebase or there is no authenticated user
  * @example
- * // Crear una nueva categoría
- * const newCategory = await saveCategory({name: "Nueva Categoría", apps: []});
+ * // Create a new category
+ * const newCategory = await saveCategory({name: "New Category", apps: []});
  * 
- * // Actualizar una categoría existente
- * await saveCategory({id: "abc123", name: "Categoría Actualizada", apps: []});
+ * // Update an existing category
+ * await saveCategory({id: "abc123", name: "Updated Category", apps: []});
  */
 export async function saveCategory(category: CategoryData): Promise<CategoryData> {
   try {
-    // Log para depuración
-    console.log("[Firebase] Intento de guardar categoría:", category);
+    // Debug log
+    console.log("[Firebase] Attempting to save category:", category);
     
     const currentUser = auth.currentUser;
     if (!currentUser) {
-      console.warn("[Firebase] No hay usuario autenticado para guardar categorías");
-      throw new Error("Usuario no autenticado");
+      console.warn("[Firebase] No authenticated user to save categories");
+      throw new Error("User not authenticated");
     }
     
     if (!db) {
-      console.error("[Firebase] Error: No se ha inicializado Firestore correctamente");
-      throw new Error("Firestore no inicializado");
+      console.error("[Firebase] Error: Firestore has not been properly initialized");
+      throw new Error("Firestore not initialized");
     }
     
-    // Verificar la conexión a Firestore con una operación simple
+    // Verify connection to Firestore with a simple operation
     try {
-      console.log("[Firebase] Verificando conexión a Firestore...");
+      console.log("[Firebase] Verifying connection to Firestore...");
       const testRef = collection(db, "test_connection");
       await getDocs(testRef);
-      console.log("[Firebase] Conexión a Firestore verificada");
+      console.log("[Firebase] Connection to Firestore verified");
     } catch (connectionError) {
-      console.error("[Firebase] Problema de conexión a Firestore:", connectionError);
-      // Continuar de todos modos, podría ser que la colección no exista
+      console.error("[Firebase] Firestore connection issue:", connectionError);
+      // Continue anyway, collection might not exist
     }
     
     const userCategoriesPath = `users/${currentUser.uid}/categories`;
     
     if (category.id && category.id.trim() !== "") {
-      // Actualizar categoría existente
-      console.log(`[Firebase] Actualizando categoría con ID: ${category.id} para usuario: ${currentUser.uid}`);
+      // Update existing category
+      console.log(`[Firebase] Updating category with ID: ${category.id} for user: ${currentUser.uid}`);
       try {
         const categoryRef = doc(db, userCategoriesPath, category.id);
         await updateDoc(categoryRef, { name: category.name });
-        console.log("[Firebase] Categoría actualizada con éxito");
+        console.log("[Firebase] Category successfully updated");
         return category;
       } catch (updateError) {
-        console.error("[Firebase] Error al actualizar la categoría:", updateError);
+        console.error("[Firebase] Error updating category:", updateError);
         
-        // Si falla la actualización, intentamos crear una nueva
-        console.log("[Firebase] Intentando crear en su lugar...");
+        // If update fails, try creating a new one
+        console.log("[Firebase] Attempting to create instead...");
         try {
-          // Intentar crear con método alternativo
+          // Try to create with alternative method
           const categoriesCollection = collection(db, userCategoriesPath);
           const newCategoryRef = doc(categoriesCollection);
           const newCategory = { name: category.name };
           
           await setDoc(newCategoryRef, newCategory);
           
-          console.log("[Firebase] Categoría creada con éxito, ID:", newCategoryRef.id);
+          console.log("[Firebase] Category successfully created, ID:", newCategoryRef.id);
           return {
             ...category,
             id: newCategoryRef.id,
             apps: []
           };
         } catch (createError) {
-          console.error("[Firebase] Error también al crear:", createError);
+          console.error("[Firebase] Error also when creating:", createError);
           throw createError;
         }
       }
     } else {
-      // Crear nueva categoría
-      console.log(`[Firebase] Creando nueva categoría: ${category.name} para usuario: ${currentUser.uid}`);
+      // Create new category
+      console.log(`[Firebase] Creating new category: ${category.name} for user: ${currentUser.uid}`);
       
       try {
-        // Verificar si podemos acceder a la colección
+        // Verify if we can access the collection
         const categoriesCollection = collection(db, userCategoriesPath);
-        console.log("[Firebase] Colección de categorías accesible");
+        console.log("[Firebase] Categories collection accessible");
         
-        // Crear un nuevo documento con ID automático
+        // Create a new document with automatic ID
         const newCategoryRef = doc(categoriesCollection);
-        console.log("[Firebase] Referencia creada:", newCategoryRef.id);
+        console.log("[Firebase] Reference created:", newCategoryRef.id);
         
         const newCategory = { name: category.name };
         
-        console.log("[Firebase] Intentando guardar documento...");
+        console.log("[Firebase] Attempting to save document...");
         await setDoc(newCategoryRef, newCategory);
         
-        console.log("[Firebase] Categoría creada con éxito, ID:", newCategoryRef.id);
+        console.log("[Firebase] Category successfully created, ID:", newCategoryRef.id);
         return {
           ...category,
           id: newCategoryRef.id,
           apps: []
         };
       } catch (createError) {
-        console.error("[Firebase] Error detallado al crear categoría:", createError);
+        console.error("[Firebase] Detailed error creating category:", createError);
         if (createError instanceof Error) {
-          console.error("[Firebase] Código:", createError.name);
-          console.error("[Firebase] Mensaje:", createError.message);
+          console.error("[Firebase] Code:", createError.name);
+          console.error("[Firebase] Message:", createError.message);
           console.error("[Firebase] Stack:", createError.stack);
         }
         throw createError;
       }
     }
   } catch (error) {
-    console.error("[Firebase] Error crítico al guardar categoría:", error);
-    // Log más detallado para detectar el problema
+    console.error("[Firebase] Critical error saving category:", error);
+    // More detailed log to detect the problem
     if (error instanceof Error) {
-      console.error("[Firebase] Mensaje de error:", error.message);
-      console.error("[Firebase] Stack de error:", error.stack);
+      console.error("[Firebase] Error message:", error.message);
+      console.error("[Firebase] Error stack:", error.stack);
     }
     
-    // Para diagnóstico, intentamos una operación muy básica
+    // For diagnosis, we try a very basic operation
     try {
       const simpleData = { test: true, timestamp: new Date().toISOString() };
       const testDoc = doc(collection(db, "debug_test"));
       await setDoc(testDoc, simpleData);
-      console.log("[Firebase] Prueba diagnóstica exitosa, se pudo crear documento de prueba");
+      console.log("[Firebase] Diagnostic test successful, could create test document");
     } catch (testError) {
-      console.error("[Firebase] Incluso la prueba diagnóstica falló:", testError);
+      console.error("[Firebase] Even the diagnostic test failed:", testError);
     }
     
-    // Proporcionar un error amigable para el usuario
-    throw new Error("No se pudo guardar la categoría en Firebase. Por favor, intente de nuevo más tarde.");
+    // Provide a friendly error message for the user
+    throw new Error("Could not save the category to Firebase. Please try again later.");
   }
 }
 
 /**
- * Elimina una categoría y todas sus aplicaciones asociadas de Firestore para el usuario actual.
- * Primero elimina todas las aplicaciones que pertenecen a la categoría y luego elimina la categoría.
+ * Deletes a category and all its associated applications from Firestore for the current user.
+ * First removes all applications that belong to the category and then deletes the category.
  * 
  * @async
- * @param {string} categoryId - ID de la categoría a eliminar
- * @returns {Promise<void>} Promesa que se resuelve cuando se completa la eliminación
- * @throws {Error} Si no se puede eliminar la categoría de Firebase o no hay usuario autenticado
+ * @param {string} categoryId - ID of the category to delete
+ * @returns {Promise<void>} Promise that resolves when the deletion is complete
+ * @throws {Error} If the category cannot be deleted from Firebase or there is no authenticated user
  * @example
- * // Eliminar una categoría y todas sus aplicaciones
+ * // Delete a category and all its applications
  * await deleteCategory("abc123");
  */
 export async function deleteCategory(categoryId: string): Promise<void> {
   try {
-    console.log("[Firebase] Intento de eliminar categoría con ID:", categoryId);
+    console.log("[Firebase] Attempting to delete category with ID:", categoryId);
     
     const currentUser = auth.currentUser;
     if (!currentUser) {
-      console.warn("[Firebase] No hay usuario autenticado para eliminar categorías");
-      throw new Error("Usuario no autenticado");
+      console.warn("[Firebase] No authenticated user to delete categories");
+      throw new Error("User not authenticated");
     }
     
     if (!db) {
-      console.error("[Firebase] Error: No se ha inicializado Firestore correctamente");
-      throw new Error("Firestore no inicializado");
+      console.error("[Firebase] Error: Firestore has not been properly initialized");
+      throw new Error("Firestore not initialized");
     }
     
     const userAppsRef = getUserAppsRef();
     const userCategoriesRef = getUserCategoriesRef();
     
     if (!userAppsRef || !userCategoriesRef) {
-      console.error("[Firebase] No se pudieron obtener las referencias a las colecciones");
-      throw new Error("Error obteniendo referencias a colecciones");
+      console.error("[Firebase] Could not get references to collections");
+      throw new Error("Error getting references to collections");
     }
     
-    // Primero eliminar todas las aplicaciones asociadas a esta categoría
-    console.log("[Firebase] Buscando aplicaciones asociadas a la categoría");
+    // First delete all applications associated with this category
+    console.log("[Firebase] Finding applications associated with the category");
     const appQuery = query(userAppsRef, where("categoryId", "==", categoryId));
     const appSnapshot = await getDocs(appQuery);
     
     const appsToDelete = appSnapshot.docs.length;
-    console.log(`[Firebase] Se encontraron ${appsToDelete} aplicaciones para eliminar`);
+    console.log(`[Firebase] Found ${appsToDelete} applications to delete`);
     
     if (appsToDelete > 0) {
       const deletePromises = appSnapshot.docs.map(appDoc => {
-        console.log(`[Firebase] Eliminando aplicación: ${appDoc.id}`);
+        console.log(`[Firebase] Deleting application: ${appDoc.id}`);
         return deleteDoc(doc(db, `users/${currentUser.uid}/apps`, appDoc.id));
       });
       
       await Promise.all(deletePromises);
-      console.log("[Firebase] Todas las aplicaciones de la categoría fueron eliminadas");
+      console.log("[Firebase] All applications in the category were deleted");
     }
     
-    // Ahora eliminar la categoría
-    console.log("[Firebase] Eliminando la categoría");
+    // Now delete the category
+    console.log("[Firebase] Deleting the category");
     await deleteDoc(doc(db, `users/${currentUser.uid}/categories`, categoryId));
-    console.log("[Firebase] Categoría eliminada con éxito");
+    console.log("[Firebase] Category successfully deleted");
   } catch (error) {
-    console.error("[Firebase] Error al eliminar categoría:", error);
+    console.error("[Firebase] Error deleting category:", error);
     if (error instanceof Error) {
-      console.error("[Firebase] Mensaje de error:", error.message);
-      console.error("[Firebase] Stack de error:", error.stack);
+      console.error("[Firebase] Error message:", error.message);
+      console.error("[Firebase] Error stack:", error.stack);
     }
-    throw new Error("No se pudo eliminar la categoría de Firebase. Por favor, intente de nuevo más tarde.");
+    throw new Error("Could not delete the category from Firebase. Please try again later.");
   }
 }
 
 /**
- * Funciones para la gestión de aplicaciones
+ * Functions for application management
  */
 
 /**
