@@ -334,44 +334,44 @@ export async function deleteCategory(categoryId: string): Promise<void> {
  */
 
 /**
- * Guarda una aplicación en Firestore para el usuario actual, 
- * ya sea creando una nueva o actualizando una existente.
- * Gestiona errores de forma robusta y realiza reintento automático en caso de fallo.
+ * Saves an application to Firestore for the current user,
+ * either creating a new one or updating an existing one.
+ * Handles errors robustly and performs automatic retry in case of failure.
  * 
  * @async
- * @param {AppData} app - Datos de la aplicación a guardar
- * @param {string} categoryId - ID de la categoría a la que pertenece la aplicación
- * @returns {Promise<AppData>} La aplicación guardada con su ID asignado
- * @throws {Error} Si no se puede guardar la aplicación en Firebase o no hay usuario autenticado
+ * @param {AppData} app - Application data to save
+ * @param {string} categoryId - ID of the category to which the application belongs
+ * @returns {Promise<AppData>} The saved application with its assigned ID
+ * @throws {Error} If the application cannot be saved to Firebase or there is no authenticated user
  * @example
- * // Crear una nueva aplicación
+ * // Create a new application
  * const newApp = await saveApp({
- *   name: "Nueva App",
+ *   name: "New App",
  *   icon: "https://example.com/icon.png",
  *   url: "https://example.com",
- *   description: "Descripción de la app"
- * }, "categoria123");
+ *   description: "App description"
+ * }, "category123");
  */
 export async function saveApp(app: AppData, categoryId: string): Promise<AppData> {
   try {
-    console.log("[Firebase] Intento de guardar aplicación:", app, "en categoría:", categoryId);
+    console.log("[Firebase] Attempting to save application:", app, "in category:", categoryId);
     
     const currentUser = auth.currentUser;
     if (!currentUser) {
-      console.warn("[Firebase] No hay usuario autenticado para guardar aplicaciones");
-      throw new Error("Usuario no autenticado");
+      console.warn("[Firebase] No authenticated user to save applications");
+      throw new Error("User not authenticated");
     }
     
     if (!db) {
-      console.error("[Firebase] Error: No se ha inicializado Firestore correctamente");
-      throw new Error("Firestore no inicializado");
+      console.error("[Firebase] Error: Firestore has not been properly initialized");
+      throw new Error("Firestore not initialized");
     }
     
     const userAppsPath = `users/${currentUser.uid}/apps`;
     
     if (app.id) {
-      // Actualizar app existente
-      console.log(`[Firebase] Actualizando aplicación con ID: ${app.id} para usuario: ${currentUser.uid}`);
+      // Update existing app
+      console.log(`[Firebase] Updating application with ID: ${app.id} for user: ${currentUser.uid}`);
       try {
         const appRef = doc(db, userAppsPath, app.id);
         await updateDoc(appRef, { 
@@ -381,13 +381,13 @@ export async function saveApp(app: AppData, categoryId: string): Promise<AppData
           description: app.description || '',
           categoryId
         });
-        console.log("[Firebase] Aplicación actualizada con éxito");
+        console.log("[Firebase] Application successfully updated");
         return app;
       } catch (updateError) {
-        console.error("[Firebase] Error al actualizar la aplicación:", updateError);
+        console.error("[Firebase] Error updating application:", updateError);
         
-        // Si falla la actualización, intentamos crear una nueva
-        console.log("[Firebase] Intentando crear aplicación en su lugar...");
+        // If update fails, try creating a new one
+        console.log("[Firebase] Attempting to create application instead...");
         const appsCollection = collection(db, userAppsPath);
         const newAppRef = doc(appsCollection);
         const newApp = {
@@ -399,15 +399,15 @@ export async function saveApp(app: AppData, categoryId: string): Promise<AppData
         };
         
         await setDoc(newAppRef, newApp);
-        console.log("[Firebase] Aplicación creada con éxito, ID:", newAppRef.id);
+        console.log("[Firebase] Application successfully created, ID:", newAppRef.id);
         return {
           ...app,
           id: newAppRef.id
         };
       }
     } else {
-      // Crear nueva app
-      console.log(`[Firebase] Creando nueva aplicación: ${app.name} para usuario: ${currentUser.uid}`);
+      // Create new app
+      console.log(`[Firebase] Creating new application: ${app.name} for user: ${currentUser.uid}`);
       const appsCollection = collection(db, userAppsPath);
       const newAppRef = doc(appsCollection);
       const newApp = {
@@ -418,9 +418,9 @@ export async function saveApp(app: AppData, categoryId: string): Promise<AppData
         categoryId
       };
       
-      console.log("[Firebase] Referencia creada, intentando guardar aplicación");
+      console.log("[Firebase] Reference created, attempting to save application");
       await setDoc(newAppRef, newApp);
-      console.log("[Firebase] Aplicación creada con éxito, ID:", newAppRef.id);
+      console.log("[Firebase] Application successfully created, ID:", newAppRef.id);
       
       return {
         ...app,
@@ -428,68 +428,68 @@ export async function saveApp(app: AppData, categoryId: string): Promise<AppData
       };
     }
   } catch (error) {
-    console.error("[Firebase] Error crítico al guardar aplicación:", error);
+    console.error("[Firebase] Critical error saving application:", error);
     if (error instanceof Error) {
-      console.error("[Firebase] Mensaje de error:", error.message);
-      console.error("[Firebase] Stack de error:", error.stack);
+      console.error("[Firebase] Error message:", error.message);
+      console.error("[Firebase] Error stack:", error.stack);
     }
-    throw new Error("No se pudo guardar la aplicación en Firebase. Por favor, intente de nuevo más tarde.");
+    throw new Error("Could not save the application to Firebase. Please try again later.");
   }
 }
 
 /**
- * Elimina una aplicación de Firestore por su ID para el usuario actual.
+ * Deletes an application from Firestore by its ID for the current user.
  * 
  * @async
- * @param {string} appId - ID de la aplicación a eliminar
- * @returns {Promise<void>} Promesa que se resuelve cuando se completa la eliminación
- * @throws {Error} Si no se puede eliminar la aplicación de Firebase o no hay usuario autenticado
+ * @param {string} appId - ID of the application to delete
+ * @returns {Promise<void>} Promise that resolves when the deletion is complete
+ * @throws {Error} If the application cannot be deleted from Firebase or there is no authenticated user
  * @example
- * // Eliminar una aplicación específica
+ * // Delete a specific application
  * await deleteApp("app123");
  */
 export async function deleteApp(appId: string): Promise<void> {
   try {
-    console.log("[Firebase] Intento de eliminar aplicación con ID:", appId);
+    console.log("[Firebase] Attempting to delete application with ID:", appId);
     
     const currentUser = auth.currentUser;
     if (!currentUser) {
-      console.warn("[Firebase] No hay usuario autenticado para eliminar aplicaciones");
-      throw new Error("Usuario no autenticado");
+      console.warn("[Firebase] No authenticated user to delete applications");
+      throw new Error("User not authenticated");
     }
     
     if (!db) {
-      console.error("[Firebase] Error: No se ha inicializado Firestore correctamente");
-      throw new Error("Firestore no inicializado");
+      console.error("[Firebase] Error: Firestore has not been properly initialized");
+      throw new Error("Firestore not initialized");
     }
     
     const userAppsPath = `users/${currentUser.uid}/apps`;
     await deleteDoc(doc(db, userAppsPath, appId));
-    console.log(`[Firebase] Aplicación eliminada con éxito para usuario: ${currentUser.uid}`);
+    console.log(`[Firebase] Application successfully deleted for user: ${currentUser.uid}`);
   } catch (error) {
-    console.error("[Firebase] Error al eliminar aplicación:", error);
+    console.error("[Firebase] Error deleting application:", error);
     if (error instanceof Error) {
-      console.error("[Firebase] Mensaje de error:", error.message);
-      console.error("[Firebase] Stack de error:", error.stack);
+      console.error("[Firebase] Error message:", error.message);
+      console.error("[Firebase] Error stack:", error.stack);
     }
-    throw new Error("No se pudo eliminar la aplicación de Firebase. Por favor, intente de nuevo más tarde.");
+    throw new Error("Could not delete the application from Firebase. Please try again later.");
   }
 }
 
 /**
- * Funciones para la gestión de favoritos del usuario
+ * Functions for user favorites management
  */
 
 /**
- * Obtiene la referencia a la colección de favoritos para el usuario actual.
- * Si no hay usuario autenticado, devuelve null.
+ * Gets the reference to the favorites collection for the current user.
+ * If there is no authenticated user, returns null.
  * 
- * @returns {CollectionReference<DocumentData> | null} Referencia a la colección de favoritos del usuario o null
+ * @returns {CollectionReference<DocumentData> | null} Reference to the user's favorites collection or null
  */
 export function getUserFavoritesRef(): CollectionReference<DocumentData> | null {
   const currentUser = auth.currentUser;
   if (!currentUser) {
-    console.warn("[Firebase] No hay usuario autenticado para obtener referencias de favoritos");
+    console.warn("[Firebase] No authenticated user to get favorite references");
     return null;
   }
   
@@ -497,30 +497,30 @@ export function getUserFavoritesRef(): CollectionReference<DocumentData> | null 
 }
 
 /**
- * Agrega una aplicación a los favoritos del usuario.
+ * Adds an application to the user's favorites.
  * 
  * @async
- * @param {AppData} app - Datos de la aplicación a marcar como favorita
- * @returns {Promise<void>} Promesa que se resuelve cuando se completa la operación
- * @throws {Error} Si no se puede agregar a favoritos o no hay usuario autenticado
+ * @param {AppData} app - Data of the application to mark as favorite
+ * @returns {Promise<void>} Promise that resolves when the operation is complete
+ * @throws {Error} If it cannot be added to favorites or there is no authenticated user
  */
 export async function addToFavorites(app: AppData): Promise<void> {
   try {
     const currentUser = auth.currentUser;
     if (!currentUser) {
-      console.warn("[Firebase] No hay usuario autenticado para agregar favoritos");
-      throw new Error("Usuario no autenticado");
+      console.warn("[Firebase] No authenticated user to add favorites");
+      throw new Error("User not authenticated");
     }
     
     const favoritesRef = getUserFavoritesRef();
     if (!favoritesRef) {
-      throw new Error("No se pudo obtener la referencia a favoritos");
+      throw new Error("Could not get reference to favorites");
     }
 
-    // Usamos el ID de la app como ID del documento favorito
+    // Use the app ID as the favorite document ID
     const favoriteId = app.id;
     if (!favoriteId) {
-      throw new Error("La aplicación no tiene ID válido");
+      throw new Error("The application has no valid ID");
     }
     
     await setDoc(doc(favoritesRef, favoriteId), {
@@ -532,40 +532,40 @@ export async function addToFavorites(app: AppData): Promise<void> {
       addedAt: new Date().toISOString()
     });
     
-    console.log(`[Firebase] App agregada a favoritos: ${app.name} para usuario: ${currentUser.uid}`);
+    console.log(`[Firebase] App added to favorites: ${app.name} for user: ${currentUser.uid}`);
   } catch (error) {
-    console.error("[Firebase] Error al agregar a favoritos:", error);
+    console.error("[Firebase] Error adding to favorites:", error);
     if (error instanceof Error) {
-      console.error("[Firebase] Mensaje de error:", error.message);
+      console.error("[Firebase] Error message:", error.message);
     }
-    throw new Error("No se pudo agregar la aplicación a favoritos. Por favor, intente de nuevo más tarde.");
+    throw new Error("Could not add the application to favorites. Please try again later.");
   }
 }
 
 /**
- * Elimina una aplicación de los favoritos del usuario.
+ * Removes an application from the user's favorites.
  * 
  * @async
- * @param {string} appId - ID de la aplicación a quitar de favoritos
- * @returns {Promise<void>} Promesa que se resuelve cuando se completa la operación
- * @throws {Error} Si no se puede eliminar de favoritos o no hay usuario autenticado
+ * @param {string} appId - ID of the application to remove from favorites
+ * @returns {Promise<void>} Promise that resolves when the operation is complete
+ * @throws {Error} If it cannot be removed from favorites or there is no authenticated user
  */
 export async function removeFromFavorites(appId: string): Promise<void> {
   try {
     const currentUser = auth.currentUser;
     if (!currentUser) {
-      console.warn("[Firebase] No hay usuario autenticado para eliminar favoritos");
-      throw new Error("Usuario no autenticado");
+      console.warn("[Firebase] No authenticated user to remove favorites");
+      throw new Error("User not authenticated");
     }
     
     await deleteDoc(doc(db, `users/${currentUser.uid}/favorites`, appId));
-    console.log(`[Firebase] App eliminada de favoritos: ${appId} para usuario: ${currentUser.uid}`);
+    console.log(`[Firebase] App removed from favorites: ${appId} for user: ${currentUser.uid}`);
   } catch (error) {
-    console.error("[Firebase] Error al eliminar de favoritos:", error);
+    console.error("[Firebase] Error removing from favorites:", error);
     if (error instanceof Error) {
-      console.error("[Firebase] Mensaje de error:", error.message);
+      console.error("[Firebase] Error message:", error.message);
     }
-    throw new Error("No se pudo eliminar la aplicación de favoritos. Por favor, intente de nuevo más tarde.");
+    throw new Error("Could not remove the application from favorites. Please try again later.");
   }
 }
 
