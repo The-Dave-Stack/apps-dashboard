@@ -6,11 +6,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader, AlertTriangle } from "lucide-react";
+import { Loader, AlertTriangle, Globe } from "lucide-react";
 import { getAppConfig } from "@/lib/appConfig";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { collection, doc, getDoc } from "firebase/firestore";
 import { getFirebaseInstances } from "@/lib/firebase-init";
+import { useTranslation } from "react-i18next";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -25,6 +33,7 @@ export default function Auth() {
   const [showRegisterTab, setShowRegisterTab] = useState(false); // Default to false (hide register tab)
   const [loadingConfig, setLoadingConfig] = useState(true);
   const [configError, setConfigError] = useState<string | null>(null);
+  const { t, i18n } = useTranslation();
   
   // Carga la configuración al iniciar
   useEffect(() => {
@@ -168,15 +177,30 @@ export default function Auth() {
       {loadingConfig ? (
         <div className="flex flex-col items-center justify-center">
           <Loader className="h-8 w-8 animate-spin text-primary-600 mb-2" />
-          <span className="text-neutral-600">Cargando...</span>
+          <span className="text-neutral-600">{t('common.loading', 'Loading...')}</span>
         </div>
       ) : (
         <Card className="w-full max-w-md bg-white rounded-lg shadow-lg overflow-hidden">
           <CardContent className="p-0">
             <div className="px-6 py-8">
               <div className="text-center mb-6">
+                <div className="flex justify-end mb-2">
+                  <Select
+                    value={i18n.language}
+                    onValueChange={(value) => i18n.changeLanguage(value)}
+                  >
+                    <SelectTrigger className="w-[120px]">
+                      <Globe className="mr-2 h-4 w-4" />
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="es">Español</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <h1 className="text-3xl font-bold text-primary-600">Bookmark Manager Sync</h1>
-                <p className="text-neutral-500 mt-2">Accede a todas tus aplicaciones favoritas en un solo lugar</p>
+                <p className="text-neutral-500 mt-2">{t('auth.subtitle', 'Access all your favorite applications in one place')}</p>
               </div>
               
               {configError && (
@@ -194,14 +218,14 @@ export default function Auth() {
                   onClick={() => setIsLogin(true)}
                   className={`flex-1 py-3 font-medium text-center ${isLogin ? 'border-b-2 border-primary-500 text-primary-600' : 'text-neutral-500 hover:text-neutral-700'}`}
                 >
-                  Iniciar Sesión
+                  {t('auth.login', 'Login')}
                 </button>
                 {showRegisterTab && (
                   <button 
                     onClick={() => setIsLogin(false)}
                     className={`flex-1 py-3 font-medium text-center ${!isLogin ? 'border-b-2 border-primary-500 text-primary-600' : 'text-neutral-500 hover:text-neutral-700'}`}
                   >
-                    Registrarse
+                    {t('auth.register', 'Register')}
                   </button>
                 )}
               </div>
@@ -210,19 +234,19 @@ export default function Auth() {
               {isLogin ? (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <Label htmlFor="email" className="text-neutral-700">Correo Electrónico</Label>
+                    <Label htmlFor="email" className="text-neutral-700">{t('auth.email', 'Email')}</Label>
                     <Input
                       id="email"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="tu@correo.com"
+                      placeholder={t('auth.emailPlaceholder', 'your@email.com')}
                       required
                       className="mt-1"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="password" className="text-neutral-700">Contraseña</Label>
+                    <Label htmlFor="password" className="text-neutral-700">{t('auth.password', 'Password')}</Label>
                     <Input
                       id="password"
                       type="password"
@@ -241,9 +265,9 @@ export default function Auth() {
                         checked={rememberMe}
                         onCheckedChange={(checked) => setRememberMe(checked as boolean)} 
                       />
-                      <Label htmlFor="remember-me" className="text-sm text-neutral-700">Recordarme</Label>
+                      <Label htmlFor="remember-me" className="text-sm text-neutral-700">{t('auth.rememberMe', 'Remember me')}</Label>
                     </div>
-                    <a href="#" className="text-sm font-medium text-primary-600 hover:underline">¿Olvidaste tu contraseña?</a>
+                    <a href="#" className="text-sm font-medium text-primary-600 hover:underline">{t('auth.forgotPassword', 'Forgot password?')}</a>
                   </div>
                   
                   <Button 
@@ -251,37 +275,37 @@ export default function Auth() {
                     className="w-full bg-primary-600 hover:bg-primary-700" 
                     disabled={isLoading}
                   >
-                    {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
+                    {isLoading ? t('auth.loggingIn', 'Logging in...') : t('auth.login', 'Login')}
                   </Button>
                 </form>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <Label htmlFor="name" className="text-neutral-700">Nombre Completo</Label>
+                    <Label htmlFor="name" className="text-neutral-700">{t('auth.fullName', 'Full Name')}</Label>
                     <Input
                       id="name"
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="Juan Pérez"
+                      placeholder={t('auth.namePlaceholder', 'John Doe')}
                       required
                       className="mt-1"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="reg-email" className="text-neutral-700">Correo Electrónico</Label>
+                    <Label htmlFor="reg-email" className="text-neutral-700">{t('auth.email', 'Email')}</Label>
                     <Input
                       id="reg-email"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="tu@correo.com"
+                      placeholder={t('auth.emailPlaceholder', 'your@email.com')}
                       required
                       className="mt-1"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="reg-password" className="text-neutral-700">Contraseña</Label>
+                    <Label htmlFor="reg-password" className="text-neutral-700">{t('auth.password', 'Password')}</Label>
                     <Input
                       id="reg-password"
                       type="password"
@@ -293,7 +317,7 @@ export default function Auth() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="confirm-password" className="text-neutral-700">Confirmar Contraseña</Label>
+                    <Label htmlFor="confirm-password" className="text-neutral-700">{t('auth.confirmPassword', 'Confirm Password')}</Label>
                     <Input
                       id="confirm-password"
                       type="password"
@@ -310,7 +334,7 @@ export default function Auth() {
                     className="w-full bg-primary-600 hover:bg-primary-700" 
                     disabled={isLoading}
                   >
-                    {isLoading ? "Creando cuenta..." : "Crear Cuenta"}
+                    {isLoading ? t('auth.creatingAccount', 'Creating account...') : t('auth.createAccount', 'Create Account')}
                   </Button>
                 </form>
               )}

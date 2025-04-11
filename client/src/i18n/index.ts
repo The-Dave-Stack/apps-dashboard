@@ -25,10 +25,10 @@ i18n
   // Inicializar i18next
   .init({
     resources,
-    fallbackLng: 'es',
+    fallbackLng: 'en',
     debug: import.meta.env.DEV,
     interpolation: {
-      escapeValue: false // No es necesario escapar las traducciones en React
+      escapeValue: false // React already escapes content by default
     },
     detection: {
       order: ['localStorage', 'navigator'],

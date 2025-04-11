@@ -570,11 +570,11 @@ export async function removeFromFavorites(appId: string): Promise<void> {
 }
 
 /**
- * Verifica si una aplicación está en los favoritos del usuario.
+ * Checks if an application is in the user's favorites.
  * 
  * @async
- * @param {string} appId - ID de la aplicación a verificar
- * @returns {Promise<boolean>} Verdadero si la app está en favoritos, falso en caso contrario
+ * @param {string} appId - ID of the application to check
+ * @returns {Promise<boolean>} True if the app is in favorites, false otherwise
  */
 export async function isAppFavorite(appId: string): Promise<boolean> {
   try {
@@ -588,22 +588,22 @@ export async function isAppFavorite(appId: string): Promise<boolean> {
     
     return favoriteDoc.exists();
   } catch (error) {
-    console.error("[Firebase] Error al verificar favorito:", error);
+    console.error("[Firebase] Error checking favorite:", error);
     return false;
   }
 }
 
 /**
- * Obtiene todas las aplicaciones favoritas del usuario actual.
+ * Gets all favorite applications for the current user.
  * 
  * @async
- * @returns {Promise<AppData[]>} Lista de aplicaciones favoritas
+ * @returns {Promise<AppData[]>} List of favorite applications
  */
 export async function getFavoriteApps(): Promise<AppData[]> {
   try {
     const currentUser = auth.currentUser;
     if (!currentUser) {
-      console.warn("[Firebase] No hay usuario autenticado para obtener favoritos");
+      console.warn("[Firebase] No authenticated user to get favorites");
       return [];
     }
     
@@ -625,25 +625,25 @@ export async function getFavoriteApps(): Promise<AppData[]> {
       };
     });
   } catch (error) {
-    console.error("[Firebase] Error al obtener favoritos:", error);
+    console.error("[Firebase] Error getting favorites:", error);
     return [];
   }
 }
 
 /**
- * Funciones para el registro de acceso a aplicaciones
+ * Functions for application access history tracking
  */
 
 /**
- * Obtiene la referencia a la colección de historiales de acceso para el usuario actual.
- * Si no hay usuario autenticado, devuelve null.
+ * Gets the reference to the access history collection for the current user.
+ * If there is no authenticated user, returns null.
  * 
- * @returns {CollectionReference<DocumentData> | null} Referencia a la colección de historial del usuario o null
+ * @returns {CollectionReference<DocumentData> | null} Reference to the user's history collection or null
  */
 export function getUserHistoryRef(): CollectionReference<DocumentData> | null {
   const currentUser = auth.currentUser;
   if (!currentUser) {
-    console.warn("[Firebase] No hay usuario autenticado para obtener referencias de historial");
+    console.warn("[Firebase] No authenticated user to get history references");
     return null;
   }
   
@@ -651,17 +651,17 @@ export function getUserHistoryRef(): CollectionReference<DocumentData> | null {
 }
 
 /**
- * Registra un acceso a una aplicación en el historial del usuario.
+ * Records an access to an application in the user's history.
  * 
  * @async
- * @param {AppData} app - Datos de la aplicación a la que se accedió
- * @returns {Promise<void>} Promesa que se resuelve cuando se completa la operación
+ * @param {AppData} app - Data of the application that was accessed
+ * @returns {Promise<void>} Promise that resolves when the operation is complete
  */
 export async function recordAppAccess(app: AppData): Promise<void> {
   try {
     const currentUser = auth.currentUser;
     if (!currentUser) {
-      // Si no hay usuario autenticado, no registramos nada pero no lanzamos error
+      // If there is no authenticated user, we don't record anything but don't throw an error
       return;
     }
     
@@ -670,7 +670,7 @@ export async function recordAppAccess(app: AppData): Promise<void> {
       return;
     }
     
-    // Usar un ID único para cada acceso
+    // Use a unique ID for each access
     const accessId = doc(historyRef).id;
     
     await setDoc(doc(historyRef, accessId), {
@@ -681,26 +681,26 @@ export async function recordAppAccess(app: AppData): Promise<void> {
       accessedAt: new Date().toISOString()
     });
     
-    console.log(`[Firebase] Acceso registrado a: ${app.name} para usuario: ${currentUser.uid}`);
+    console.log(`[Firebase] Access recorded to: ${app.name} for user: ${currentUser.uid}`);
   } catch (error) {
-    console.error("[Firebase] Error al registrar acceso:", error);
-    // No lanzamos error para no interrumpir la experiencia del usuario
+    console.error("[Firebase] Error recording access:", error);
+    // We don't throw an error to avoid interrupting the user experience
   }
 }
 
 /**
- * Obtiene el historial de accesos a aplicaciones del usuario actual.
- * Los resultados vienen ordenados del más reciente al más antiguo.
+ * Gets the history of application accesses for the current user.
+ * Results are ordered from most recent to oldest.
  * 
  * @async
- * @param {number} limitCount - Número máximo de registros a obtener (por defecto 10)
- * @returns {Promise<{appId: string, name: string, icon: string, url: string, accessedAt: string}[]>} Lista de accesos recientes
+ * @param {number} limitCount - Maximum number of records to obtain (default 10)
+ * @returns {Promise<{appId: string, name: string, icon: string, url: string, accessedAt: string}[]>} List of recent accesses
  */
 export async function getRecentAppAccess(limitCount = 10): Promise<{appId: string, name: string, icon: string, url: string, accessedAt: string}[]> {
   try {
     const currentUser = auth.currentUser;
     if (!currentUser) {
-      console.warn("[Firebase] No hay usuario autenticado para obtener historial");
+      console.warn("[Firebase] No authenticated user to get history");
       return [];
     }
     
@@ -709,9 +709,9 @@ export async function getRecentAppAccess(limitCount = 10): Promise<{appId: strin
       return [];
     }
     
-    // Ordenar por fecha de acceso descendente y limitar a la cantidad especificada
+    // Sort by access date descending and limit to the specified amount
     const maxItems = limitCount > 0 ? limitCount : 10;
-    // Usamos limitQuery (alias para la función limit de firebase/firestore)
+    // We use limitQuery (alias for the limit function from firebase/firestore)
     const q = query(historyRef, /* orderBy('accessedAt', 'desc'), */ limitQuery(maxItems));
     const snapshot = await getDocs(q);
     
@@ -725,11 +725,11 @@ export async function getRecentAppAccess(limitCount = 10): Promise<{appId: strin
         accessedAt: data.accessedAt
       };
     }).sort((a, b) => {
-      // Ordenamos manualmente ya que orderBy puede no funcionar en algunos entornos
+      // We sort manually since orderBy may not work in some environments
       return new Date(b.accessedAt).getTime() - new Date(a.accessedAt).getTime();
     });
   } catch (error) {
-    console.error("[Firebase] Error al obtener historial:", error);
+    console.error("[Firebase] Error getting history:", error);
     return [];
   }
 }
