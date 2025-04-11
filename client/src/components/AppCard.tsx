@@ -21,9 +21,11 @@ import { useTranslation } from "react-i18next";
  * Props para el componente AppCard
  * @interface AppCardProps
  * @property {AppData} app - Datos de la aplicación a mostrar
+ * @property {string} [badge] - Texto opcional para mostrar como insignia en la tarjeta
  */
 interface AppCardProps {
   app: AppData;
+  badge?: string;
 }
 
 /**
