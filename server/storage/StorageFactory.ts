@@ -1,7 +1,7 @@
 /**
- * @fileoverview Fábrica de almacenamiento para Bookmark Manager Sync
- * Este módulo proporciona una fábrica que crea una instancia de almacenamiento
- * según la configuración de la variable de entorno BMS_DATABASE.
+ * @fileoverview Storage factory for Bookmark Manager Sync
+ * This module provides a factory that creates a storage instance
+ * based on the BMS_DATABASE environment variable configuration.
  * @module storage/StorageFactory
  */
 
@@ -11,13 +11,13 @@ import { PostgresStorage } from './PostgresStorage';
 import { SupabaseStorage } from './SupabaseStorage';
 
 /**
- * Tipos de almacenamiento soportados
+ * Supported storage types
  */
 export type StorageType = 'firebase' | 'postgres' | 'supabase';
 
 /**
- * Clase fábrica que proporciona una instancia de almacenamiento
- * basada en la configuración del entorno.
+ * Factory class that provides a storage instance
+ * based on environment configuration.
  */
 export class StorageFactory {
   private static instance: IStorage | null = null;

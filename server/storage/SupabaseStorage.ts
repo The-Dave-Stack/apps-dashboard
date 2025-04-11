@@ -22,27 +22,27 @@ export class SupabaseStorage implements IStorage {
     const supabaseKey = process.env.SUPABASE_KEY;
     
     if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Las variables de entorno SUPABASE_URL y SUPABASE_KEY son requeridas para usar SupabaseStorage');
+      throw new Error('Environment variables SUPABASE_URL and SUPABASE_KEY are required to use SupabaseStorage');
     }
     
     this.client = createClient(supabaseUrl, supabaseKey);
     
-    // Inicializar la base de datos si es necesario
+    // Initialize the database if necessary
     this.initializeDatabase().catch(err => {
-      console.error('[Supabase] Error al inicializar la base de datos:', err);
+      console.error('[Supabase] Error initializing database:', err);
     });
   }
   
   /**
-   * Inicializa la base de datos, creando las tablas necesarias si no existen
+   * Initialize the database, creating necessary tables if they don't exist
    */
   private async initializeDatabase(): Promise<void> {
     try {
-      console.log('[Supabase] Verificando esquema de base de datos...');
+      console.log('[Supabase] Verifying database schema...');
       
-      // Verificar si las tablas existen y crearlas si no
-      // Nota: Supabase permite gestionar las tablas desde la interfaz web,
-      // pero también podemos verificar y crear programáticamente si es necesario
+      // Check if tables exist and create them if not
+      // Note: Supabase allows table management through the web interface,
+      // but we can also check and create programmatically if needed
       
       const { error: categoriesError } = await this.client
         .from('bms_categories')
@@ -50,18 +50,18 @@ export class SupabaseStorage implements IStorage {
         .limit(1);
         
       if (categoriesError && categoriesError.code === '42P01') { // UNDEFINED_TABLE
-        console.log('[Supabase] Creando tabla de categorías...');
+        console.log('[Supabase] Creating categories table...');
         await this.client.rpc('create_bms_tables');
       }
     } catch (error) {
-      console.error('[Supabase] Error al inicializar la base de datos:', error);
+      console.error('[Supabase] Error initializing database:', error);
     }
   }
   
   /**
-   * Obtiene todas las categorías para un usuario específico
-   * @param userId - ID del usuario
-   * @returns Promise con array de categorías
+   * Gets all categories for a specific user
+   * @param userId - User ID
+   * @returns Promise with array of categories
    */
   async getCategories(userId: string): Promise<FirebaseCategory[]> {
     try {
@@ -84,16 +84,16 @@ export class SupabaseStorage implements IStorage {
         }))
       }));
     } catch (error) {
-      console.error(`[Supabase] Error al obtener categorías para el usuario ${userId}:`, error);
+      console.error(`[Supabase] Error getting categories for user ${userId}:`, error);
       return [];
     }
   }
   
   /**
-   * Obtiene una categoría específica por su ID
-   * @param userId - ID del usuario
-   * @param categoryId - ID de la categoría
-   * @returns Promise con la categoría o null si no existe
+   * Gets a specific category by its ID
+   * @param userId - User ID
+   * @param categoryId - Category ID
+   * @returns Promise with the category or null if it doesn't exist
    */
   async getCategoryById(userId: string, categoryId: string): Promise<FirebaseCategory | null> {
     try {
@@ -118,20 +118,20 @@ export class SupabaseStorage implements IStorage {
         }))
       };
     } catch (error) {
-      console.error(`[Supabase] Error al obtener categoría ${categoryId} para usuario ${userId}:`, error);
+      console.error(`[Supabase] Error getting category ${categoryId} for user ${userId}:`, error);
       return null;
     }
   }
   
   /**
-   * Crea una nueva categoría
-   * @param userId - ID del usuario
-   * @param category - Datos de la categoría a crear
-   * @returns Promise con la categoría creada incluyendo su ID
+   * Creates a new category
+   * @param userId - User ID
+   * @param category - Category data to create
+   * @returns Promise with the created category including its ID
    */
   async createCategory(userId: string, category: Omit<FirebaseCategory, 'id'>): Promise<FirebaseCategory> {
     try {
-      // Generar ID único para la categoría
+      // Generate unique ID for the category
       const categoryId = crypto.randomUUID();
       
       const { data, error } = await this.client
@@ -152,17 +152,17 @@ export class SupabaseStorage implements IStorage {
         apps: []
       };
     } catch (error) {
-      console.error(`[Supabase] Error al crear categoría para usuario ${userId}:`, error);
+      console.error(`[Supabase] Error creating category for user ${userId}:`, error);
       throw error;
     }
   }
   
   /**
-   * Actualiza una categoría existente
-   * @param userId - ID del usuario
-   * @param categoryId - ID de la categoría
-   * @param category - Datos actualizados de la categoría
-   * @returns Promise con la categoría actualizada
+   * Updates an existing category
+   * @param userId - User ID
+   * @param categoryId - Category ID
+   * @param category - Updated category data
+   * @returns Promise with the updated category
    */
   async updateCategory(userId: string, categoryId: string, category: Partial<FirebaseCategory>): Promise<FirebaseCategory> {
     try {
@@ -188,26 +188,26 @@ export class SupabaseStorage implements IStorage {
         }))
       };
     } catch (error) {
-      console.error(`[Supabase] Error al actualizar categoría ${categoryId} para usuario ${userId}:`, error);
+      console.error(`[Supabase] Error updating category ${categoryId} for user ${userId}:`, error);
       throw error;
     }
   }
   
   /**
-   * Elimina una categoría
-   * @param userId - ID del usuario
-   * @param categoryId - ID de la categoría
-   * @returns Promise que se resuelve cuando la categoría es eliminada
+   * Deletes a category
+   * @param userId - User ID
+   * @param categoryId - Category ID
+   * @returns Promise that resolves when the category is deleted
    */
   async deleteCategory(userId: string, categoryId: string): Promise<void> {
     try {
-      // Eliminar primero las aplicaciones asociadas
+      // Delete associated apps first
       await this.client
         .from('bms_apps')
         .delete()
         .eq('category_id', categoryId);
         
-      // Luego eliminar la categoría
+      // Then delete the category
       const { error } = await this.client
         .from('bms_categories')
         .delete()
@@ -216,7 +216,7 @@ export class SupabaseStorage implements IStorage {
         
       if (error) throw error;
     } catch (error) {
-      console.error(`[Supabase] Error al eliminar categoría ${categoryId} para usuario ${userId}:`, error);
+      console.error(`[Supabase] Error deleting category ${categoryId} for user ${userId}:`, error);
       throw error;
     }
   }
