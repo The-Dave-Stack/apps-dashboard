@@ -838,10 +838,6 @@ service cloud.firestore {
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold mb-4">{t('admin.configHeader')}</h2>
           <div className="flex space-x-2">
-            <Button variant="outline" onClick={() => window.open("/admin/users", "_self")}>
-              <Users className="mr-2 h-4 w-4" />
-              {t('admin.manageUsers')}
-            </Button>
             <Button 
               onClick={async () => {
                 try {
