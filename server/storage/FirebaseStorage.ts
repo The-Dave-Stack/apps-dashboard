@@ -24,13 +24,13 @@ export class FirebaseStorage implements IStorage {
   }
   
   /**
-   * Obtiene todas las categorías para un usuario específico
-   * @param userId - ID del usuario
-   * @returns Promise con array de categorías
+   * Gets all categories for a specific user
+   * @param userId - User ID
+   * @returns Promise with array of categories
    */
   async getCategories(userId: string): Promise<FirebaseCategory[]> {
     try {
-      console.log(`[Firebase] Obteniendo categorías para el usuario: ${userId}`);
+      console.log(`[Firebase] Getting categories for user: ${userId}`);
       const categoriesRef = this.db.collection(`users/${userId}/categories`);
       const snapshot = await categoriesRef.get();
       const categories: FirebaseCategory[] = [];
@@ -44,19 +44,19 @@ export class FirebaseStorage implements IStorage {
         });
       });
 
-      console.log(`[Firebase] Se encontraron ${categories.length} categorías para el usuario ${userId}`);
+      console.log(`[Firebase] Found ${categories.length} categories for user ${userId}`);
       return categories;
     } catch (error) {
-      console.error('[Firebase] Error al obtener categorías:', error);
+      console.error('[Firebase] Error getting categories:', error);
       throw error;
     }
   }
   
   /**
-   * Obtiene una categoría específica por su ID
-   * @param userId - ID del usuario
-   * @param categoryId - ID de la categoría
-   * @returns Promise con la categoría o null si no existe
+   * Gets a specific category by its ID
+   * @param userId - User ID
+   * @param categoryId - Category ID
+   * @returns Promise with the category or null if it doesn't exist
    */
   async getCategoryById(userId: string, categoryId: string): Promise<FirebaseCategory | null> {
     try {
@@ -74,16 +74,16 @@ export class FirebaseStorage implements IStorage {
         apps: data.apps || [],
       };
     } catch (error) {
-      console.error(`[Firebase] Error al obtener categoría ${categoryId}:`, error);
+      console.error(`[Firebase] Error getting category ${categoryId}:`, error);
       throw error;
     }
   }
   
   /**
-   * Crea una nueva categoría
-   * @param userId - ID del usuario
-   * @param category - Datos de la categoría a crear
-   * @returns Promise con la categoría creada incluyendo su ID
+   * Creates a new category
+   * @param userId - User ID
+   * @param category - Category data to create
+   * @returns Promise with the created category including its ID
    */
   async createCategory(userId: string, category: Omit<FirebaseCategory, 'id'>): Promise<FirebaseCategory> {
     try {
@@ -99,60 +99,60 @@ export class FirebaseStorage implements IStorage {
         apps: category.apps || [],
       };
     } catch (error) {
-      console.error('[Firebase] Error al crear categoría:', error);
+      console.error('[Firebase] Error creating category:', error);
       throw error;
     }
   }
   
   /**
-   * Actualiza una categoría existente
-   * @param userId - ID del usuario
-   * @param categoryId - ID de la categoría
-   * @param category - Datos actualizados de la categoría
-   * @returns Promise con la categoría actualizada
+   * Updates an existing category
+   * @param userId - User ID
+   * @param categoryId - Category ID
+   * @param category - Updated category data
+   * @returns Promise with the updated category
    */
   async updateCategory(userId: string, categoryId: string, category: Partial<FirebaseCategory>): Promise<FirebaseCategory> {
     try {
       const categoryRef = this.db.doc(`users/${userId}/categories/${categoryId}`);
       
-      // No incluir el ID en los datos a actualizar
+      // Don't include the ID in the data to update
       const { id, ...updateData } = category;
       
       await categoryRef.update(updateData);
       
       const updatedCategory = await this.getCategoryById(userId, categoryId);
       if (!updatedCategory) {
-        throw new Error(`Categoría ${categoryId} no encontrada después de actualizar`);
+        throw new Error(`Category ${categoryId} not found after update`);
       }
       
       return updatedCategory;
     } catch (error) {
-      console.error(`[Firebase] Error al actualizar categoría ${categoryId}:`, error);
+      console.error(`[Firebase] Error updating category ${categoryId}:`, error);
       throw error;
     }
   }
   
   /**
-   * Elimina una categoría
-   * @param userId - ID del usuario
-   * @param categoryId - ID de la categoría
-   * @returns Promise que se resuelve cuando la categoría es eliminada
+   * Deletes a category
+   * @param userId - User ID
+   * @param categoryId - Category ID
+   * @returns Promise that resolves when the category is deleted
    */
   async deleteCategory(userId: string, categoryId: string): Promise<void> {
     try {
       const categoryRef = this.db.doc(`users/${userId}/categories/${categoryId}`);
       await categoryRef.delete();
     } catch (error) {
-      console.error(`[Firebase] Error al eliminar categoría ${categoryId}:`, error);
+      console.error(`[Firebase] Error deleting category ${categoryId}:`, error);
       throw error;
     }
   }
   
   /**
-   * Obtiene todas las aplicaciones para una categoría específica
-   * @param userId - ID del usuario
-   * @param categoryId - ID de la categoría
-   * @returns Promise con array de aplicaciones
+   * Gets all applications for a specific category
+   * @param userId - User ID
+   * @param categoryId - Category ID
+   * @returns Promise with array of applications
    */
   async getApps(userId: string, categoryId: string): Promise<FirebaseApp[]> {
     try {
@@ -163,40 +163,40 @@ export class FirebaseStorage implements IStorage {
       
       return category.apps || [];
     } catch (error) {
-      console.error(`[Firebase] Error al obtener aplicaciones de categoría ${categoryId}:`, error);
+      console.error(`[Firebase] Error getting applications from category ${categoryId}:`, error);
       throw error;
     }
   }
   
   /**
-   * Obtiene una aplicación específica
-   * @param userId - ID del usuario
-   * @param categoryId - ID de la categoría
-   * @param appId - ID de la aplicación
-   * @returns Promise con la aplicación o null si no existe
+   * Gets a specific application
+   * @param userId - User ID
+   * @param categoryId - Category ID
+   * @param appId - Application ID
+   * @returns Promise with the application or null if it doesn't exist
    */
   async getAppById(userId: string, categoryId: string, appId: string): Promise<FirebaseApp | null> {
     try {
       const apps = await this.getApps(userId, categoryId);
       return apps.find(app => app.id === appId) || null;
     } catch (error) {
-      console.error(`[Firebase] Error al obtener aplicación ${appId}:`, error);
+      console.error(`[Firebase] Error getting application ${appId}:`, error);
       throw error;
     }
   }
   
   /**
-   * Crea una nueva aplicación en una categoría
-   * @param userId - ID del usuario
-   * @param categoryId - ID de la categoría
-   * @param app - Datos de la aplicación a crear
-   * @returns Promise con la aplicación creada incluyendo su ID
+   * Creates a new application in a category
+   * @param userId - User ID
+   * @param categoryId - Category ID
+   * @param app - Application data to create
+   * @returns Promise with the created application including its ID
    */
   async createApp(userId: string, categoryId: string, app: Omit<FirebaseApp, 'id'>): Promise<FirebaseApp> {
     try {
       const category = await this.getCategoryById(userId, categoryId);
       if (!category) {
-        throw new Error(`Categoría ${categoryId} no encontrada`);
+        throw new Error(`Category ${categoryId} not found`);
       }
       
       const newApp: FirebaseApp = {
@@ -213,37 +213,37 @@ export class FirebaseStorage implements IStorage {
       
       return newApp;
     } catch (error) {
-      console.error(`[Firebase] Error al crear aplicación en categoría ${categoryId}:`, error);
+      console.error(`[Firebase] Error creating application in category ${categoryId}:`, error);
       throw error;
     }
   }
   
   /**
-   * Actualiza una aplicación existente
-   * @param userId - ID del usuario
-   * @param categoryId - ID de la categoría
-   * @param appId - ID de la aplicación
-   * @param app - Datos actualizados de la aplicación
-   * @returns Promise con la aplicación actualizada
+   * Updates an existing application
+   * @param userId - User ID
+   * @param categoryId - Category ID
+   * @param appId - Application ID
+   * @param app - Updated application data
+   * @returns Promise with the updated application
    */
   async updateApp(userId: string, categoryId: string, appId: string, app: Partial<FirebaseApp>): Promise<FirebaseApp> {
     try {
       const category = await this.getCategoryById(userId, categoryId);
       if (!category) {
-        throw new Error(`Categoría ${categoryId} no encontrada`);
+        throw new Error(`Category ${categoryId} not found`);
       }
       
       const apps = category.apps || [];
       const appIndex = apps.findIndex(a => a.id === appId);
       
       if (appIndex === -1) {
-        throw new Error(`Aplicación ${appId} no encontrada en categoría ${categoryId}`);
+        throw new Error(`Application ${appId} not found in category ${categoryId}`);
       }
       
       const updatedApp = {
         ...apps[appIndex],
         ...app,
-        id: appId, // Asegurarse de mantener el ID original
+        id: appId, // Ensure original ID is preserved
       };
       
       apps[appIndex] = updatedApp;
@@ -252,47 +252,47 @@ export class FirebaseStorage implements IStorage {
       
       return updatedApp;
     } catch (error) {
-      console.error(`[Firebase] Error al actualizar aplicación ${appId}:`, error);
+      console.error(`[Firebase] Error updating application ${appId}:`, error);
       throw error;
     }
   }
   
   /**
-   * Elimina una aplicación
-   * @param userId - ID del usuario
-   * @param categoryId - ID de la categoría
-   * @param appId - ID de la aplicación
-   * @returns Promise que se resuelve cuando la aplicación es eliminada
+   * Deletes an application
+   * @param userId - User ID
+   * @param categoryId - Category ID
+   * @param appId - Application ID
+   * @returns Promise that resolves when the application is deleted
    */
   async deleteApp(userId: string, categoryId: string, appId: string): Promise<void> {
     try {
       const category = await this.getCategoryById(userId, categoryId);
       if (!category) {
-        throw new Error(`Categoría ${categoryId} no encontrada`);
+        throw new Error(`Category ${categoryId} not found`);
       }
       
       const apps = (category.apps || []).filter(app => app.id !== appId);
       
       await this.updateCategory(userId, categoryId, { apps });
     } catch (error) {
-      console.error(`[Firebase] Error al eliminar aplicación ${appId}:`, error);
+      console.error(`[Firebase] Error deleting application ${appId}:`, error);
       throw error;
     }
   }
   
   /**
-   * Marca o desmarca una aplicación como favorita
-   * @param userId - ID del usuario
-   * @param appId - ID de la aplicación
-   * @param isFavorite - Indica si la aplicación es favorita o no
-   * @returns Promise que se resuelve cuando la operación se completa
+   * Toggles the favorite status of an application
+   * @param userId - User ID
+   * @param appId - Application ID
+   * @param isFavorite - Indicates if the application should be marked as favorite
+   * @returns Promise that resolves when the operation is completed
    */
   async toggleFavorite(userId: string, appId: string, isFavorite: boolean): Promise<void> {
     try {
       const favoriteRef = this.db.doc(`users/${userId}/favorites/${appId}`);
       
       if (isFavorite) {
-        // Primero, encontrar la aplicación en todas las categorías
+        // First, find the application in all categories
         const categories = await this.getCategories(userId);
         let foundApp: FirebaseApp | null = null;
         
@@ -305,28 +305,28 @@ export class FirebaseStorage implements IStorage {
         }
         
         if (!foundApp) {
-          throw new Error(`Aplicación ${appId} no encontrada`);
+          throw new Error(`Application ${appId} not found`);
         }
         
-        // Guardar como favorito
+        // Save as favorite
         await favoriteRef.set({
           ...foundApp,
           timestamp: FieldValue.serverTimestamp(),
         });
       } else {
-        // Eliminar de favoritos
+        // Remove from favorites
         await favoriteRef.delete();
       }
     } catch (error) {
-      console.error(`[Firebase] Error al ${isFavorite ? 'añadir' : 'quitar'} favorito ${appId}:`, error);
+      console.error(`[Firebase] Error ${isFavorite ? 'adding' : 'removing'} favorite ${appId}:`, error);
       throw error;
     }
   }
   
   /**
-   * Obtiene todas las aplicaciones favoritas de un usuario
-   * @param userId - ID del usuario
-   * @returns Promise con array de aplicaciones favoritas
+   * Gets all favorite applications for a user
+   * @param userId - User ID
+   * @returns Promise with array of favorite applications
    */
   async getFavorites(userId: string): Promise<FirebaseApp[]> {
     try {
@@ -349,16 +349,16 @@ export class FirebaseStorage implements IStorage {
       
       return favorites;
     } catch (error) {
-      console.error('[Firebase] Error al obtener favoritos:', error);
+      console.error('[Firebase] Error getting favorites:', error);
       throw error;
     }
   }
   
   /**
-   * Verifica si una aplicación es favorita
-   * @param userId - ID del usuario
-   * @param appId - ID de la aplicación
-   * @returns Promise con un booleano indicando si es favorita
+   * Checks if an application is marked as favorite
+   * @param userId - User ID
+   * @param appId - Application ID
+   * @returns Promise with a boolean indicating if it's a favorite
    */
   async isFavorite(userId: string, appId: string): Promise<boolean> {
     try {
@@ -367,22 +367,22 @@ export class FirebaseStorage implements IStorage {
       
       return favoriteDoc.exists;
     } catch (error) {
-      console.error(`[Firebase] Error al verificar si ${appId} es favorito:`, error);
+      console.error(`[Firebase] Error checking if ${appId} is a favorite:`, error);
       throw error;
     }
   }
   
   /**
-   * Registra un acceso a una aplicación
-   * @param userId - ID del usuario
-   * @param appId - ID de la aplicación
-   * @returns Promise que se resuelve cuando el acceso es registrado
+   * Records an access to an application
+   * @param userId - User ID
+   * @param appId - Application ID
+   * @returns Promise that resolves when the access is recorded
    */
   async recordAccess(userId: string, appId: string): Promise<void> {
     try {
       const historyRef = this.db.collection(`users/${userId}/history`);
       
-      // Primero, encontrar la aplicación en todas las categorías
+      // First, find the application in all categories
       const categories = await this.getCategories(userId);
       let foundApp: FirebaseApp | null = null;
       
@@ -395,10 +395,10 @@ export class FirebaseStorage implements IStorage {
       }
       
       if (!foundApp) {
-        throw new Error(`Aplicación ${appId} no encontrada`);
+        throw new Error(`Application ${appId} not found`);
       }
       
-      // Registrar acceso
+      // Record access
       await historyRef.add({
         appId: appId,
         name: foundApp.name,
@@ -407,16 +407,16 @@ export class FirebaseStorage implements IStorage {
         timestamp: FieldValue.serverTimestamp(),
       });
     } catch (error) {
-      console.error(`[Firebase] Error al registrar acceso a ${appId}:`, error);
+      console.error(`[Firebase] Error recording access to ${appId}:`, error);
       throw error;
     }
   }
   
   /**
-   * Obtiene las aplicaciones accedidas recientemente
-   * @param userId - ID del usuario
-   * @param limitCount - Número máximo de aplicaciones a devolver
-   * @returns Promise con array de aplicaciones recientes
+   * Gets recently accessed applications
+   * @param userId - User ID
+   * @param limitCount - Maximum number of applications to return
+   * @returns Promise with array of recent applications
    */
   async getRecentApps(userId: string, limitCount: number = 10): Promise<FirebaseApp[]> {
     try {
@@ -434,7 +434,7 @@ export class FirebaseStorage implements IStorage {
         const data = doc.data();
         const appId = data.appId;
         
-        // Evitar duplicados
+        // Avoid duplicates
         if (!addedIds.has(appId)) {
           addedIds.add(appId);
           recentApps.push({
@@ -449,16 +449,16 @@ export class FirebaseStorage implements IStorage {
       
       return recentApps;
     } catch (error) {
-      console.error('[Firebase] Error al obtener aplicaciones recientes:', error);
+      console.error('[Firebase] Error getting recent applications:', error);
       throw error;
     }
   }
   
   /**
-   * Busca aplicaciones por término de búsqueda
-   * @param userId - ID del usuario
-   * @param searchTerm - Término de búsqueda
-   * @returns Promise con array de aplicaciones que coinciden con la búsqueda
+   * Searches for applications by search term
+   * @param userId - User ID
+   * @param searchTerm - Search term
+   * @returns Promise with array of applications that match the search
    */
   async searchApps(userId: string, searchTerm: string): Promise<FirebaseApp[]> {
     try {
@@ -467,7 +467,7 @@ export class FirebaseStorage implements IStorage {
       
       const results: FirebaseApp[] = [];
       
-      // Buscar en todas las categorías y sus aplicaciones
+      // Search in all categories and their applications
       for (const category of categories) {
         const matchingApps = (category.apps || []).filter(app => 
           app.name.toLowerCase().includes(searchTermLower) || 
@@ -479,14 +479,14 @@ export class FirebaseStorage implements IStorage {
       
       return results;
     } catch (error) {
-      console.error(`[Firebase] Error al buscar aplicaciones con término "${searchTerm}":`, error);
+      console.error(`[Firebase] Error searching applications with term "${searchTerm}":`, error);
       throw error;
     }
   }
   
   /**
-   * Obtiene la configuración global de la aplicación
-   * @returns Promise con la configuración de la aplicación
+   * Gets the global application configuration
+   * @returns Promise with the application configuration
    */
   async getAppConfig(): Promise<Record<string, any>> {
     try {
@@ -494,7 +494,7 @@ export class FirebaseStorage implements IStorage {
       const configDoc = await configRef.get();
       
       if (!configDoc.exists) {
-        // Si no existe, crear con valores predeterminados
+        // If it doesn't exist, create with default values
         const defaultConfig = {
           showRegisterTab: true,
         };
@@ -505,34 +505,34 @@ export class FirebaseStorage implements IStorage {
       
       return configDoc.data() as Record<string, any>;
     } catch (error) {
-      console.error('[Firebase] Error al obtener configuración de la aplicación:', error);
+      console.error('[Firebase] Error getting application configuration:', error);
       throw error;
     }
   }
   
   /**
-   * Actualiza la configuración global de la aplicación
-   * @param config - Configuración parcial a actualizar
-   * @returns Promise con la configuración actualizada
+   * Updates the global application configuration
+   * @param config - Partial configuration to update
+   * @returns Promise with the updated configuration
    */
   async updateAppConfig(config: Record<string, any>): Promise<Record<string, any>> {
     try {
-      // Obtener configuración actual
+      // Get current configuration
       const currentConfig = await this.getAppConfig();
       
-      // Combinar con la nueva configuración
+      // Merge with the new configuration
       const newConfig = {
         ...currentConfig,
         ...config,
       };
       
-      // Actualizar
+      // Update
       const configRef = this.db.doc('config/appConfig');
       await configRef.set(newConfig);
       
       return newConfig;
     } catch (error) {
-      console.error('[Firebase] Error al actualizar configuración de la aplicación:', error);
+      console.error('[Firebase] Error updating application configuration:', error);
       throw error;
     }
   }
