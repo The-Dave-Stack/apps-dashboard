@@ -5,16 +5,16 @@ import "./styles/customStyles.css";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { AuthProvider } from "./lib/auth";
-// Importar configuración de i18n
+// Import i18n configuration
 import "./i18n";
 import { LanguageProvider } from "./i18n/LanguageContext";
-// Importar verificación de variables de entorno
+// Import environment variables verification
 import { logFirebaseEnvStatus } from "./lib/env-check";
 
-// Verificar variables de entorno de Firebase
+// Verify Firebase environment variables
 logFirebaseEnvStatus();
 
-// Inicialización de Firebase en la raíz de la aplicación
+// Firebase initialization at the application root
 console.log("Initializing React application");
 
 createRoot(document.getElementById("root")!).render(

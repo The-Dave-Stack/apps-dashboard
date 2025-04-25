@@ -538,26 +538,26 @@ export class FirebaseStorage implements IStorage {
   }
 
   /**
-   * Obtiene todos los usuarios registrados en el sistema
-   * @returns Promise con array de usuarios
+   * Gets all registered users in the system
+   * @returns Promise with array of users
    */
   async getUsers(): Promise<FirebaseUser[]> {
     try {
-      console.log('[Firebase] Obteniendo lista de usuarios con Firebase Auth');
+      console.log('[Firebase] Getting user list with Firebase Auth');
       
-      // Usamos Firebase Auth para obtener la lista de usuarios
+      // Use Firebase Auth to get the list of users
       const { auth } = getFirebaseInstances();
       
       try {
-        // Obtenemos los usuarios (máximo 1000, se puede implementar paginación si es necesario)
+        // Get users (maximum 1000, pagination could be implemented if needed)
         const listUsersResult = await auth.listUsers(1000);
         
         if (!listUsersResult.users || listUsersResult.users.length === 0) {
-          console.log('[Firebase] No se encontraron usuarios en Firebase Auth');
+          console.log('[Firebase] No users found in Firebase Auth');
           return [];
         }
         
-        // Convertimos los usuarios de Firebase Auth al formato que espera nuestra aplicación
+        // Convert Firebase Auth users to the format expected by our application
         const users: FirebaseUser[] = listUsersResult.users.map(user => {
           return {
             id: user.uid,
@@ -569,50 +569,50 @@ export class FirebaseStorage implements IStorage {
           };
         });
         
-        console.log(`[Firebase] Se encontraron ${users.length} usuarios en Firebase Auth`);
+        console.log(`[Firebase] Found ${users.length} users in Firebase Auth`);
         return users;
       } catch (authError) {
-        console.error('[Firebase] Error al obtener usuarios con Firebase Auth:', authError);
+        console.error('[Firebase] Error getting users with Firebase Auth:', authError);
         
-        // Si falla la obtención con Auth, intentamos con el método anterior
-        console.log('[Firebase] Intentando obtener usuario actual como alternativa');
+        // If fetching with Auth fails, try with the previous method
+        console.log('[Firebase] Trying to get current user as an alternative');
         const authId = this.getCurrentUserId();
         if (!authId) {
-          console.error('[Firebase] No hay usuario autenticado para obtener la lista de usuarios');
+          console.error('[Firebase] No authenticated user to get user list');
           return [];
         }
         
         const currentUser = await this.getUserById(authId);
         
         if (currentUser) {
-          console.log('[Firebase] Devolviendo al menos el usuario actual', currentUser);
+          console.log('[Firebase] Returning at least the current user', currentUser);
           return [currentUser];
         }
       }
       
       return [];
     } catch (error) {
-      console.error('[Firebase] Error al obtener usuarios:', error);
-      return []; // Devolvemos un array vacío en caso de error para evitar que la aplicación se rompa
+      console.error('[Firebase] Error getting users:', error);
+      return []; // Return an empty array in case of error to prevent the application from breaking
     }
   }
   
-  // Método auxiliar para obtener el ID del usuario autenticado actualmente
+  // Helper method to get the currently authenticated user ID
   private getCurrentUserId(): string | null {
     try {
-      // En el servidor, usamos el ID del usuario admin por defecto
-      // Este ID se utiliza para acceder a datos de sistema como la lista de usuarios
-      return 'u20InPS27iMb50V9kzjKScKSx4j1'; // ID del usuario admin por defecto
+      // On the server, we use the default admin user ID
+      // This ID is used to access system data like the user list
+      return 'u20InPS27iMb50V9kzjKScKSx4j1'; // Default admin user ID
     } catch (error) {
-      console.error('[Firebase] Error al obtener el ID del usuario actual:', error);
+      console.error('[Firebase] Error getting the current user ID:', error);
       return null;
     }
   }
   
   /**
-   * Obtiene un usuario específico por su ID
-   * @param userId - ID del usuario
-   * @returns Promise con el usuario o null si no existe
+   * Gets a specific user by their ID
+   * @param userId - User ID
+   * @returns Promise with the user or null if they don't exist
    */
   async getUserById(userId: string): Promise<FirebaseUser | null> {
     try {
@@ -620,22 +620,22 @@ export class FirebaseStorage implements IStorage {
       const userDoc = await userRef.get();
       
       if (!userDoc.exists) {
-        // Si el documento no existe pero es el ID del admin por defecto,
-        // creamos un usuario ficticio con rol de administrador
+        // If the document doesn't exist but it's the default admin ID,
+        // create a default admin user
         if (userId === 'u20InPS27iMb50V9kzjKScKSx4j1') {
-          console.log('[Firebase] Creando usuario administrador predeterminado');
+          console.log('[Firebase] Creating default administrator user');
           
-          // Creamos un usuario admin por defecto
+          // Create a default admin user
           const defaultAdmin: FirebaseUser = {
             id: userId,
-            username: 'Administrador',
+            username: 'Administrator',
             email: 'admin@bookmarkmanager.com',
             role: UserRole.ADMIN,
             createdAt: new Date(),
             disabled: false,
           };
           
-          // Guardamos el usuario en Firestore para futuras consultas
+          // Save the user in Firestore for future queries
           await userRef.set({
             username: defaultAdmin.username,
             email: defaultAdmin.email,
@@ -660,28 +660,28 @@ export class FirebaseStorage implements IStorage {
         disabled: data.disabled || false,
       };
     } catch (error) {
-      console.error(`[Firebase] Error al obtener usuario ${userId}:`, error);
+      console.error(`[Firebase] Error getting user ${userId}:`, error);
       throw error;
     }
   }
   
   /**
-   * Actualiza el rol de un usuario
-   * @param userId - ID del usuario
-   * @param role - Nuevo rol para el usuario
-   * @returns Promise con el usuario actualizado
+   * Updates a user's role
+   * @param userId - User ID
+   * @param role - New role for the user
+   * @returns Promise with the updated user
    */
   async updateUserRole(userId: string, role: UserRole): Promise<FirebaseUser> {
     try {
-      console.log(`[Firebase] Actualizando rol de usuario ${userId} a ${role}`);
+      console.log(`[Firebase] Updating user role ${userId} to ${role}`);
       
-      // Usamos Firebase Auth para actualizar el rol del usuario
+      // Use Firebase Auth to update the user's role
       const { auth } = getFirebaseInstances();
       
-      // Las custom claims se usan para almacenar roles y otros datos personalizados
+      // Custom claims are used to store roles and other custom data
       await auth.setCustomUserClaims(userId, { role });
       
-      // También actualizamos el documento en Firestore para mantener la consistencia
+      // Also update the document in Firestore to maintain consistency
       try {
         const userRef = this.db.doc(`users/${userId}`);
         await userRef.update({
@@ -689,46 +689,46 @@ export class FirebaseStorage implements IStorage {
         });
       } catch (error) {
         const firestoreError = error as Error;
-        console.warn(`[Firebase] Error al actualizar rol en Firestore: ${firestoreError.message}`);
-        // No fallamos completamente si solo falla Firestore pero Auth funcionó
+        console.warn(`[Firebase] Error updating role in Firestore: ${firestoreError.message}`);
+        // We don't fail completely if only Firestore fails but Auth worked
       }
       
-      // Obtener el usuario actualizado
-      // Nota: Puede haber un pequeño retraso antes de que las custom claims estén disponibles
+      // Get the updated user
+      // Note: There may be a slight delay before custom claims are available
       const user = await auth.getUser(userId);
       
       return {
         id: user.uid,
         username: user.displayName || user.email?.split('@')[0] || '',
         email: user.email || '',
-        role: role, // Usamos el rol que acabamos de asignar
+        role: role, // Use the role we just assigned
         createdAt: user.metadata.creationTime ? new Date(user.metadata.creationTime) : new Date(),
         disabled: user.disabled || false,
       };
     } catch (error) {
-      console.error(`[Firebase] Error al actualizar rol de usuario ${userId}:`, error);
+      console.error(`[Firebase] Error updating user role ${userId}:`, error);
       throw error;
     }
   }
   
   /**
-   * Activa o desactiva un usuario
-   * @param userId - ID del usuario
-   * @param disabled - Indica si el usuario debe ser desactivado
-   * @returns Promise con el usuario actualizado
+   * Activates or deactivates a user
+   * @param userId - User ID
+   * @param disabled - Indicates if the user should be disabled
+   * @returns Promise with the updated user
    */
   async toggleUserStatus(userId: string, disabled: boolean): Promise<FirebaseUser> {
     try {
-      console.log(`[Firebase] ${disabled ? 'Desactivando' : 'Activando'} usuario ${userId}`);
+      console.log(`[Firebase] ${disabled ? 'Disabling' : 'Enabling'} user ${userId}`);
       
-      // Usamos Firebase Auth para deshabilitar/habilitar el usuario
+      // Use Firebase Auth to disable/enable the user
       const { auth } = getFirebaseInstances();
       
       await auth.updateUser(userId, {
         disabled: disabled
       });
       
-      // También actualizamos el documento en Firestore para mantener la consistencia
+      // Also update the document in Firestore to maintain consistency
       try {
         const userRef = this.db.doc(`users/${userId}`);
         await userRef.update({
@@ -736,11 +736,11 @@ export class FirebaseStorage implements IStorage {
         });
       } catch (error) {
         const firestoreError = error as Error;
-        console.warn(`[Firebase] Error al actualizar estado en Firestore: ${firestoreError.message}`);
-        // No fallamos completamente si solo falla Firestore pero Auth funcionó
+        console.warn(`[Firebase] Error updating status in Firestore: ${firestoreError.message}`);
+        // We don't fail completely if only Firestore fails but Auth worked
       }
       
-      // Obtener el usuario actualizado
+      // Get the updated user
       const user = await auth.getUser(userId);
       
       return {
@@ -752,67 +752,67 @@ export class FirebaseStorage implements IStorage {
         disabled: user.disabled || false,
       };
     } catch (error) {
-      console.error(`[Firebase] Error al ${disabled ? 'desactivar' : 'activar'} usuario ${userId}:`, error);
+      console.error(`[Firebase] Error ${disabled ? 'disabling' : 'enabling'} user ${userId}:`, error);
       throw error;
     }
   }
   
   /**
-   * Elimina un usuario
-   * @param userId - ID del usuario
-   * @returns Promise que se resuelve cuando el usuario es eliminado
+   * Deletes a user
+   * @param userId - User ID
+   * @returns Promise that resolves when the user is deleted
    */
   async deleteUser(userId: string): Promise<void> {
     try {
-      console.log(`[Firebase] Eliminando usuario ${userId}`);
+      console.log(`[Firebase] Deleting user ${userId}`);
       
-      // Usamos Firebase Auth para eliminar el usuario
+      // Use Firebase Auth to delete the user
       const { auth } = getFirebaseInstances();
       
       await auth.deleteUser(userId);
       
-      // También eliminamos el documento en Firestore para mantener la consistencia
+      // Also delete the document in Firestore to maintain consistency
       try {
         const userRef = this.db.doc(`users/${userId}`);
         await userRef.delete();
       } catch (error) {
         const firestoreError = error as Error;
-        console.warn(`[Firebase] Error al eliminar usuario en Firestore: ${firestoreError.message}`);
-        // No fallamos completamente si solo falla Firestore pero Auth funcionó
+        console.warn(`[Firebase] Error deleting user in Firestore: ${firestoreError.message}`);
+        // We don't fail completely if only Firestore fails but Auth worked
       }
     } catch (error) {
-      console.error(`[Firebase] Error al eliminar usuario ${userId}:`, error);
+      console.error(`[Firebase] Error deleting user ${userId}:`, error);
       throw error;
     }
   }
   
   /**
-   * Verifica si hay usuarios en el sistema
-   * @returns Promise con un booleano indicando si hay usuarios
+   * Checks if there are users in the system
+   * @returns Promise with a boolean indicating if there are users
    */
   async hasUsers(): Promise<boolean> {
     try {
-      console.log('[Firebase] Verificando si hay usuarios con Firebase Auth');
+      console.log('[Firebase] Checking if there are users with Firebase Auth');
       
-      // Usamos Firebase Auth para verificar si hay usuarios
+      // Use Firebase Auth to check if there are users
       const { auth } = getFirebaseInstances();
       
       try {
-        // Intentamos obtener solo un usuario
+        // Try to get just one user
         const listUsersResult = await auth.listUsers(1);
         return listUsersResult.users.length > 0;
       } catch (authError) {
-        console.error('[Firebase] Error al verificar usuarios con Firebase Auth:', authError);
+        console.error('[Firebase] Error checking users with Firebase Auth:', authError);
         
-        // Si falla la obtención con Auth, intentamos con Firestore
-        console.log('[Firebase] Intentando verificar usuarios con Firestore');
+        // If fetching with Auth fails, try with Firestore
+        console.log('[Firebase] Trying to check users with Firestore');
         const usersRef = this.db.collection('users');
         const snapshot = await usersRef.limit(1).get();
         
         return !snapshot.empty;
       }
     } catch (error) {
-      console.error('[Firebase] Error al verificar existencia de usuarios:', error);
+      console.error('[Firebase] Error checking existence of users:', error);
       throw error;
     }
   }
