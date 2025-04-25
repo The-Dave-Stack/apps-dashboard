@@ -1,16 +1,16 @@
 /**
- * @fileoverview Utilidad para verificar las variables de entorno de Firebase
- * Este módulo proporciona una función para comprobar y mostrar el estado de las
- * variables de entorno necesarias para la configuración de Firebase.
+ * @fileoverview Utility to verify Firebase environment variables
+ * This module provides a function to check and display the status of the
+ * environment variables needed for Firebase configuration.
  * @module lib/env-check
  */
 
 /**
- * Interfaz que define el resultado de la comprobación de variables de entorno
+ * Interface that defines the result of environment variables check
  * @interface EnvCheckResult
- * @property {boolean} allPresent - Indica si todas las variables requeridas están presentes
- * @property {string[]} missing - Array con los nombres de las variables que faltan
- * @property {Record<string, boolean>} status - Estado de cada variable (presente o no)
+ * @property {boolean} allPresent - Indicates if all required variables are present
+ * @property {string[]} missing - Array with the names of missing variables
+ * @property {Record<string, boolean>} status - Status of each variable (present or not)
  */
 interface EnvCheckResult {
   allPresent: boolean;
@@ -19,7 +19,7 @@ interface EnvCheckResult {
 }
 
 /**
- * Variables de entorno requeridas para configurar Firebase
+ * Environment variables required to configure Firebase
  * @const {string[]} REQUIRED_ENV_VARS
  */
 const REQUIRED_ENV_VARS = [
@@ -29,20 +29,20 @@ const REQUIRED_ENV_VARS = [
 ];
 
 /**
- * Comprueba si todas las variables de entorno requeridas para Firebase están presentes
+ * Checks if all required environment variables for Firebase are present
  * 
- * @returns {EnvCheckResult} Resultado de la comprobación con detalles sobre las variables faltantes
+ * @returns {EnvCheckResult} Check result with details about missing variables
  * @example
  * const envStatus = checkFirebaseEnvVars();
  * if (!envStatus.allPresent) {
- *   console.error("Faltan variables de entorno:", envStatus.missing.join(", "));
+ *   console.error("Missing environment variables:", envStatus.missing.join(", "));
  * }
  */
 export function checkFirebaseEnvVars(): EnvCheckResult {
   const status: Record<string, boolean> = {};
   const missing: string[] = [];
   
-  // Comprobar cada variable requerida
+  // Check each required variable
   REQUIRED_ENV_VARS.forEach(varName => {
     const isPresent = import.meta.env[varName] !== undefined && 
                        import.meta.env[varName] !== "";
@@ -62,12 +62,12 @@ export function checkFirebaseEnvVars(): EnvCheckResult {
 }
 
 /**
- * Muestra en la consola el estado de las variables de entorno de Firebase
- * Útil para depuración durante el desarrollo local
+ * Displays in the console the status of Firebase environment variables
+ * Useful for debugging during local development
  * 
  * @returns {void}
  * @example
- * // Llamar al inicio de la aplicación para verificar la configuración
+ * // Call at the start of the application to verify the configuration
  * logFirebaseEnvStatus();
  */
 export function logFirebaseEnvStatus(): void {

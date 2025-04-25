@@ -1,7 +1,7 @@
 /**
- * @fileoverview Módulo de inicialización de Firebase para Bookmark Manager Sync
- * Este módulo maneja la inicialización de los servicios de Firebase y proporciona
- * un singleton para acceder a las instancias de Firebase en toda la aplicación.
+ * @fileoverview Firebase Initialization Module for Bookmark Manager Sync
+ * This module handles the initialization of Firebase services and provides
+ * a singleton to access Firebase instances throughout the application.
  * @module firebase-init
  */
 
@@ -10,7 +10,7 @@ import { getAuth, Auth } from "firebase/auth";
 import { getFirestore, Firestore } from "firebase/firestore";
 
 /**
- * Variables para implementar el patrón Singleton
+ * Variables to implement the Singleton pattern
  * @private
  */
 let initialized = false;
@@ -19,7 +19,7 @@ let firebaseAuth: Auth | null = null;
 let firebaseDB: Firestore | null = null;
 
 /**
- * Configuración de Firebase usando variables de entorno
+ * Firebase configuration using environment variables
  * @const {object} firebaseConfig
  * @private
  */
@@ -29,16 +29,16 @@ const firebaseConfig = {
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.appspot.com`,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  // Opciones adicionales para mejorar la estabilidad
+  // Additional options to improve stability
   experimentalForceLongPolling: true,
 };
 
 /**
- * Interfaz que define las instancias de Firebase utilizadas en la aplicación
+ * Interface that defines the Firebase instances used in the application
  * @interface FirebaseInstances
- * @property {FirebaseApp} app - La instancia principal de la aplicación Firebase
- * @property {Auth} auth - La instancia de autenticación de Firebase
- * @property {Firestore} db - La instancia de Firestore (base de datos)
+ * @property {FirebaseApp} app - The main Firebase application instance
+ * @property {Auth} auth - The Firebase authentication instance
+ * @property {Firestore} db - The Firestore (database) instance
  */
 interface FirebaseInstances {
   app: FirebaseApp;
@@ -47,45 +47,45 @@ interface FirebaseInstances {
 }
 
 /**
- * Inicializa Firebase y devuelve las instancias de Firebase
- * Implementa el patrón Singleton para garantizar una única inicialización.
+ * Initializes Firebase and returns the Firebase instances
+ * Implements the Singleton pattern to ensure a single initialization.
  * 
- * @returns {FirebaseInstances} Objeto con las instancias de Firebase (app, auth, db)
- * @throws {Error} Si la inicialización falla o si las instancias no están disponibles
+ * @returns {FirebaseInstances} Object with Firebase instances (app, auth, db)
+ * @throws {Error} If initialization fails or if instances are not available
  * @example
- * // Obtener instancias de Firebase
+ * // Get Firebase instances
  * const { app, auth, db } = getFirebaseInstances();
  * 
- * // Usar Firestore
+ * // Use Firestore
  * const usersRef = collection(db, 'users');
  */
 export function getFirebaseInstances(): FirebaseInstances {
   if (!initialized) {
     try {
-      // Verificar que las variables de entorno necesarias estén definidas
+      // Verify that the necessary environment variables are defined
       if (!import.meta.env.VITE_FIREBASE_API_KEY || 
           !import.meta.env.VITE_FIREBASE_PROJECT_ID || 
           !import.meta.env.VITE_FIREBASE_APP_ID) {
-        console.error("Error: Faltan variables de entorno para Firebase.");
-        console.error("Por favor, crea un archivo .env con las variables mencionadas en .env.example");
-        throw new Error("Configuración de Firebase incompleta. Verifica el archivo .env");
+        console.error("Error: Missing environment variables for Firebase.");
+        console.error("Please create a .env file with the variables mentioned in .env.example");
+        throw new Error("Incomplete Firebase configuration. Check the .env file");
       }
       
-      console.log("Inicializando Firebase por primera vez:", import.meta.env.VITE_FIREBASE_PROJECT_ID);
+      console.log("Initializing Firebase for the first time:", import.meta.env.VITE_FIREBASE_PROJECT_ID);
       firebaseApp = initializeApp(firebaseConfig);
       firebaseAuth = getAuth(firebaseApp);
       firebaseDB = getFirestore(firebaseApp);
       initialized = true;
-      console.log("Firebase inicializado correctamente");
+      console.log("Firebase initialized successfully");
     } catch (error) {
-      console.error("Error al inicializar Firebase:", error);
+      console.error("Error initializing Firebase:", error);
       throw error;
     }
   }
   
-  // Verificación de seguridad: las variables deberían estar inicializadas
+  // Security check: variables should be initialized
   if (!firebaseApp || !firebaseAuth || !firebaseDB) {
-    throw new Error("Firebase no se inicializó correctamente");
+    throw new Error("Firebase was not initialized correctly");
   }
   
   return {
