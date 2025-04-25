@@ -2,7 +2,7 @@ import React, { createContext, useState, useContext, useEffect, ReactNode } from
 import { useTranslation } from 'react-i18next';
 import i18n from './index';
 
-// Definir los idiomas disponibles
+// Define available languages
 export const availableLanguages = {
   es: 'Español',
   en: 'English'
@@ -24,21 +24,21 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   const { i18n } = useTranslation();
   const [language, setLanguage] = useState(i18n.language || 'es');
 
-  // Función para cambiar el idioma
+  // Function to change language
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
   };
 
-  // Actualizar el estado cuando cambia el idioma
+  // Update state when language changes
   useEffect(() => {
     const handleLanguageChanged = (lng: string) => {
       setLanguage(lng);
     };
 
-    // Suscribirse al evento de cambio de idioma
+    // Subscribe to language change event
     i18n.on('languageChanged', handleLanguageChanged);
 
-    // Limpiar suscripción cuando se desmonta el componente
+    // Clean up subscription when component unmounts
     return () => {
       i18n.off('languageChanged', handleLanguageChanged);
     };
@@ -51,11 +51,11 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   );
 };
 
-// Hook personalizado para usar el contexto
+// Custom hook to use the context
 export const useLanguage = () => {
   const context = useContext(LanguageContext);
   if (context === undefined) {
-    throw new Error('useLanguage debe ser usado dentro de un LanguageProvider');
+    throw new Error('useLanguage must be used within a LanguageProvider');
   }
   return context;
 };

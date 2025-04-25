@@ -2,11 +2,11 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
-// Importar archivos de traducción
+// Import translation files
 import translationES from './locales/es.json';
 import translationEN from './locales/en.json';
 
-// Recursos de traducción
+// Translation resources
 const resources = {
   es: {
     translation: translationES
@@ -16,13 +16,13 @@ const resources = {
   }
 };
 
-// Configuración de i18next
+// i18next configuration
 i18n
-  // Detectar idioma automáticamente
+  // Automatically detect language
   .use(LanguageDetector)
-  // Integración con React
+  // React integration
   .use(initReactI18next)
-  // Inicializar i18next
+  // Initialize i18next
   .init({
     resources,
     fallbackLng: 'en',
