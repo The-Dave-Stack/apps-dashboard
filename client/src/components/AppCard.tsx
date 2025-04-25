@@ -1,7 +1,7 @@
 /**
- * @fileoverview Componente AppCard - Tarjeta de aplicación reutilizable
- * Este componente renderiza una tarjeta individual para cada aplicación,
- * incluyendo funcionalidades para marcar como favorito y registrar accesos.
+ * @fileoverview AppCard Component - Reusable application card
+ * This component renders an individual card for each application,
+ * including functionality to mark as favorite and record access history.
  * @module components/AppCard
  */
 
@@ -18,11 +18,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 
 /**
- * Props para el componente AppCard
+ * Props for the AppCard component
  * @interface AppCardProps
- * @property {AppData} app - Datos de la aplicación a mostrar
- * @property {React.ReactNode} [badge] - Elemento opcional para mostrar como insignia en la tarjeta
- * @property {boolean} [compact] - Indica si la tarjeta debe mostrarse en modo compacto
+ * @property {AppData} app - Application data to display
+ * @property {React.ReactNode} [badge] - Optional element to display as a badge on the card
+ * @property {boolean} [compact] - Indicates if the card should be displayed in compact mode
  */
 interface AppCardProps {
   app: AppData;
@@ -31,12 +31,12 @@ interface AppCardProps {
 }
 
 /**
- * Componente que muestra una tarjeta de aplicación con funcionalidad para
- * marcar como favorito y registrar historial de uso.
+ * Component that displays an application card with functionality for
+ * marking as favorite and recording usage history.
  *
  * @component
- * @param {AppCardProps} props - Propiedades del componente
- * @returns {JSX.Element} Componente AppCard renderizado
+ * @param {AppCardProps} props - Component properties
+ * @returns {JSX.Element} Rendered AppCard component
  */
 export default function AppCard({ app, badge, compact }: AppCardProps) {
   const { user } = useAuth();
@@ -47,11 +47,11 @@ export default function AppCard({ app, badge, compact }: AppCardProps) {
   const [loading, setLoading] = useState(false);
 
   /**
-   * Efecto para verificar si la aplicación está en favoritos del usuario actual
+   * Effect to check if the application is in the current user's favorites
    */
   useEffect(() => {
     /**
-     * Consulta Firestore para verificar si esta app está marcada como favorita
+     * Query Firestore to check if this app is marked as a favorite
      * @async
      */
     const checkIfFavorite = async () => {
@@ -63,7 +63,7 @@ export default function AppCard({ app, badge, compact }: AppCardProps) {
         
         setIsFavorite(favoriteDoc.exists());
       } catch (error) {
-        console.error("Error al verificar favorito:", error);
+        console.error("Error checking favorite status:", error);
       }
     };
     
@@ -71,33 +71,33 @@ export default function AppCard({ app, badge, compact }: AppCardProps) {
   }, [user, app.id, db]);
 
   /**
-   * Registra el acceso del usuario a una aplicación en Firestore
+   * Records user access to an application in Firestore
    * @async
    */
   const handleAppClick = async () => {
     if (user && app.id) {
       try {
-        // Guardar en el historial del usuario
+        // Save to user history
         const historyRef = doc(collection(doc(db, "users", user.uid), "history"), app.id);
         await setDoc(historyRef, {
           lastAccessed: serverTimestamp()
         }, { merge: true });
         
-        console.log(`Aplicación ${app.name} registrada en historial`);
+        console.log(`Application ${app.name} recorded in history`);
       } catch (error) {
-        console.error("Error al registrar acceso:", error);
+        console.error("Error recording access:", error);
       }
     }
   };
 
   /**
-   * Alterna el estado de favorito de una aplicación
+   * Toggles the favorite status of an application
    * @async
-   * @param {React.MouseEvent} e - Evento del click
+   * @param {React.MouseEvent} e - Click event
    */
   const toggleFavorite = async (e: React.MouseEvent) => {
-    e.preventDefault(); // Evita abrir el enlace
-    e.stopPropagation(); // Evita la propagación del evento
+    e.preventDefault(); // Prevents opening the link
+    e.stopPropagation(); // Prevents event propagation
     
     if (!user || !app.id) {
       toast({
@@ -113,7 +113,7 @@ export default function AppCard({ app, badge, compact }: AppCardProps) {
       const favoriteRef = doc(collection(doc(db, "users", user.uid), "favorites"), app.id);
       
       if (isFavorite) {
-        // Eliminar de favoritos
+        // Remove from favorites
         await deleteDoc(favoriteRef);
         setIsFavorite(false);
         toast({
@@ -121,7 +121,7 @@ export default function AppCard({ app, badge, compact }: AppCardProps) {
           description: t('common.favorites.removeMessage', { name: app.name }),
         });
       } else {
-        // Añadir a favoritos
+        // Add to favorites
         await setDoc(favoriteRef, {
           addedAt: serverTimestamp()
         });
@@ -132,7 +132,7 @@ export default function AppCard({ app, badge, compact }: AppCardProps) {
         });
       }
     } catch (error) {
-      console.error("Error al gestionar favorito:", error);
+      console.error("Error managing favorite:", error);
       toast({
         title: t('common.favorites.error'),
         description: t('common.favorites.errorMessage'),

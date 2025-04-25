@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Statistics page component
+ * This component displays usage statistics for the user's app interactions,
+ * including hourly and daily activity charts, top used apps, and key metrics.
+ * @module pages/Statistics
+ */
+
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { 
@@ -26,26 +33,55 @@ import { Skeleton } from "@/components/ui/skeleton";
 import AppCard from "@/components/AppCard";
 import { getFirebaseInstances } from "@/lib/firebase-init";
 
-// Interfaces para los datos
+/**
+ * Interface for usage statistics data
+ * @interface UsageStats
+ */
 interface UsageStats {
+  /** Total number of app accesses */
   totalAccesses: number;
+  /** Hour of the day with most activity (0-23) */
   mostActiveHour: number;
+  /** Most active day name */
   mostActiveDay: string;
+  /** Hourly activity distribution */
   hourlyActivity: { hour: number; count: number }[];
+  /** Daily activity distribution */
   dailyActivity: { day: string; count: number }[];
+  /** Top apps by usage */
   topApps: { id: string; name: string; icon: string; url: string; count: number }[];
 }
 
+/**
+ * Interface for access history data from Firestore
+ * @interface AccessData
+ */
 interface AccessData {
+  /** Unique app identifier */
   appId: string;
+  /** App name */
   appName: string;
+  /** App icon URL */
   appIcon: string;
+  /** App URL */
   appUrl: string;
+  /** Hour of access (0-23) */
   hour: number;
+  /** Day of access (0-6, Sunday-Saturday) */
   day: number;
+  /** Full timestamp of access */
   timestamp: Date;
 }
 
+/**
+ * Statistics component for displaying app usage metrics and visualizations
+ * 
+ * This component fetches and displays a user's app usage statistics,
+ * showing metrics about app interactions by time (hour, day) and most used apps.
+ * It allows filtering by different time periods (week, month, all time).
+ * 
+ * @returns {JSX.Element} The rendered Statistics component
+ */
 export default function Statistics() {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -54,7 +90,11 @@ export default function Statistics() {
   const [stats, setStats] = useState<UsageStats | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Función auxiliar para obtener el nombre del día
+  /**
+   * Helper function to get the localized day name from day index
+   * @param {number} dayIndex - Day index (0-6, Sunday-Saturday)
+   * @returns {string} Localized day name
+   */
   const getDayName = (dayIndex: number): string => {
     const days = [
       t("statistics.days.sunday"),
@@ -68,19 +108,22 @@ export default function Statistics() {
     return days[dayIndex];
   };
 
-  // Obtener estadísticas de uso
+  // Fetch usage statistics
   useEffect(() => {
     if (!user) return;
 
+    /**
+     * Fetches and processes statistics data from Firestore
+     */
     const fetchStatistics = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        // Obtener Firestore
+        // Get Firestore instance
         const { db } = getFirebaseInstances();
         
-        // Calcular la fecha límite según el período seleccionado
+        // Calculate limit date based on selected period
         const now = new Date();
         let limitDate = new Date();
         if (period === 'week') {
@@ -92,7 +135,7 @@ export default function Statistics() {
           limitDate = new Date(2020, 0, 1);
         }
 
-        // Obtener historial de accesos
+        // Get access history collection
         const accessesRef = collection(db, 'users', user.uid, 'accessHistory');
         
         let accessQuery;
@@ -104,7 +147,7 @@ export default function Statistics() {
         
         const accessesSnapshot = await getDocs(accessQuery);
         
-        // Si no hay datos, establecer valores predeterminados
+        // If no data, set default values
         if (accessesSnapshot.empty) {
           setStats({
             totalAccesses: 0,
@@ -118,7 +161,7 @@ export default function Statistics() {
           return;
         }
 
-        // Procesar los datos para las estadísticas
+        // Process data for statistics
         const accesses: AccessData[] = accessesSnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
           const data = doc.data();
           const timestamp = data.timestamp?.toDate() || new Date();
@@ -133,32 +176,32 @@ export default function Statistics() {
           };
         });
 
-        // Calcular estadísticas
+        // Calculate statistics
         const totalAccesses = accesses.length;
         
-        // Contar por hora
+        // Count by hour
         const hourCounts = Array(24).fill(0);
         accesses.forEach((access: AccessData) => hourCounts[access.hour]++);
         const mostActiveHour = hourCounts.indexOf(Math.max(...hourCounts));
         
-        // Contar por día
+        // Count by day
         const dayCounts = Array(7).fill(0);
         accesses.forEach((access: AccessData) => dayCounts[access.day]++);
         const mostActiveDay = getDayName(dayCounts.indexOf(Math.max(...dayCounts)));
         
-        // Estadística de actividad por hora
+        // Hourly activity statistics
         const hourlyActivity = hourCounts.map((count, hour) => ({
           hour,
           count
         }));
         
-        // Estadística de actividad por día
+        // Daily activity statistics
         const dailyActivity = dayCounts.map((count, dayIndex) => ({
           day: getDayName(dayIndex),
           count
         }));
         
-        // Top apps por uso
+        // Top apps by usage
         const appCounts: Record<string, { count: number; name: string; icon: string; url: string }> = {};
         accesses.forEach((access: AccessData) => {
           if (!appCounts[access.appId]) {
@@ -214,7 +257,7 @@ export default function Statistics() {
 
         <TabsContent value={period} className="space-y-6 mt-6">
           {loading ? (
-            // Esqueleto para carga
+            // Loading skeleton
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {Array.from({ length: 3 }).map((_, i) => (
                 <Card key={i}>
@@ -229,16 +272,16 @@ export default function Statistics() {
               ))}
             </div>
           ) : error ? (
-            // Mensaje de error
+            // Error message
             <Card>
               <CardContent className="pt-6 text-center">
                 <p className="text-destructive">{error}</p>
               </CardContent>
             </Card>
           ) : stats && stats.totalAccesses > 0 ? (
-            // Contenido principal
+            // Main content
             <>
-              {/* Indicadores principales */}
+              {/* Main indicators */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card>
                   <CardHeader className="pb-2">
@@ -277,7 +320,7 @@ export default function Statistics() {
                 </Card>
               </div>
 
-              {/* Gráfica de actividad por hora */}
+              {/* Hourly activity chart */}
               <Card>
                 <CardHeader>
                   <CardTitle>{t("statistics.hourlyActivity")}</CardTitle>
@@ -299,7 +342,7 @@ export default function Statistics() {
                 </CardContent>
               </Card>
 
-              {/* Gráfica de actividad por día */}
+              {/* Daily activity chart */}
               <Card>
                 <CardHeader>
                   <CardTitle>{t("statistics.dailyActivity")}</CardTitle>
@@ -352,7 +395,7 @@ export default function Statistics() {
               </Card>
             </>
           ) : (
-            // Sin datos
+            // No data
             <Card>
               <CardContent className="pt-6 text-center">
                 <h3 className="text-xl font-semibold mb-2">{t("statistics.noData")}</h3>

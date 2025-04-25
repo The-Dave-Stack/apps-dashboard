@@ -1,6 +1,6 @@
 /**
- * @fileoverview Implementación de almacenamiento con Firebase para Bookmark Manager Sync
- * Este módulo implementa la interfaz IStorage utilizando Firebase como backend.
+ * @fileoverview Firebase Storage Implementation for Bookmark Manager Sync
+ * This module implements the IStorage interface using Firebase as a backend.
  * @module storage/FirebaseStorage
  */
 
@@ -11,7 +11,7 @@ import { FirebaseCategory, FirebaseApp, FirebaseUser, UserRole } from '@shared/s
 import crypto from 'crypto';
 
 /**
- * Implementación de almacenamiento utilizando Firebase/Firestore
+ * Storage implementation using Firebase/Firestore
  * @class FirebaseStorage
  * @implements {IStorage}
  */
