@@ -1,4 +1,4 @@
-// Exportamos funciones simples que utilizan directamente los servicios de Firebase
+// Exporting simple functions that directly use Firebase services
 import { 
   User,
   onAuthStateChanged,
@@ -9,10 +9,10 @@ import {
 } from "firebase/auth";
 import { getFirebaseInstances } from "./firebase-init";
 
-// Obtenemos la instancia de autenticación de Firebase
+// Get Firebase authentication instance
 const { auth } = getFirebaseInstances();
 
-// Función para iniciar sesión con email y contraseña
+// Function to sign in with email and password
 export async function loginWithEmail(email: string, password: string): Promise<User> {
   console.log("Login attempt with:", email);
   try {
@@ -25,7 +25,7 @@ export async function loginWithEmail(email: string, password: string): Promise<U
   }
 }
 
-// Función para iniciar sesión anónima (útil para desarrollo)
+// Function for anonymous login (useful for development)
 export async function loginAnonymously(): Promise<User> {
   console.log("Anonymous login attempt");
   try {
@@ -38,7 +38,7 @@ export async function loginAnonymously(): Promise<User> {
   }
 }
 
-// Función para registrar un nuevo usuario
+// Function to register a new user
 export async function registerWithEmail(email: string, password: string): Promise<User> {
   console.log("Register attempt with:", email);
   try {
@@ -51,7 +51,7 @@ export async function registerWithEmail(email: string, password: string): Promis
   }
 }
 
-// Función para cerrar sesión
+// Function to sign out
 export async function logout(): Promise<void> {
   console.log("Logout attempt");
   try {
@@ -63,12 +63,12 @@ export async function logout(): Promise<void> {
   }
 }
 
-// Función para obtener el usuario actual
+// Function to get the current user
 export function getCurrentUser(): User | null {
   return auth.currentUser;
 }
 
-// Componente AuthProvider que proporciona autenticación global
+// AuthProvider component that provides global authentication
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
